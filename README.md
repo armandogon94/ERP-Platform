@@ -1,6 +1,6 @@
 # ERP Platform
 
-Odoo-inspired multi-tenant Enterprise Resource Planning system with 13 core modules serving 10 industries. Unified architecture where modules adapt to industry-specific workflows through configuration — no code duplication.
+Modular multi-tenant Enterprise Resource Planning system with 13 core modules serving 10 industries. Unified architecture where modules adapt to industry-specific workflows through configuration — no code duplication.
 
 [![Django 5.x](https://img.shields.io/badge/Django-5.x-092E20?logo=django&logoColor=white)](https://djangoproject.com/)
 [![React 18](https://img.shields.io/badge/React-18+-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
@@ -53,7 +53,7 @@ Odoo-inspired multi-tenant Enterprise Resource Planning system with 13 core modu
 
 ## Design Language
 
-Odoo-inspired purple/white base theme (#7C3AED) with industry-specific brand color accents in navigation. Consistent layout across all verticals: top navbar, left sidebar, main content area. Responsive and mobile-friendly.
+Purple/white base theme (#7C3AED) with industry-specific brand color accents in navigation. Consistent layout across all verticals: top navbar, left sidebar, main content area. Responsive and mobile-friendly.
 
 ## Quick Start
 
