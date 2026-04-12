@@ -1,6 +1,8 @@
-from django.urls import path
+from django.urls import include, path
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from api.v1.auth import LoginView, LogoutView, MeView, RefreshView
 
 
 class APIRootView(APIView):
@@ -18,4 +20,11 @@ class APIRootView(APIView):
 
 urlpatterns = [
     path("", APIRootView.as_view(), name="api-root"),
+    # Auth
+    path("auth/login/", LoginView.as_view(), name="auth-login"),
+    path("auth/refresh/", RefreshView.as_view(), name="auth-refresh"),
+    path("auth/logout/", LogoutView.as_view(), name="auth-logout"),
+    path("auth/me/", MeView.as_view(), name="auth-me"),
+    # Core
+    path("core/", include("core.urls")),
 ]

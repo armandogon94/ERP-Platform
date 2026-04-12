@@ -29,7 +29,7 @@ apiClient.interceptors.response.use(
       if (refreshToken) {
         try {
           const { data } = await axios.post(
-            `${apiClient.defaults.baseURL}/v1/auth/token/refresh/`,
+            `${apiClient.defaults.baseURL}/v1/auth/refresh/`,
             { refresh: refreshToken },
           );
           localStorage.setItem("access_token", data.access);

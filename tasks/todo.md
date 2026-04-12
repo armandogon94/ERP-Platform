@@ -12,16 +12,16 @@
 - [x] `make dev` starts all 6 services
 - [x] Django at :14000, React at :14500
 - [x] `make test` passes both suites (4 backend + 3 frontend)
-- [ ] Commit: `feat: scaffold Docker infrastructure with Django + React + Celery`
+- [x] Commit: `feat: scaffold Docker infrastructure with Django + React + Celery`
 
 ---
 
 ## Phase 2: Core Backend (Slice 1 — Models + Auth + RBAC)
 
-- [ ] **Task 1.1:** TenantModel + Company + UserProfile (M) — abstract base, models, factories, tests
-- [ ] **Task 1.2:** JWT Auth endpoints (M) — login, logout, refresh, serializers, tests
-- [ ] **Task 1.3:** RBAC Models (M) — Role, Permission, IndustryRoleTemplate, provisioning service, tests
-- [ ] **Task 1.4:** Middleware + DRF Permissions (M) — CompanyRoleContextMiddleware, ModulePermission, tests
+- [x] **Task 1.1:** TenantModel + Company + UserProfile (M) — abstract base, models, factories, tests
+- [x] **Task 1.2:** JWT Auth endpoints (M) — login, logout, refresh, serializers, tests
+- [x] **Task 1.3:** RBAC Models (M) — Role, Permission, IndustryRoleTemplate, provisioning service, tests
+- [x] **Task 1.4:** Middleware + DRF Permissions (M) — CompanyRoleContextMiddleware, ModulePermission, tests
 - [ ] **Task 1.5:** Module System (M) — ModuleRegistry, ModuleConfig, Menu, API, tests
 - [ ] **Task 1.6:** Sequence + AuditLog + Notification (M) — Sequence generator, signals, models, tests
 - [ ] **Task 1.7:** Seed Data (M) — 10 companies, 50 users, 80 role templates, management commands, tests

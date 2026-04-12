@@ -1,9 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, it, expect } from "vitest";
+import { beforeEach, describe, it, expect } from "vitest";
 import App from "./App";
+import { useAuthStore } from "./stores/authStore";
 
 describe("App", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    useAuthStore.setState({
+      user: null,
+      company: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: null,
+    });
+  });
+
   it("renders without crashing", () => {
     render(
       <MemoryRouter>
@@ -13,7 +25,17 @@ describe("App", () => {
     expect(screen.getByText("ERP Platform")).toBeInTheDocument();
   });
 
-  it("shows welcome message on home page", () => {
+  it("redirects to login when unauthenticated", () => {
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <App />
+      </MemoryRouter>,
+    );
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+  });
+
+  it("shows home page when authenticated", () => {
+    useAuthStore.setState({ isAuthenticated: true });
     render(
       <MemoryRouter initialEntries={["/"]}>
         <App />
