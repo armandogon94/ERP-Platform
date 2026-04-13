@@ -305,6 +305,46 @@ class Menu(TenantModel):
         return self.label
 
 
+# ─── View System ───────────────────────────────────────────────
+
+
+class ViewType(models.TextChoices):
+    LIST = "list", "List"
+    FORM = "form", "Form"
+    KANBAN = "kanban", "Kanban"
+    PIVOT = "pivot", "Pivot"
+    GRAPH = "graph", "Graph"
+
+
+class ViewDefinition(TenantModel):
+    """JSON-driven view configuration (Odoo-style).
+
+    Stores how to render a list, form, kanban, pivot, or graph view
+    for a given model. The frontend reads the config and renders the
+    appropriate component.
+    """
+
+    model_name = models.CharField(max_length=100)
+    view_type = models.CharField(max_length=10, choices=ViewType.choices)
+    name = models.CharField(max_length=255)
+    is_default = models.BooleanField(default=False)
+    priority = models.IntegerField(default=16)
+    config = models.JSONField(default=dict)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["model_name", "priority"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["company", "model_name", "view_type"],
+                condition=models.Q(is_default=True, deleted_at__isnull=True),
+                name="unique_default_view_per_model_type",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.view_type})"
+
+
 # ─── Sequence System ────────────────────────────────────────────
 
 

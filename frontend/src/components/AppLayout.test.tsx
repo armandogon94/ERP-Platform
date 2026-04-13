@@ -19,8 +19,20 @@ function renderLayout() {
 describe("AppLayout", () => {
   beforeEach(() => {
     useAuthStore.setState({
-      user: { id: 1, email: "admin@novapay.com", first_name: "Admin", last_name: "NovaPay", company: null },
-      company: { id: 1, name: "NovaPay", slug: "novapay", brand_color: "#2563EB", industry: "fintech" },
+      user: {
+        id: 1,
+        email: "admin@novapay.com",
+        first_name: "Admin",
+        last_name: "NovaPay",
+        company: null,
+      },
+      company: {
+        id: 1,
+        name: "NovaPay",
+        slug: "novapay",
+        brand_color: "#2563EB",
+        industry: "fintech",
+      },
       isAuthenticated: true,
     });
   });

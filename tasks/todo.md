@@ -22,36 +22,54 @@
 - [x] **Task 1.2:** JWT Auth endpoints (M) — login, logout, refresh, serializers, tests
 - [x] **Task 1.3:** RBAC Models (M) — Role, Permission, IndustryRoleTemplate, provisioning service, tests
 - [x] **Task 1.4:** Middleware + DRF Permissions (M) — CompanyRoleContextMiddleware, ModulePermission, tests
-- [ ] **Task 1.5:** Module System (M) — ModuleRegistry, ModuleConfig, Menu, API, tests
-- [ ] **Task 1.6:** Sequence + AuditLog + Notification (M) — Sequence generator, signals, models, tests
-- [ ] **Task 1.7:** Seed Data (M) — 10 companies, 50 users, 80 role templates, management commands, tests
+- [x] **Task 1.5:** Module System (M) — ModuleRegistry, ModuleConfig, Menu, API, tests
+- [x] **Task 1.6:** Sequence + AuditLog + Notification (M) — Sequence generator, signals, models, tests
+- [x] **Task 1.7:** Seed Data (M) — 10 companies, 50 users, 80 role templates, management commands, tests
 
 ### Checkpoint: Core Backend
-- [ ] 40+ backend tests pass
-- [ ] JWT auth end-to-end
-- [ ] RBAC enforced (403)
-- [ ] Company isolation verified
-- [ ] Commit: `feat: core backend with companies, auth, RBAC, sequences, and seed data`
+- [x] 80 backend tests pass
+- [x] JWT auth end-to-end
+- [x] RBAC enforced (403)
+- [x] Company isolation verified
+- [x] Commit: `feat: implement Slice 1 core multi-tenancy system`
 
 ---
 
 ## Phase 3: Core Frontend (Slice 1 — Auth + Layout)
 
-- [ ] **Task 1.8:** Frontend Auth (M) — Zustand authStore, LoginForm, JWT interceptor, tests
-- [ ] **Task 1.9:** Frontend Layout (M) — AppLayout, TopNavbar, Sidebar, AppSwitcher, theme, tests
+- [x] **Task 1.8:** Frontend Auth (M) — Zustand authStore, LoginForm, JWT interceptor, tests
+- [x] **Task 1.9:** Frontend Layout (M) — AppLayout, TopNavbar, Sidebar, AppSwitcher, theme, tests
 
 ### Checkpoint: Slice 1 Complete
-- [ ] Login as admin@novapay.com → blue-branded dashboard
-- [ ] Login as admin@dentaflow.com → cyan-branded dashboard
-- [ ] App Switcher shows 13 modules
-- [ ] 403 on unauthorized module access
-- [ ] Commit: `feat: core frontend with login, layout, app switcher, and theming`
+- [x] 80 backend + 21 frontend = 101 tests passing
+- [x] Protected routes redirect to login
+- [x] Brand color applied to navbar
+- [x] App Switcher with module grid
+- [x] Commit: `feat: implement Slice 1 core multi-tenancy system`
 
 ---
 
-## Upcoming Slices (to be broken down after Slice 1)
+## Phase 4: View System (Slice 2 — Form/List/Kanban)
 
-- [ ] **Slice 2:** View System (Form/List/Kanban) — XL, break into tasks after Slice 1
+- [x] **Task 2.1:** View + Action models (M) — ViewDefinition JSONB config, migration, 11 tests
+- [x] **Task 2.2:** DynamicModelViewSet (M) — Generic CRUD viewset base with filtering/ordering, 4 tests
+- [x] **Task 2.3:** ListView component (M) — Sortable columns, search, record count, 9 tests
+- [x] **Task 2.4:** FormView component (M) — JSON-config-driven form renderer, 14 tests
+- [x] **Task 2.5:** KanbanView component (M) — Drag-and-drop columns, card rendering, 10 tests
+- [x] **Task 2.6:** Component library (S) — Button, Input, Select, Modal, Badge, 29 tests
+
+### Checkpoint: Slice 2 Complete
+- [x] ListView renders from JSON config with sort/search
+- [x] FormView renders from JSON config with all field types
+- [x] KanbanView renders columns with drag-drop
+- [x] DynamicModelViewSet provides generic CRUD
+- [x] 95 backend + 83 frontend = 178 tests pass
+- [x] Commit: `feat: implement Slice 2 view system`
+
+---
+
+## Upcoming Slices
+
 - [ ] **Slice 3:** Industry Config System — M
 - [ ] **Slices 4–6:** HR, Calendar, Inventory (parallelizable) — L, XL
 - [ ] **Slices 7–8:** Purchasing, Sales — L

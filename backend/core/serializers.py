@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from core.models import Company, ModuleConfig, ModuleRegistry
+from core.models import Company, ModuleConfig, ModuleRegistry, ViewDefinition
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -36,3 +36,12 @@ class ModuleConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = ModuleConfig
         fields = ["id", "key", "value", "value_type"]
+
+
+class ViewDefinitionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ViewDefinition
+        fields = [
+            "id", "model_name", "view_type", "name",
+            "is_default", "priority", "config",
+        ]

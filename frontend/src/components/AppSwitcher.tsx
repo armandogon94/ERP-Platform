@@ -13,11 +13,7 @@ interface AppSwitcherProps {
   onClose: () => void;
 }
 
-export default function AppSwitcher({
-  modules,
-  isOpen,
-  onClose,
-}: AppSwitcherProps) {
+export default function AppSwitcher({ modules, isOpen, onClose }: AppSwitcherProps) {
   const navigate = useNavigate();
 
   if (!isOpen) return null;

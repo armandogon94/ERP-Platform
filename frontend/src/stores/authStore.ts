@@ -1,11 +1,5 @@
 import { create } from "zustand";
-import {
-  type Company,
-  type User,
-  getMeApi,
-  loginApi,
-  logoutApi,
-} from "../api/auth";
+import { type Company, type User, getMeApi, loginApi, logoutApi } from "../api/auth";
 
 interface AuthState {
   user: User | null;
@@ -40,8 +34,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
       });
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Login failed";
+      const message = err instanceof Error ? err.message : "Login failed";
       set({ error: message, isLoading: false });
       throw err;
     }

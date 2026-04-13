@@ -39,8 +39,20 @@ describe("authStore", () => {
     const mockResponse = {
       access: "test-access",
       refresh: "test-refresh",
-      user: { id: 1, email: "test@novapay.com", first_name: "Admin", last_name: "NovaPay", company: null },
-      company: { id: 1, name: "NovaPay", slug: "novapay", brand_color: "#2563EB", industry: "fintech" },
+      user: {
+        id: 1,
+        email: "test@novapay.com",
+        first_name: "Admin",
+        last_name: "NovaPay",
+        company: null,
+      },
+      company: {
+        id: 1,
+        name: "NovaPay",
+        slug: "novapay",
+        brand_color: "#2563EB",
+        industry: "fintech",
+      },
     };
     mockLoginApi.mockResolvedValueOnce(mockResponse);
 
@@ -90,7 +102,13 @@ describe("authStore", () => {
       email: "admin@novapay.com",
       first_name: "Admin",
       last_name: "NovaPay",
-      company: { id: 1, name: "NovaPay", slug: "novapay", brand_color: "#2563EB", industry: "fintech" },
+      company: {
+        id: 1,
+        name: "NovaPay",
+        slug: "novapay",
+        brand_color: "#2563EB",
+        industry: "fintech",
+      },
     };
     mockGetMeApi.mockResolvedValueOnce(mockUser);
 
