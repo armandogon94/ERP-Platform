@@ -10,6 +10,9 @@ import ProductFormPage from "./pages/inventory/ProductFormPage";
 import VendorListPage from "./pages/purchasing/VendorListPage";
 import PurchaseOrderListPage from "./pages/purchasing/PurchaseOrderListPage";
 import PurchaseOrderFormPage from "./pages/purchasing/PurchaseOrderFormPage";
+import QuotationListPage from "./pages/sales/QuotationListPage";
+import SalesOrderListPage from "./pages/sales/SalesOrderListPage";
+import SalesOrderFormPage from "./pages/sales/SalesOrderFormPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -55,11 +58,18 @@ export default function App() {
         <Route path="/inventory/products/:id/edit" element={<ProductFormPage />} />
         <Route path="/purchasing/vendors" element={<VendorListPage />} />
         <Route path="/purchasing/purchase-orders" element={<PurchaseOrderListPage />} />
-        <Route path="/purchasing/purchase-orders/new" element={<PurchaseOrderFormPage />} />
+        <Route
+          path="/purchasing/purchase-orders/new"
+          element={<PurchaseOrderFormPage />}
+        />
         <Route
           path="/purchasing/purchase-orders/:id/edit"
           element={<PurchaseOrderFormPage />}
         />
+        <Route path="/sales/quotations" element={<QuotationListPage />} />
+        <Route path="/sales/orders" element={<SalesOrderListPage />} />
+        <Route path="/sales/orders/new" element={<SalesOrderFormPage />} />
+        <Route path="/sales/orders/:id/edit" element={<SalesOrderFormPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

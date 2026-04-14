@@ -118,9 +118,8 @@ export async function deletePurchaseOrderApi(id: number): Promise<void> {
 export async function fetchRFQsApi(
   params?: Record<string, string>,
 ): Promise<RequestForQuote[]> {
-  const { data } = await apiClient.get<RequestForQuote[]>(
-    "/v1/purchasing/rfqs/",
-    { params },
-  );
+  const { data } = await apiClient.get<RequestForQuote[]>("/v1/purchasing/rfqs/", {
+    params,
+  });
   return data;
 }

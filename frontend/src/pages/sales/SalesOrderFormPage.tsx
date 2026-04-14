@@ -1,61 +1,55 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  type PurchaseOrder,
-  type Vendor,
-  createPurchaseOrderApi,
-  fetchPurchaseOrderApi,
-  fetchVendorsApi,
-  updatePurchaseOrderApi,
-} from "../../api/purchasing";
+  type SalesOrder,
+  createSalesOrderApi,
+  fetchSalesOrderApi,
+  updateSalesOrderApi,
+} from "../../api/sales";
 
 interface FormState {
-  vendor: string;
-  po_number: string;
+  order_number: string;
+  customer_name: string;
+  customer_email: string;
   status: string;
   notes: string;
 }
 
 const EMPTY_FORM: FormState = {
-  vendor: "",
-  po_number: "",
-  status: "draft",
+  order_number: "",
+  customer_name: "",
+  customer_email: "",
+  status: "confirmed",
   notes: "",
 };
 
-export default function PurchaseOrderFormPage() {
+export default function SalesOrderFormPage() {
   const { id } = useParams<{ id?: string }>();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isLoading, setIsLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
 
   const headingPrefix = isEdit ? "Edit" : "New";
 
   useEffect(() => {
-    fetchVendorsApi()
-      .then(setVendors)
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
     if (!isEdit || !id) return;
 
-    fetchPurchaseOrderApi(Number(id))
-      .then((po: PurchaseOrder) => {
+    fetchSalesOrderApi(Number(id))
+      .then((so: SalesOrder) => {
         setForm({
-          vendor: String(po.vendor),
-          po_number: po.po_number,
-          status: po.status,
-          notes: po.notes,
+          order_number: so.order_number,
+          customer_name: so.customer_name,
+          customer_email: so.customer_email,
+          status: so.status,
+          notes: so.notes,
         });
         setIsLoading(false);
       })
       .catch((err: Error) => {
-        setError(err.message || "Error loading purchase order");
+        setError(err.message || "Error loading sales order");
         setIsLoading(false);
       });
   }, [id, isEdit]);
@@ -69,17 +63,13 @@ export default function PurchaseOrderFormPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const payload = {
-      ...form,
-      vendor: Number(form.vendor) || undefined,
-    };
     try {
       if (isEdit && id) {
-        await updatePurchaseOrderApi(Number(id), payload);
+        await updateSalesOrderApi(Number(id), form);
       } else {
-        await createPurchaseOrderApi(payload);
+        await createSalesOrderApi(form);
       }
-      navigate("/purchasing/purchase-orders");
+      navigate("/sales/orders");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
     }
@@ -91,40 +81,54 @@ export default function PurchaseOrderFormPage() {
 
   return (
     <div>
-      <h1>{headingPrefix} Purchase Order</h1>
+      <h1>{headingPrefix} Sales Order</h1>
 
       {error && <div role="alert">{error}</div>}
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="vendor">Vendor</label>
-          <select id="vendor" name="vendor" value={form.vendor} onChange={handleChange}>
-            <option value="">-- Select vendor --</option>
-            {vendors.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.name}
-              </option>
-            ))}
-          </select>
+          <label htmlFor="order_number">Order Number</label>
+          <input
+            id="order_number"
+            name="order_number"
+            value={form.order_number}
+            onChange={handleChange}
+          />
         </div>
 
         <div>
-          <label htmlFor="po_number">PO Number</label>
+          <label htmlFor="customer_name">Customer Name</label>
           <input
-            id="po_number"
-            name="po_number"
-            value={form.po_number}
+            id="customer_name"
+            name="customer_name"
+            value={form.customer_name}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="customer_email">Customer Email</label>
+          <input
+            id="customer_email"
+            name="customer_email"
+            type="email"
+            value={form.customer_email}
             onChange={handleChange}
           />
         </div>
 
         <div>
           <label htmlFor="status">Status</label>
-          <select id="status" name="status" value={form.status} onChange={handleChange}>
-            <option value="draft">Draft</option>
-            <option value="sent">Sent</option>
+          <select
+            id="status"
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+          >
             <option value="confirmed">Confirmed</option>
-            <option value="received">Received</option>
+            <option value="in_progress">In Progress</option>
+            <option value="delivered">Delivered</option>
+            <option value="invoiced">Invoiced</option>
             <option value="cancelled">Cancelled</option>
           </select>
         </div>

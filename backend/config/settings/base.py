@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "modules.calendar",
     "modules.inventory",
     "modules.purchasing",
+    "modules.sales",
 ]
 
 MIDDLEWARE = [
