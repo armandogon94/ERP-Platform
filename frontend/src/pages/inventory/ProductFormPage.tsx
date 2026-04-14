@@ -69,9 +69,7 @@ export default function ProductFormPage() {
   }, [id, isEdit]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value, type } = e.target;
     setForm((prev) => ({
@@ -109,22 +107,12 @@ export default function ProductFormPage() {
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="name">Name</label>
-          <input
-            id="name"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-          />
+          <input id="name" name="name" value={form.name} onChange={handleChange} />
         </div>
 
         <div>
           <label htmlFor="sku">SKU</label>
-          <input
-            id="sku"
-            name="sku"
-            value={form.sku}
-            onChange={handleChange}
-          />
+          <input id="sku" name="sku" value={form.sku} onChange={handleChange} />
         </div>
 
         <div>

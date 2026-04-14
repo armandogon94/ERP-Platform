@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "modules.hr",
     "modules.calendar",
     "modules.inventory",
+    "modules.purchasing",
 ]
 
 MIDDLEWARE = [

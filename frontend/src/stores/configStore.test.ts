@@ -82,9 +82,7 @@ describe("configStore", () => {
         }),
       );
 
-      const fetchPromise = useConfigStore
-        .getState()
-        .fetchModuleConfig(1, "inventory");
+      const fetchPromise = useConfigStore.getState().fetchModuleConfig(1, "inventory");
       expect(useConfigStore.getState().isLoading).toBe(true);
 
       resolvePromise(dentalInventoryConfig);

@@ -30,9 +30,7 @@ describe("useTerminology", () => {
 
   it("returns the provided fallback when no override exists", () => {
     useConfigStore.setState({ terminology: {} });
-    const { result } = renderHook(() =>
-      useTerminology("UnknownKey", "Default Label"),
-    );
+    const { result } = renderHook(() => useTerminology("UnknownKey", "Default Label"));
     expect(result.current).toBe("Default Label");
   });
 

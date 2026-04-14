@@ -54,8 +54,12 @@ export interface StockMove {
   updated_at: string;
 }
 
-export async function fetchProductsApi(params?: Record<string, string>): Promise<Product[]> {
-  const { data } = await apiClient.get<Product[]>("/v1/inventory/products/", { params });
+export async function fetchProductsApi(
+  params?: Record<string, string>,
+): Promise<Product[]> {
+  const { data } = await apiClient.get<Product[]>("/v1/inventory/products/", {
+    params,
+  });
   return data;
 }
 

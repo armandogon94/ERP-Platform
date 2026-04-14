@@ -36,30 +36,22 @@ export interface EventFilters {
   updated_since?: string;
 }
 
-export async function fetchEventsApi(
-  filters?: EventFilters,
-): Promise<CalendarEvent[]> {
-  const { data } = await apiClient.get<CalendarEvent[]>(
-    "/v1/calendar/events/",
-    { params: filters },
-  );
+export async function fetchEventsApi(filters?: EventFilters): Promise<CalendarEvent[]> {
+  const { data } = await apiClient.get<CalendarEvent[]>("/v1/calendar/events/", {
+    params: filters,
+  });
   return data;
 }
 
 export async function fetchEventApi(id: number): Promise<CalendarEvent> {
-  const { data } = await apiClient.get<CalendarEvent>(
-    `/v1/calendar/events/${id}/`,
-  );
+  const { data } = await apiClient.get<CalendarEvent>(`/v1/calendar/events/${id}/`);
   return data;
 }
 
 export async function createEventApi(
   payload: Partial<CalendarEvent>,
 ): Promise<CalendarEvent> {
-  const { data } = await apiClient.post<CalendarEvent>(
-    "/v1/calendar/events/",
-    payload,
-  );
+  const { data } = await apiClient.post<CalendarEvent>("/v1/calendar/events/", payload);
   return data;
 }
 
@@ -79,8 +71,6 @@ export async function deleteEventApi(id: number): Promise<void> {
 }
 
 export async function fetchResourcesApi(): Promise<CalendarResource[]> {
-  const { data } = await apiClient.get<CalendarResource[]>(
-    "/v1/calendar/resources/",
-  );
+  const { data } = await apiClient.get<CalendarResource[]>("/v1/calendar/resources/");
   return data;
 }

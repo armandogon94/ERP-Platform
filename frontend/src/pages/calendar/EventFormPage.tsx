@@ -66,9 +66,7 @@ export default function EventFormPage() {
   }, [id, isEdit]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value, type } = e.target;
     setForm((prev) => ({
@@ -106,12 +104,7 @@ export default function EventFormPage() {
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="title">Title</label>
-          <input
-            id="title"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-          />
+          <input id="title" name="title" value={form.title} onChange={handleChange} />
         </div>
 
         <div>
@@ -173,12 +166,7 @@ export default function EventFormPage() {
 
         <div>
           <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-          >
+          <select id="status" name="status" value={form.status} onChange={handleChange}>
             <option value="confirmed">Confirmed</option>
             <option value="tentative">Tentative</option>
             <option value="cancelled">Cancelled</option>

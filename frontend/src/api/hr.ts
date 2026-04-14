@@ -64,9 +64,7 @@ export async function fetchEmployeeApi(id: number): Promise<Employee> {
   return data;
 }
 
-export async function createEmployeeApi(
-  payload: Partial<Employee>,
-): Promise<Employee> {
+export async function createEmployeeApi(payload: Partial<Employee>): Promise<Employee> {
   const { data } = await apiClient.post<Employee>("/v1/hr/employees/", payload);
   return data;
 }
@@ -75,10 +73,7 @@ export async function updateEmployeeApi(
   id: number,
   payload: Partial<Employee>,
 ): Promise<Employee> {
-  const { data } = await apiClient.patch<Employee>(
-    `/v1/hr/employees/${id}/`,
-    payload,
-  );
+  const { data } = await apiClient.patch<Employee>(`/v1/hr/employees/${id}/`, payload);
   return data;
 }
 

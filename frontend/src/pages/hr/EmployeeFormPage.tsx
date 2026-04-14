@@ -78,9 +78,7 @@ export default function EmployeeFormPage() {
       });
   }, [id, isEdit]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -186,12 +184,7 @@ export default function EmployeeFormPage() {
 
         <div>
           <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-          >
+          <select id="status" name="status" value={form.status} onChange={handleChange}>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
             <option value="terminated">Terminated</option>
