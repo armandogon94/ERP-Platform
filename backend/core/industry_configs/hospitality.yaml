@@ -1,0 +1,46 @@
+industry: hospitality
+display_name: "Hospitality/Restaurant"
+terminology:
+  Product: "Menu Item"
+  Customer: "Guest"
+  Warehouse: "Kitchen Storage"
+  Sales Order: "Reservation"
+  Invoice: "Guest Bill"
+  Employee: "Staff"
+  Vendor: "Food Supplier"
+  Purchase Order: "Food Order"
+  Project: "Event"
+  Ticket: "Guest Request"
+  Fleet: "Delivery Fleet"
+modules:
+  inventory:
+    display_name: "Kitchen Inventory"
+    icon: "kitchen"
+    field_overrides:
+      product_label: "Menu Item"
+      warehouse_label: "Kitchen Storage"
+  calendar:
+    display_name: "Reservations"
+    icon: "event_seat"
+    field_overrides:
+      event_label: "Reservation"
+      attendee_label: "Guest"
+  pos:
+    display_name: "Table POS"
+    icon: "point_of_sale"
+  sales:
+    display_name: "Reservations & Orders"
+    icon: "restaurant"
+  helpdesk:
+    display_name: "Guest Services"
+    icon: "room_service"
+  hr:
+    display_name: "Staff Management"
+    icon: "people"
+  purchasing:
+    display_name: "Food & Beverage Ordering"
+    icon: "shopping_cart"
+defaults:
+  currency: "USD"
+  date_format: "MM/DD/YYYY"
+  fiscal_year_start: "01-01"

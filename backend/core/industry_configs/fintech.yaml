@@ -1,0 +1,40 @@
+industry: fintech
+display_name: "FinTech"
+terminology:
+  Customer: "Client"
+  Product: "Financial Product"
+  Warehouse: "Document Vault"
+  Sales Order: "Service Agreement"
+  Invoice: "Client Invoice"
+  Employee: "Analyst"
+  Vendor: "Partner"
+  Purchase Order: "Procurement Request"
+  Project: "Deal"
+  Ticket: "Support Case"
+  Fleet: "Corporate Vehicles"
+modules:
+  accounting:
+    display_name: "Finance"
+    icon: "account_balance"
+  invoicing:
+    display_name: "Client Billing"
+    icon: "receipt_long"
+  hr:
+    display_name: "People & Compliance"
+    icon: "people"
+  projects:
+    display_name: "Deals"
+    icon: "trending_up"
+  helpdesk:
+    display_name: "Client Support"
+    icon: "support_agent"
+  sales:
+    display_name: "Client Relationships"
+    icon: "handshake"
+  reports:
+    display_name: "Financial Analytics"
+    icon: "analytics"
+defaults:
+  currency: "USD"
+  date_format: "MM/DD/YYYY"
+  fiscal_year_start: "01-01"

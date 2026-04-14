@@ -1,0 +1,37 @@
+industry: insurance
+display_name: "Insurance"
+terminology:
+  Customer: "Policyholder"
+  Product: "Policy"
+  Sales Order: "Policy Agreement"
+  Invoice: "Premium Invoice"
+  Employee: "Underwriter"
+  Vendor: "Reinsurer"
+  Purchase Order: "Reinsurance Order"
+  Project: "Claims Case"
+  Ticket: "Claims Request"
+  Warehouse: "Document Archive"
+  Fleet: "Claims Fleet"
+modules:
+  sales:
+    display_name: "Policy Sales"
+    icon: "policy"
+  invoicing:
+    display_name: "Premium Billing"
+    icon: "receipt"
+  helpdesk:
+    display_name: "Claims"
+    icon: "gavel"
+  hr:
+    display_name: "Underwriting Staff"
+    icon: "people"
+  projects:
+    display_name: "Claims Cases"
+    icon: "folder"
+  accounting:
+    display_name: "Actuarial Finance"
+    icon: "account_balance"
+defaults:
+  currency: "USD"
+  date_format: "MM/DD/YYYY"
+  fiscal_year_start: "01-01"

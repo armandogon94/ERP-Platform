@@ -453,6 +453,32 @@ class Notification(models.Model):
         return f"{self.title} → {self.recipient.username}"
 
 
+class IndustryConfigTemplate(models.Model):
+    """Industry-level config defaults. One row per industry, loaded from YAML files.
+
+    Forms the base of the 3-tier hierarchy:
+    IndustryConfigTemplate → Company.config_json → ModuleConfig (most specific)
+    """
+
+    industry = models.CharField(
+        max_length=20,
+        choices=Industry.choices,
+        unique=True,
+    )
+    config = models.JSONField(
+        default=dict,
+        help_text="Full config dict including terminology, module overrides, and defaults.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["industry"]
+
+    def __str__(self):
+        return f"Config: {self.get_industry_display()}"
+
+
 class Setting(models.Model):
     """Global or per-company settings."""
 

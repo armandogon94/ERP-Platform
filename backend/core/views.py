@@ -3,9 +3,20 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from api.v1.filters import CompanyScopedFilterBackend
-from api.v1.permissions import IsCompanyMember
+from api.v1.permissions import IsCompanyAdmin, IsCompanyMember
 from core.models import ModuleConfig, ModuleRegistry, ViewDefinition
-from core.serializers import ModuleConfigSerializer, ModuleSerializer, ViewDefinitionSerializer
+from core.serializers import (
+    ConfigPatchSerializer,
+    ModuleSerializer,
+    ResolvedConfigSerializer,
+    ViewDefinitionSerializer,
+)
+from core.services.config_service import (
+    get_resolved_config,
+    get_terminology,
+    invalidate_company_config,
+    merge_configs,
+)
 
 
 class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
@@ -17,15 +28,58 @@ class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ModuleRegistry.objects.order_by("sequence", "name")
     pagination_class = None
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get", "patch"])
     def config(self, request, pk=None):
+        if request.method == "PATCH":
+            return self._patch_config(request, pk)
+        return self._get_config(request, pk)
+
+    def _get_config(self, request, pk):
         module = self.get_object()
-        configs = ModuleConfig.objects.filter(
-            company=request.company,
-            module=module,
-            deleted_at__isnull=True,
+        config = get_resolved_config(request.company, module_name=module.name)
+        terminology = config.get("terminology", {})
+        serializer = ResolvedConfigSerializer(
+            {
+                "module": module.name,
+                "industry": request.company.industry,
+                "config": config,
+                "terminology": terminology,
+            }
         )
-        serializer = ModuleConfigSerializer(configs, many=True)
+        return Response(serializer.data)
+
+    def _patch_config(self, request, pk):
+        # Require company admin
+        if not request.is_company_admin:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Only company admins can update module config.")
+
+        module = self.get_object()
+        patch_serializer = ConfigPatchSerializer(data=request.data)
+        patch_serializer.is_valid(raise_exception=True)
+
+        overrides = patch_serializer.validated_data["overrides"]
+
+        # Merge overrides into Company.config_json and save
+        company = request.company
+        current_config = company.config_json or {}
+        company.config_json = merge_configs(current_config, overrides)
+        company.save(update_fields=["config_json", "updated_at"])
+
+        # Invalidate cache (signal also fires, but we invalidate explicitly here too)
+        invalidate_company_config(company.id)
+
+        # Return updated resolved config
+        config = get_resolved_config(company, module_name=module.name)
+        terminology = config.get("terminology", {})
+        serializer = ResolvedConfigSerializer(
+            {
+                "module": module.name,
+                "industry": company.industry,
+                "config": config,
+                "terminology": terminology,
+            }
+        )
         return Response(serializer.data)
 
 

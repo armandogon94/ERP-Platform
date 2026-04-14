@@ -38,6 +38,24 @@ class ModuleConfigSerializer(serializers.ModelSerializer):
         fields = ["id", "key", "value", "value_type"]
 
 
+class ResolvedConfigSerializer(serializers.Serializer):
+    """Serializer for the resolved 3-tier config response."""
+
+    module = serializers.CharField()
+    industry = serializers.CharField()
+    config = serializers.DictField()
+    terminology = serializers.DictField()
+
+
+class ConfigPatchSerializer(serializers.Serializer):
+    """Validates the PATCH body for module config overrides."""
+
+    overrides = serializers.DictField(
+        child=serializers.JSONField(),
+        help_text="Partial config dict to merge into Company.config_json.",
+    )
+
+
 class ViewDefinitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ViewDefinition

@@ -1,0 +1,41 @@
+industry: logistics
+display_name: "Logistics"
+terminology:
+  Customer: "Shipper"
+  Product: "Shipment"
+  Warehouse: "Depot"
+  Sales Order: "Freight Order"
+  Invoice: "Freight Invoice"
+  Employee: "Driver/Operator"
+  Vendor: "Carrier"
+  Purchase Order: "Carrier Order"
+  Project: "Logistics Project"
+  Ticket: "Incident Report"
+  Vehicle: "Truck/Van"
+modules:
+  inventory:
+    display_name: "Warehouse & Stock"
+    icon: "warehouse"
+    field_overrides:
+      warehouse_label: "Depot"
+  fleet:
+    display_name: "Fleet Operations"
+    icon: "local_shipping"
+    field_overrides:
+      vehicle_label: "Truck/Van"
+  sales:
+    display_name: "Freight Orders"
+    icon: "assignment"
+  hr:
+    display_name: "Drivers & Operators"
+    icon: "drive_eta"
+  helpdesk:
+    display_name: "Incident Management"
+    icon: "report"
+  projects:
+    display_name: "Logistics Projects"
+    icon: "route"
+defaults:
+  currency: "USD"
+  date_format: "MM/DD/YYYY"
+  fiscal_year_start: "01-01"

@@ -1,0 +1,40 @@
+industry: real_estate
+display_name: "Real Estate"
+terminology:
+  Product: "Property"
+  Customer: "Buyer/Tenant"
+  Sales Order: "Listing Agreement"
+  Invoice: "Lease Invoice"
+  Employee: "Agent"
+  Vendor: "Contractor"
+  Purchase Order: "Maintenance Order"
+  Project: "Listing"
+  Ticket: "Maintenance Request"
+  Warehouse: "Property Storage"
+  Fleet: "Agent Vehicles"
+modules:
+  sales:
+    display_name: "Listings"
+    icon: "home"
+  invoicing:
+    display_name: "Lease Billing"
+    icon: "receipt"
+  projects:
+    display_name: "Listings Management"
+    icon: "real_estate_agent"
+  helpdesk:
+    display_name: "Maintenance Requests"
+    icon: "build"
+  hr:
+    display_name: "Agents"
+    icon: "badge"
+  calendar:
+    display_name: "Showings"
+    icon: "event"
+    field_overrides:
+      event_label: "Showing"
+      attendee_label: "Prospect"
+defaults:
+  currency: "USD"
+  date_format: "MM/DD/YYYY"
+  fiscal_year_start: "01-01"

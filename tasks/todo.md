@@ -68,6 +68,24 @@
 
 ---
 
+## Phase 5: Industry Config System (Slice 3)
+
+- [ ] **Task 3.1:** IndustryConfigTemplate model + config_service (M) — model, merge_configs, get_resolved_config, tests
+- [ ] **Task 3.2:** YAML config files + load_industry_config command (M) — 10 YAML files, pyyaml, management command, tests
+- [ ] **Task 3.3:** Redis cache + signal invalidation (M) — cache layer, Django signals, graceful fallback, tests
+- [ ] **Task 3.4:** Enhanced config API GET + PATCH (M) — resolved config response, PATCH overrides, tests
+- [ ] **Task 3.5:** Frontend hooks useModuleConfig + useTerminology (M) — Zustand store, hooks, API functions, tests
+- [ ] **Task 3.6:** AppLayout integration — API-driven modules (S) — replace hardcoded defaults, fallback, tests
+
+### Checkpoint: Slice 3 Complete
+- [ ] `GET /api/v1/core/modules/{id}/config/` returns resolved 3-tier config with terminology
+- [ ] DentaFlow returns "Supply Room" for Warehouse, "Dental Supply" for Product
+- [ ] AppLayout renders API-driven modules in sidebar and app switcher
+- [ ] 178 + 30 = 208+ tests pass
+- [ ] Commit: `feat: implement Slice 3 industry config system`
+
+---
+
 ## Upcoming Slices
 
 - [ ] **Slice 3:** Industry Config System — M

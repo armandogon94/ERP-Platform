@@ -1,0 +1,46 @@
+industry: construction
+display_name: "Construction"
+terminology:
+  Customer: "Client/Owner"
+  Product: "Material"
+  Warehouse: "Job Site Storage"
+  Sales Order: "Contract"
+  Invoice: "Progress Invoice"
+  Employee: "Worker/Subcontractor"
+  Vendor: "Subcontractor"
+  Purchase Order: "Material Order"
+  Project: "Construction Project"
+  Ticket: "Site Issue"
+  Fleet: "Construction Equipment"
+  Vehicle: "Equipment/Vehicle"
+modules:
+  projects:
+    display_name: "Projects"
+    icon: "construction"
+    field_overrides:
+      project_label: "Construction Project"
+      milestone_label: "Phase"
+  inventory:
+    display_name: "Materials"
+    icon: "inventory_2"
+    field_overrides:
+      product_label: "Material"
+      warehouse_label: "Job Site Storage"
+  fleet:
+    display_name: "Equipment"
+    icon: "agriculture"
+    field_overrides:
+      vehicle_label: "Equipment/Vehicle"
+  purchasing:
+    display_name: "Material Procurement"
+    icon: "shopping_cart"
+  hr:
+    display_name: "Workforce"
+    icon: "engineering"
+  helpdesk:
+    display_name: "Site Issues"
+    icon: "report_problem"
+defaults:
+  currency: "USD"
+  date_format: "MM/DD/YYYY"
+  fiscal_year_start: "01-01"

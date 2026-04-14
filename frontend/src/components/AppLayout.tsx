@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
+import { useConfigStore } from "../stores/configStore";
 import AppSwitcher, { type AppModule } from "./AppSwitcher";
 import Sidebar, { type SidebarItem } from "./Sidebar";
 import TopNavbar from "./TopNavbar";
 
-// Default sidebar items (modules will be loaded from API later)
+// Fallback sidebar items shown while API loads or if fetch fails
 const DEFAULT_SIDEBAR_ITEMS: SidebarItem[] = [
   { name: "accounting", label: "Accounting", icon: "\u{1F4B0}", url: "/accounting" },
   { name: "invoicing", label: "Invoicing", icon: "\u{1F4C4}", url: "/invoicing" },
@@ -24,9 +25,41 @@ const DEFAULT_MODULES: AppModule[] = DEFAULT_SIDEBAR_ITEMS.map((item) => ({
   color: "#714B67",
 }));
 
+function modulesToSidebarItems(
+  modules: { name: string; display_name: string; icon: string }[],
+): SidebarItem[] {
+  return modules
+    .filter((m) => m.name !== "reports") // reports is a BI module, not a sidebar item
+    .map((m) => ({
+      name: m.name,
+      label: m.display_name,
+      icon: m.icon || "\u{1F4CB}",
+      url: `/${m.name}`,
+    }));
+}
+
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [appSwitcherOpen, setAppSwitcherOpen] = useState(false);
+
+  const { modules, fetchModules } = useConfigStore();
+
+  useEffect(() => {
+    fetchModules();
+  }, [fetchModules]);
+
+  const sidebarItems =
+    modules.length > 0 ? modulesToSidebarItems(modules) : DEFAULT_SIDEBAR_ITEMS;
+
+  const appModules: AppModule[] =
+    modules.length > 0
+      ? modules.map((m) => ({
+          name: m.name,
+          display_name: m.display_name,
+          icon: m.icon || "\u{1F4CB}",
+          color: m.color || "#714B67",
+        }))
+      : DEFAULT_MODULES;
 
   return (
     <div className="app-layout">
@@ -35,13 +68,13 @@ export default function AppLayout() {
         onToggleAppSwitcher={() => setAppSwitcherOpen((prev) => !prev)}
       />
       <div className="app-body">
-        <Sidebar items={DEFAULT_SIDEBAR_ITEMS} isOpen={sidebarOpen} />
+        <Sidebar items={sidebarItems} isOpen={sidebarOpen} />
         <main className="app-content">
           <Outlet />
         </main>
       </div>
       <AppSwitcher
-        modules={DEFAULT_MODULES}
+        modules={appModules}
         isOpen={appSwitcherOpen}
         onClose={() => setAppSwitcherOpen(false)}
       />

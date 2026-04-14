@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from core.models import (
     Company,
     Industry,
+    IndustryConfigTemplate,
     IndustryRoleTemplate,
     Permission,
     Role,
@@ -76,6 +77,15 @@ class PermissionFactory(factory.django.DjangoModelFactory):
     name = factory.LazyAttribute(lambda o: f"Can {o.codename}")
     module = factory.LazyAttribute(lambda o: o.codename.split(".")[0])
     action = factory.LazyAttribute(lambda o: o.codename.split(".")[1])
+
+
+class IndustryConfigTemplateFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = IndustryConfigTemplate
+        django_get_or_create = ["industry"]
+
+    industry = Industry.FINTECH
+    config = factory.LazyFunction(dict)
 
 
 class IndustryRoleTemplateFactory(factory.django.DjangoModelFactory):

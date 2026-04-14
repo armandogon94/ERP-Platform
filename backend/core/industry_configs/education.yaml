@@ -1,0 +1,44 @@
+industry: education
+display_name: "Education"
+terminology:
+  Customer: "Student/Parent"
+  Product: "Course"
+  Sales Order: "Enrollment"
+  Invoice: "Tuition Invoice"
+  Employee: "Faculty/Staff"
+  Vendor: "Educational Supplier"
+  Purchase Order: "Resource Order"
+  Project: "Academic Program"
+  Ticket: "Student Support Request"
+  Warehouse: "Resource Center"
+  Fleet: "School Transport"
+  Vehicle: "School Bus"
+modules:
+  calendar:
+    display_name: "Academic Calendar"
+    icon: "school"
+    field_overrides:
+      event_label: "Class/Event"
+      attendee_label: "Student"
+  hr:
+    display_name: "Faculty & Staff"
+    icon: "people"
+  projects:
+    display_name: "Academic Programs"
+    icon: "menu_book"
+  invoicing:
+    display_name: "Tuition Billing"
+    icon: "receipt"
+  helpdesk:
+    display_name: "Student Support"
+    icon: "support"
+  inventory:
+    display_name: "Resources & Supplies"
+    icon: "inventory_2"
+    field_overrides:
+      product_label: "Resource"
+      warehouse_label: "Resource Center"
+defaults:
+  currency: "USD"
+  date_format: "MM/DD/YYYY"
+  fiscal_year_start: "08-01"

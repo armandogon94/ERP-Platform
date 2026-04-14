@@ -1,0 +1,38 @@
+industry: healthcare
+display_name: "Healthcare"
+terminology:
+  Customer: "Patient"
+  Product: "Medical Supply"
+  Warehouse: "Medical Storage"
+  Sales Order: "Care Plan"
+  Invoice: "Patient Bill"
+  Employee: "Clinical Staff"
+  Vendor: "Medical Supplier"
+  Purchase Order: "Supply Requisition"
+  Project: "Clinical Project"
+  Ticket: "Patient Inquiry"
+  Fleet: "Medical Transport"
+  Vehicle: "Ambulance"
+modules:
+  inventory:
+    display_name: "Medical Supplies"
+    icon: "local_pharmacy"
+  calendar:
+    display_name: "Appointments"
+    icon: "calendar_month"
+    field_overrides:
+      event_label: "Appointment"
+      attendee_label: "Patient"
+  hr:
+    display_name: "Clinical Staff"
+    icon: "medical_services"
+  helpdesk:
+    display_name: "Patient Support"
+    icon: "support"
+  invoicing:
+    display_name: "Patient Billing"
+    icon: "receipt"
+defaults:
+  currency: "USD"
+  date_format: "MM/DD/YYYY"
+  fiscal_year_start: "01-01"

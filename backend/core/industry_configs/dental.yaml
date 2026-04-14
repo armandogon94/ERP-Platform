@@ -1,0 +1,55 @@
+industry: dental
+display_name: "Dental Clinic"
+terminology:
+  Warehouse: "Supply Room"
+  Product: "Dental Supply"
+  Manufacturing: "Lab Work"
+  Purchase Order: "Supply Order"
+  Sales Order: "Treatment Plan"
+  Invoice: "Patient Invoice"
+  Customer: "Patient"
+  Vendor: "Supplier"
+  Employee: "Staff Member"
+  Project: "Treatment Case"
+  Ticket: "Patient Inquiry"
+  Fleet: "Equipment"
+  Vehicle: "Dental Unit"
+modules:
+  inventory:
+    display_name: "Supplies"
+    icon: "medical_services"
+    field_overrides:
+      product_label: "Supply Item"
+      warehouse_label: "Supply Room"
+      lot_label: "Batch"
+  calendar:
+    display_name: "Appointments"
+    icon: "event"
+    field_overrides:
+      event_label: "Appointment"
+      attendee_label: "Patient"
+  manufacturing:
+    display_name: "Lab Work"
+    icon: "science"
+  sales:
+    display_name: "Treatment Plans"
+    icon: "assignment"
+  helpdesk:
+    display_name: "Patient Support"
+    icon: "support"
+  hr:
+    display_name: "Staff"
+    icon: "people"
+  purchasing:
+    display_name: "Supply Ordering"
+    icon: "shopping_cart"
+  invoicing:
+    display_name: "Patient Billing"
+    icon: "receipt"
+  projects:
+    display_name: "Treatment Cases"
+    icon: "folder"
+defaults:
+  currency: "USD"
+  date_format: "MM/DD/YYYY"
+  fiscal_year_start: "01-01"

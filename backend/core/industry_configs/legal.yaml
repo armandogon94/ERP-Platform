@@ -1,0 +1,43 @@
+industry: legal
+display_name: "Legal Firm"
+terminology:
+  Customer: "Client"
+  Product: "Legal Service"
+  Sales Order: "Engagement Letter"
+  Invoice: "Legal Invoice"
+  Employee: "Attorney"
+  Vendor: "Court Services"
+  Purchase Order: "Court Filing Order"
+  Project: "Matter/Case"
+  Ticket: "Client Request"
+  Warehouse: "Document Repository"
+  Fleet: "Court Vehicles"
+modules:
+  projects:
+    display_name: "Matters"
+    icon: "gavel"
+    field_overrides:
+      project_label: "Matter"
+      task_label: "Legal Task"
+  calendar:
+    display_name: "Court Calendar"
+    icon: "event"
+    field_overrides:
+      event_label: "Hearing/Deadline"
+      attendee_label: "Counsel"
+  invoicing:
+    display_name: "Legal Billing"
+    icon: "receipt"
+  hr:
+    display_name: "Attorneys & Staff"
+    icon: "people"
+  helpdesk:
+    display_name: "Client Requests"
+    icon: "support_agent"
+  accounting:
+    display_name: "Trust Accounting"
+    icon: "account_balance"
+defaults:
+  currency: "USD"
+  date_format: "MM/DD/YYYY"
+  fiscal_year_start: "01-01"
