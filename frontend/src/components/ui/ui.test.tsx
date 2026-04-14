@@ -113,50 +113,82 @@ describe("Select", () => {
 
 describe("Modal", () => {
   it("renders nothing when closed", () => {
-    render(<Modal open={false} onClose={() => {}}>Content</Modal>);
+    render(
+      <Modal open={false} onClose={() => {}}>
+        Content
+      </Modal>,
+    );
     expect(screen.queryByText("Content")).not.toBeInTheDocument();
   });
 
   it("renders children when open", () => {
-    render(<Modal open onClose={() => {}}>Content</Modal>);
+    render(
+      <Modal open onClose={() => {}}>
+        Content
+      </Modal>,
+    );
     expect(screen.getByText("Content")).toBeInTheDocument();
   });
 
   it("renders title", () => {
-    render(<Modal open onClose={() => {}} title="Confirm">Body</Modal>);
+    render(
+      <Modal open onClose={() => {}} title="Confirm">
+        Body
+      </Modal>,
+    );
     expect(screen.getByText("Confirm")).toBeInTheDocument();
   });
 
   it("has dialog role with aria-modal", () => {
-    render(<Modal open onClose={() => {}}>Body</Modal>);
+    render(
+      <Modal open onClose={() => {}}>
+        Body
+      </Modal>,
+    );
     const dialog = screen.getByRole("dialog");
     expect(dialog).toHaveAttribute("aria-modal", "true");
   });
 
   it("calls onClose when close button clicked", () => {
     const onClose = vi.fn();
-    render(<Modal open onClose={onClose}>Body</Modal>);
+    render(
+      <Modal open onClose={onClose}>
+        Body
+      </Modal>,
+    );
     fireEvent.click(screen.getByLabelText("Close"));
     expect(onClose).toHaveBeenCalled();
   });
 
   it("calls onClose when overlay clicked", () => {
     const onClose = vi.fn();
-    render(<Modal open onClose={onClose}>Body</Modal>);
+    render(
+      <Modal open onClose={onClose}>
+        Body
+      </Modal>,
+    );
     fireEvent.click(screen.getByRole("presentation"));
     expect(onClose).toHaveBeenCalled();
   });
 
   it("does not close when modal content clicked", () => {
     const onClose = vi.fn();
-    render(<Modal open onClose={onClose}>Body</Modal>);
+    render(
+      <Modal open onClose={onClose}>
+        Body
+      </Modal>,
+    );
     fireEvent.click(screen.getByText("Body"));
     expect(onClose).not.toHaveBeenCalled();
   });
 
   it("closes on Escape key", () => {
     const onClose = vi.fn();
-    render(<Modal open onClose={onClose}>Body</Modal>);
+    render(
+      <Modal open onClose={onClose}>
+        Body
+      </Modal>,
+    );
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalled();
   });

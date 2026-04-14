@@ -78,7 +78,13 @@ export default function FormView({
 }
 
 function renderInput(
-  field: { field: string; type: string; placeholder?: string; options?: { value: string; label: string }[]; required?: boolean },
+  field: {
+    field: string;
+    type: string;
+    placeholder?: string;
+    options?: { value: string; label: string }[];
+    required?: boolean;
+  },
   value: unknown,
   readonly: boolean,
   onChange: (v: unknown) => void,

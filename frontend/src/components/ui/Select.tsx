@@ -21,7 +21,8 @@ export default function Select({
   className = "",
   ...rest
 }: SelectProps) {
-  const selectId = id || (label ? `select-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined);
+  const selectId =
+    id || (label ? `select-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined);
 
   return (
     <div className={`select-group ${error ? "select-error" : ""} ${className}`.trim()}>
@@ -34,7 +35,11 @@ export default function Select({
           </option>
         ))}
       </select>
-      {error && <span className="select-error-message" role="alert">{error}</span>}
+      {error && (
+        <span className="select-error-message" role="alert">
+          {error}
+        </span>
+      )}
     </div>
   );
 }

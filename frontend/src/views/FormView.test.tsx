@@ -9,7 +9,12 @@ const config: FormViewConfig = {
       title: "General",
       fields: [
         { field: "name", label: "Name", type: "char", required: true },
-        { field: "email", label: "Email", type: "char", placeholder: "user@example.com" },
+        {
+          field: "email",
+          label: "Email",
+          type: "char",
+          placeholder: "user@example.com",
+        },
         { field: "notes", label: "Notes", type: "text" },
       ],
     },
@@ -105,11 +110,13 @@ describe("FormView", () => {
     const onSave = vi.fn();
     render(<FormView config={config} record={record} onSave={onSave} />);
     fireEvent.submit(screen.getByRole("form"));
-    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
-      name: "Alice",
-      email: "alice@example.com",
-      active: true,
-    }));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "Alice",
+        email: "alice@example.com",
+        active: true,
+      }),
+    );
   });
 
   it("calls onCancel when cancel button clicked", () => {
