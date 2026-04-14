@@ -3,6 +3,8 @@ import AppLayout from "./components/AppLayout";
 import LoginPage from "./pages/LoginPage";
 import EmployeeListPage from "./pages/hr/EmployeeListPage";
 import EmployeeFormPage from "./pages/hr/EmployeeFormPage";
+import EventListPage from "./pages/calendar/EventListPage";
+import EventFormPage from "./pages/calendar/EventFormPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -40,6 +42,9 @@ export default function App() {
         <Route path="/hr/employees" element={<EmployeeListPage />} />
         <Route path="/hr/employees/new" element={<EmployeeFormPage />} />
         <Route path="/hr/employees/:id/edit" element={<EmployeeFormPage />} />
+        <Route path="/calendar/events" element={<EventListPage />} />
+        <Route path="/calendar/events/new" element={<EventFormPage />} />
+        <Route path="/calendar/events/:id/edit" element={<EventFormPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

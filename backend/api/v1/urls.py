@@ -29,4 +29,5 @@ urlpatterns = [
     path("core/", include("core.urls")),
     # ERP modules
     path("hr/", include("modules.hr.urls")),
+    path("calendar/", include("modules.calendar.urls")),
 ]
