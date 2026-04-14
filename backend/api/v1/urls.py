@@ -30,4 +30,5 @@ urlpatterns = [
     # ERP modules
     path("hr/", include("modules.hr.urls")),
     path("calendar/", include("modules.calendar.urls")),
+    path("inventory/", include("modules.inventory.urls")),
 ]

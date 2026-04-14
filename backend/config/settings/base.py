@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     # ERP modules
     "modules.hr",
     "modules.calendar",
+    "modules.inventory",
 ]
 
 MIDDLEWARE = [
