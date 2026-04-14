@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     "django_celery_beat",
     # Project apps
     "core",
+    # ERP modules
+    "modules.hr",
 ]
 
 MIDDLEWARE = [

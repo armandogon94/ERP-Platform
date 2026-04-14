@@ -27,4 +27,6 @@ urlpatterns = [
     path("auth/me/", MeView.as_view(), name="auth-me"),
     # Core
     path("core/", include("core.urls")),
+    # ERP modules
+    path("hr/", include("modules.hr.urls")),
 ]

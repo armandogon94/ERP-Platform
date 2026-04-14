@@ -70,19 +70,37 @@
 
 ## Phase 5: Industry Config System (Slice 3)
 
-- [ ] **Task 3.1:** IndustryConfigTemplate model + config_service (M) — model, merge_configs, get_resolved_config, tests
-- [ ] **Task 3.2:** YAML config files + load_industry_config command (M) — 10 YAML files, pyyaml, management command, tests
-- [ ] **Task 3.3:** Redis cache + signal invalidation (M) — cache layer, Django signals, graceful fallback, tests
-- [ ] **Task 3.4:** Enhanced config API GET + PATCH (M) — resolved config response, PATCH overrides, tests
-- [ ] **Task 3.5:** Frontend hooks useModuleConfig + useTerminology (M) — Zustand store, hooks, API functions, tests
-- [ ] **Task 3.6:** AppLayout integration — API-driven modules (S) — replace hardcoded defaults, fallback, tests
+- [x] **Task 3.1:** IndustryConfigTemplate model + config_service (M) — model, merge_configs, get_resolved_config, 22 tests
+- [x] **Task 3.2:** YAML config files + load_industry_config command (M) — 10 YAML files, pyyaml, management command, 10 tests
+- [x] **Task 3.3:** Redis cache + signal invalidation (M) — cache layer, Django signals, graceful fallback, 8 tests
+- [x] **Task 3.4:** Enhanced config API GET + PATCH (M) — resolved config response, PATCH overrides, 9 tests
+- [x] **Task 3.5:** Frontend hooks useModuleConfig + useTerminology (M) — Zustand store, hooks, API functions, 16 tests
+- [x] **Task 3.6:** AppLayout integration — API-driven modules (S) — replace hardcoded defaults, fallback, 8 tests
 
 ### Checkpoint: Slice 3 Complete
-- [ ] `GET /api/v1/core/modules/{id}/config/` returns resolved 3-tier config with terminology
-- [ ] DentaFlow returns "Supply Room" for Warehouse, "Dental Supply" for Product
-- [ ] AppLayout renders API-driven modules in sidebar and app switcher
-- [ ] 178 + 30 = 208+ tests pass
-- [ ] Commit: `feat: implement Slice 3 industry config system`
+- [x] `GET /api/v1/core/modules/{id}/config/` returns resolved 3-tier config with terminology
+- [x] DentaFlow returns "Supply Room" for Warehouse, "Dental Supply" for Product
+- [x] AppLayout renders API-driven modules in sidebar and app switcher
+- [x] 144 backend + 99 frontend = 243 tests pass
+- [x] Commit: `feat: implement Slice 3 industry config system`
+
+---
+
+## Phase 6: HR Module (Slice 4)
+
+- [ ] **Task 4.1:** HR app + Employee + Department models (M) — Django app, TenantModel subclasses, migration, factories, model tests
+- [ ] **Task 4.2:** LeaveRequest + Payroll models (M) — models, migration, factories, tests
+- [ ] **Task 4.3:** HR API — CRUD endpoints (M) — ViewSets, serializers, URL registration under /api/v1/hr/, API tests
+- [ ] **Task 4.4:** Frontend HR pages (M) — hr.ts API module, EmployeeListPage, EmployeeFormPage, App.tsx routes, tests
+
+### Checkpoint: Slice 4 Complete
+- [ ] `GET /api/v1/hr/employees/` returns company-scoped employees
+- [ ] POST/PATCH/DELETE employees work with RBAC
+- [ ] EmployeeListPage renders employees using ListView
+- [ ] EmployeeFormPage renders form using FormView
+- [ ] useTerminology used for "Employee" label (dental → "Staff Member")
+- [ ] 243 + 40 = 283+ tests pass
+- [ ] Commit: `feat: implement Slice 4 HR module`
 
 ---
 
