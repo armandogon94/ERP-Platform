@@ -1,0 +1,54 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { type Invoice, fetchInvoicesApi } from "../../api/invoicing";
+
+export default function InvoiceListPage() {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchInvoicesApi()
+      .then(setInvoices)
+      .catch((err: Error) => setError(err.message || "Error loading invoices"))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  return (
+    <div>
+      <h1>Invoices</h1>
+
+      <Link to="/invoicing/invoices/new">New Invoice</Link>
+
+      {isLoading && <div>Loading...</div>}
+      {error && <div role="alert">{error}</div>}
+
+      {!isLoading && !error && (
+        <table>
+          <thead>
+            <tr>
+              <th>Invoice Number</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {invoices.map((inv) => (
+              <tr key={inv.id}>
+                <td>
+                  <Link to={`/invoicing/invoices/${inv.id}/edit`}>
+                    {inv.invoice_number}
+                  </Link>
+                </td>
+                <td>{inv.customer_name}</td>
+                <td>{inv.status}</td>
+                <td>{inv.total_amount}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}

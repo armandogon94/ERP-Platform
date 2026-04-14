@@ -45,19 +45,12 @@ export async function fetchAccountsApi(
 }
 
 export async function fetchAccountApi(id: number): Promise<Account> {
-  const { data } = await apiClient.get<Account>(
-    `/v1/accounting/accounts/${id}/`,
-  );
+  const { data } = await apiClient.get<Account>(`/v1/accounting/accounts/${id}/`);
   return data;
 }
 
-export async function createAccountApi(
-  payload: Partial<Account>,
-): Promise<Account> {
-  const { data } = await apiClient.post<Account>(
-    "/v1/accounting/accounts/",
-    payload,
-  );
+export async function createAccountApi(payload: Partial<Account>): Promise<Account> {
+  const { data } = await apiClient.post<Account>("/v1/accounting/accounts/", payload);
   return data;
 }
 
@@ -84,17 +77,14 @@ export async function fetchJournalsApi(
 export async function fetchJournalEntriesApi(
   params?: Record<string, string>,
 ): Promise<JournalEntry[]> {
-  const { data } = await apiClient.get<JournalEntry[]>(
-    "/v1/accounting/entries/",
-    { params },
-  );
+  const { data } = await apiClient.get<JournalEntry[]>("/v1/accounting/entries/", {
+    params,
+  });
   return data;
 }
 
 export async function fetchJournalEntryApi(id: number): Promise<JournalEntry> {
-  const { data } = await apiClient.get<JournalEntry>(
-    `/v1/accounting/entries/${id}/`,
-  );
+  const { data } = await apiClient.get<JournalEntry>(`/v1/accounting/entries/${id}/`);
   return data;
 }
 

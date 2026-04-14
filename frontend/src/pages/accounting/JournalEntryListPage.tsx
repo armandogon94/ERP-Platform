@@ -37,9 +37,7 @@ export default function JournalEntryListPage() {
             {entries.map((e) => (
               <tr key={e.id}>
                 <td>
-                  <Link to={`/accounting/entries/${e.id}/edit`}>
-                    {e.reference}
-                  </Link>
+                  <Link to={`/accounting/entries/${e.id}/edit`}>{e.reference}</Link>
                 </td>
                 <td>{e.journal_name}</td>
                 <td>{e.entry_date ?? "—"}</td>

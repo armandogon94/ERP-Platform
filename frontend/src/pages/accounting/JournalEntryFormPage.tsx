@@ -38,7 +38,9 @@ export default function JournalEntryFormPage() {
   const headingPrefix = isEdit ? "Edit" : "New";
 
   useEffect(() => {
-    fetchJournalsApi().then(setJournals).catch(() => {});
+    fetchJournalsApi()
+      .then(setJournals)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -138,12 +140,7 @@ export default function JournalEntryFormPage() {
 
         <div>
           <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-          >
+          <select id="status" name="status" value={form.status} onChange={handleChange}>
             <option value="draft">Draft</option>
             <option value="posted">Posted</option>
             <option value="cancelled">Cancelled</option>

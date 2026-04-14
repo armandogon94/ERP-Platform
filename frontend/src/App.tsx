@@ -16,6 +16,8 @@ import SalesOrderFormPage from "./pages/sales/SalesOrderFormPage";
 import AccountListPage from "./pages/accounting/AccountListPage";
 import JournalEntryListPage from "./pages/accounting/JournalEntryListPage";
 import JournalEntryFormPage from "./pages/accounting/JournalEntryFormPage";
+import InvoiceListPage from "./pages/invoicing/InvoiceListPage";
+import InvoiceFormPage from "./pages/invoicing/InvoiceFormPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -76,10 +78,10 @@ export default function App() {
         <Route path="/accounting/accounts" element={<AccountListPage />} />
         <Route path="/accounting/entries" element={<JournalEntryListPage />} />
         <Route path="/accounting/entries/new" element={<JournalEntryFormPage />} />
-        <Route
-          path="/accounting/entries/:id/edit"
-          element={<JournalEntryFormPage />}
-        />
+        <Route path="/accounting/entries/:id/edit" element={<JournalEntryFormPage />} />
+        <Route path="/invoicing/invoices" element={<InvoiceListPage />} />
+        <Route path="/invoicing/invoices/new" element={<InvoiceFormPage />} />
+        <Route path="/invoicing/invoices/:id/edit" element={<InvoiceFormPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
