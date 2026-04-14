@@ -1,55 +1,62 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  type SalesOrder,
-  createSalesOrderApi,
-  fetchSalesOrderApi,
-  updateSalesOrderApi,
-} from "../../api/sales";
+  type Journal,
+  type JournalEntry,
+  createJournalEntryApi,
+  fetchJournalEntryApi,
+  fetchJournalsApi,
+  updateJournalEntryApi,
+} from "../../api/accounting";
 
 interface FormState {
-  order_number: string;
-  customer_name: string;
-  customer_email: string;
+  journal: string;
+  reference: string;
+  entry_date: string;
   status: string;
   notes: string;
 }
 
 const EMPTY_FORM: FormState = {
-  order_number: "",
-  customer_name: "",
-  customer_email: "",
-  status: "confirmed",
+  journal: "",
+  reference: "",
+  entry_date: "",
+  status: "draft",
   notes: "",
 };
 
-export default function SalesOrderFormPage() {
+export default function JournalEntryFormPage() {
   const { id } = useParams<{ id?: string }>();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [journals, setJournals] = useState<Journal[]>([]);
   const [isLoading, setIsLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
 
   const headingPrefix = isEdit ? "Edit" : "New";
 
   useEffect(() => {
+    fetchJournalsApi().then(setJournals).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (!isEdit || !id) return;
 
-    fetchSalesOrderApi(Number(id))
-      .then((so: SalesOrder) => {
+    fetchJournalEntryApi(Number(id))
+      .then((entry: JournalEntry) => {
         setForm({
-          order_number: so.order_number,
-          customer_name: so.customer_name,
-          customer_email: so.customer_email,
-          status: so.status,
-          notes: so.notes,
+          journal: String(entry.journal),
+          reference: entry.reference,
+          entry_date: entry.entry_date ?? "",
+          status: entry.status,
+          notes: entry.notes,
         });
         setIsLoading(false);
       })
       .catch((err: Error) => {
-        setError(err.message || "Error loading sales order");
+        setError(err.message || "Error loading journal entry");
         setIsLoading(false);
       });
   }, [id, isEdit]);
@@ -63,13 +70,18 @@ export default function SalesOrderFormPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const payload = {
+      ...form,
+      journal: Number(form.journal) || undefined,
+      entry_date: form.entry_date || null,
+    };
     try {
       if (isEdit && id) {
-        await updateSalesOrderApi(Number(id), form);
+        await updateJournalEntryApi(Number(id), payload);
       } else {
-        await createSalesOrderApi(form);
+        await createJournalEntryApi(payload);
       }
-      navigate("/sales/orders");
+      navigate("/accounting/entries");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
     }
@@ -81,49 +93,59 @@ export default function SalesOrderFormPage() {
 
   return (
     <div>
-      <h1>{headingPrefix} Sales Order</h1>
+      <h1>{headingPrefix} Journal Entry</h1>
 
       {error && <div role="alert">{error}</div>}
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="order_number">Order Number</label>
+          <label htmlFor="journal">Journal</label>
+          <select
+            id="journal"
+            name="journal"
+            value={form.journal}
+            onChange={handleChange}
+          >
+            <option value="">-- Select journal --</option>
+            {journals.map((j) => (
+              <option key={j.id} value={j.id}>
+                {j.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="reference">Reference</label>
           <input
-            id="order_number"
-            name="order_number"
-            value={form.order_number}
+            id="reference"
+            name="reference"
+            value={form.reference}
             onChange={handleChange}
           />
         </div>
 
         <div>
-          <label htmlFor="customer_name">Customer Name</label>
+          <label htmlFor="entry_date">Entry Date</label>
           <input
-            id="customer_name"
-            name="customer_name"
-            value={form.customer_name}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="customer_email">Customer Email</label>
-          <input
-            id="customer_email"
-            name="customer_email"
-            type="email"
-            value={form.customer_email}
+            id="entry_date"
+            name="entry_date"
+            type="date"
+            value={form.entry_date}
             onChange={handleChange}
           />
         </div>
 
         <div>
           <label htmlFor="status">Status</label>
-          <select id="status" name="status" value={form.status} onChange={handleChange}>
-            <option value="confirmed">Confirmed</option>
-            <option value="in_progress">In Progress</option>
-            <option value="delivered">Delivered</option>
-            <option value="invoiced">Invoiced</option>
+          <select
+            id="status"
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+          >
+            <option value="draft">Draft</option>
+            <option value="posted">Posted</option>
             <option value="cancelled">Cancelled</option>
           </select>
         </div>

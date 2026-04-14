@@ -13,6 +13,9 @@ import PurchaseOrderFormPage from "./pages/purchasing/PurchaseOrderFormPage";
 import QuotationListPage from "./pages/sales/QuotationListPage";
 import SalesOrderListPage from "./pages/sales/SalesOrderListPage";
 import SalesOrderFormPage from "./pages/sales/SalesOrderFormPage";
+import AccountListPage from "./pages/accounting/AccountListPage";
+import JournalEntryListPage from "./pages/accounting/JournalEntryListPage";
+import JournalEntryFormPage from "./pages/accounting/JournalEntryFormPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -70,6 +73,13 @@ export default function App() {
         <Route path="/sales/orders" element={<SalesOrderListPage />} />
         <Route path="/sales/orders/new" element={<SalesOrderFormPage />} />
         <Route path="/sales/orders/:id/edit" element={<SalesOrderFormPage />} />
+        <Route path="/accounting/accounts" element={<AccountListPage />} />
+        <Route path="/accounting/entries" element={<JournalEntryListPage />} />
+        <Route path="/accounting/entries/new" element={<JournalEntryFormPage />} />
+        <Route
+          path="/accounting/entries/:id/edit"
+          element={<JournalEntryFormPage />}
+        />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -37,9 +37,7 @@ export default function SalesOrderListPage() {
             {orders.map((so) => (
               <tr key={so.id}>
                 <td>
-                  <Link to={`/sales/orders/${so.id}/edit`}>
-                    {so.order_number}
-                  </Link>
+                  <Link to={`/sales/orders/${so.id}/edit`}>{so.order_number}</Link>
                 </td>
                 <td>{so.customer_name}</td>
                 <td>{so.status}</td>

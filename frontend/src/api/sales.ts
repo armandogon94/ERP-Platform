@@ -31,17 +31,14 @@ export interface SalesOrder {
 export async function fetchQuotationsApi(
   params?: Record<string, string>,
 ): Promise<SalesQuotation[]> {
-  const { data } = await apiClient.get<SalesQuotation[]>(
-    "/v1/sales/quotations/",
-    { params },
-  );
+  const { data } = await apiClient.get<SalesQuotation[]>("/v1/sales/quotations/", {
+    params,
+  });
   return data;
 }
 
 export async function fetchQuotationApi(id: number): Promise<SalesQuotation> {
-  const { data } = await apiClient.get<SalesQuotation>(
-    `/v1/sales/quotations/${id}/`,
-  );
+  const { data } = await apiClient.get<SalesQuotation>(`/v1/sales/quotations/${id}/`);
   return data;
 }
 
@@ -83,10 +80,7 @@ export async function fetchSalesOrderApi(id: number): Promise<SalesOrder> {
 export async function createSalesOrderApi(
   payload: Partial<SalesOrder>,
 ): Promise<SalesOrder> {
-  const { data } = await apiClient.post<SalesOrder>(
-    "/v1/sales/orders/",
-    payload,
-  );
+  const { data } = await apiClient.post<SalesOrder>("/v1/sales/orders/", payload);
   return data;
 }
 
