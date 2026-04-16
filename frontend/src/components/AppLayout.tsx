@@ -1,9 +1,22 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
+import { useAuthStore } from "../stores/authStore";
 import { useConfigStore } from "../stores/configStore";
 import AppSwitcher, { type AppModule } from "./AppSwitcher";
 import Sidebar, { type SidebarItem } from "./Sidebar";
 import TopNavbar from "./TopNavbar";
+import "./AppLayout.css";
+
+// Shade a hex color toward black by `amount` (0–1). Used for --accent-strong.
+function darken(hex: string, amount: number): string {
+  const m = hex.replace("#", "");
+  if (m.length !== 6) return hex;
+  const num = parseInt(m, 16);
+  const r = Math.max(0, Math.round(((num >> 16) & 0xff) * (1 - amount)));
+  const g = Math.max(0, Math.round(((num >> 8) & 0xff) * (1 - amount)));
+  const b = Math.max(0, Math.round((num & 0xff) * (1 - amount)));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+}
 
 // Fallback sidebar items shown while API loads or if fetch fails
 const DEFAULT_SIDEBAR_ITEMS: SidebarItem[] = [
@@ -43,6 +56,7 @@ export default function AppLayout() {
   const [appSwitcherOpen, setAppSwitcherOpen] = useState(false);
 
   const { modules, fetchModules, fetchModuleConfig } = useConfigStore();
+  const brandColor = useAuthStore((s) => s.company?.brand_color);
 
   useEffect(() => {
     fetchModules();
@@ -54,6 +68,14 @@ export default function AppLayout() {
       fetchModuleConfig(m.id, m.name);
     }
   }, [modules, fetchModuleConfig]);
+
+  useEffect(() => {
+    // Apply per-company theming via CSS custom properties (see D34).
+    if (!brandColor) return;
+    const root = document.documentElement;
+    root.style.setProperty("--accent", brandColor);
+    root.style.setProperty("--accent-strong", darken(brandColor, 0.15));
+  }, [brandColor]);
 
   const sidebarItems =
     modules.length > 0 ? modulesToSidebarItems(modules) : DEFAULT_SIDEBAR_ITEMS;

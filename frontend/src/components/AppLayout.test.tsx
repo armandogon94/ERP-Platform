@@ -131,4 +131,41 @@ describe("AppLayout", () => {
     expect(screen.getByText("Accounting")).toBeInTheDocument();
     expect(screen.getByText("HR")).toBeInTheDocument();
   });
+
+  it("renders Lucide SVG icons in sidebar (not emoji)", () => {
+    renderLayout();
+    const sidebar = screen.getByRole("complementary", { name: /module navigation/i });
+    // Every sidebar link should include an <svg> (Lucide) instead of an emoji.
+    const svgs = sidebar.querySelectorAll("svg");
+    expect(svgs.length).toBeGreaterThan(0);
+    // No emoji-only text node inside icon spans.
+    const iconSpans = sidebar.querySelectorAll(".sidebar-icon");
+    for (const span of iconSpans) {
+      expect(span.textContent?.trim() ?? "").toBe("");
+    }
+  });
+
+  it("sets --accent CSS variable from company.brand_color", () => {
+    useAuthStore.setState({
+      user: {
+        id: 2,
+        email: "admin@tablesync.com",
+        first_name: "Admin",
+        last_name: "TableSync",
+        company: null,
+      },
+      company: {
+        id: 2,
+        name: "TableSync",
+        slug: "tablesync",
+        brand_color: "#9F1239",
+        industry: "hospitality",
+      },
+      isAuthenticated: true,
+    });
+    renderLayout();
+    expect(document.documentElement.style.getPropertyValue("--accent")).toBe(
+      "#9F1239",
+    );
+  });
 });

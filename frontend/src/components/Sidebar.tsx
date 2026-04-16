@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { iconFor } from "./moduleIcons";
 
 export interface SidebarItem {
   name: string;
@@ -18,14 +19,19 @@ export default function Sidebar({ items, isOpen }: SidebarProps) {
   return (
     <aside className="sidebar" aria-label="Module navigation">
       <ul>
-        {items.map((item) => (
-          <li key={item.name}>
-            <NavLink to={item.url} className="sidebar-link">
-              <span className="sidebar-icon">{item.icon}</span>
-              <span className="sidebar-label">{item.label}</span>
-            </NavLink>
-          </li>
-        ))}
+        {items.map((item) => {
+          const Icon = iconFor(item.name);
+          return (
+            <li key={item.name}>
+              <NavLink to={item.url} className="sidebar-link">
+                <span className="sidebar-icon" aria-hidden="true">
+                  <Icon />
+                </span>
+                <span className="sidebar-label">{item.label}</span>
+              </NavLink>
+            </li>
+          );
+        })}
       </ul>
     </aside>
   );

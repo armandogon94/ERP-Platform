@@ -1,0 +1,110 @@
+/* Design tokens — Odoo-inspired professional density (D34).
+ * Semantic layer: components reference tokens via var(--…), not raw hex.
+ * Per-company overrides set `--accent` on html root; see AppLayout.
+ */
+
+:root {
+  /* ── Color: neutral surfaces ─────────────────────────────────────── */
+  --color-bg: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-muted: #f8f9fa;
+  --color-border: #e5e7eb;
+  --color-border-strong: #cbd5e1;
+  --color-divider: #f1f3f5;
+
+  /* ── Color: text ─────────────────────────────────────────────────── */
+  --color-text: #111827;           /* body text, headings */
+  --color-text-muted: #4b5563;     /* secondary labels, table caption */
+  --color-text-subtle: #6b7280;    /* helper text, placeholder */
+  --color-text-inverted: #ffffff;  /* text on colored backgrounds */
+
+  /* ── Color: accent (brand) — overridden per company ──────────────── */
+  --accent: #714b67;               /* Odoo primary purple */
+  --accent-strong: #5a3c52;
+  --accent-soft: #efe8ec;
+  --accent-fg: #ffffff;
+
+  /* ── Color: semantic ─────────────────────────────────────────────── */
+  --color-primary: var(--accent);
+  --color-primary-fg: var(--accent-fg);
+  --color-success: #15803d;
+  --color-success-soft: #dcfce7;
+  --color-warning: #b45309;
+  --color-warning-soft: #fef3c7;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fee2e2;
+  --color-info: #1e40af;
+  --color-info-soft: #dbeafe;
+
+  /* ── Spacing scale (4pt grid) ────────────────────────────────────── */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* ── Border radius ───────────────────────────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ─────────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px 0 rgba(16, 24, 40, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(16, 24, 40, 0.08), 0 2px 4px -2px rgba(16, 24, 40, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(16, 24, 40, 0.08), 0 4px 6px -4px rgba(16, 24, 40, 0.05);
+
+  /* ── Typography ──────────────────────────────────────────────────── */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 22px;
+  --font-size-3xl: 28px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ── Layout ──────────────────────────────────────────────────────── */
+  --topnav-height: 48px;
+  --sidebar-width: 220px;
+  --sidebar-width-collapsed: 56px;
+
+  /* ── Motion ──────────────────────────────────────────────────────── */
+  --duration-fast: 120ms;
+  --duration-normal: 180ms;
+  --duration-slow: 240ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ── Z-index scale ───────────────────────────────────────────────── */
+  --z-sidebar: 10;
+  --z-topnav: 20;
+  --z-dropdown: 30;
+  --z-modal-backdrop: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

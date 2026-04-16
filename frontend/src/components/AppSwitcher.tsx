@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { iconFor } from "./moduleIcons";
 
 export interface AppModule {
   name: string;
@@ -28,24 +29,28 @@ export default function AppSwitcher({ modules, isOpen, onClose }: AppSwitcherPro
       >
         <h2>Applications</h2>
         <div className="app-grid">
-          {modules.map((mod) => (
-            <button
-              key={mod.name}
-              className="app-tile"
-              onClick={() => {
-                navigate(`/${mod.name}`);
-                onClose();
-              }}
-            >
-              <span
-                className="app-tile-icon"
-                style={{ backgroundColor: mod.color || "#714B67" }}
+          {modules.map((mod) => {
+            const Icon = iconFor(mod.name);
+            return (
+              <button
+                key={mod.name}
+                className="app-tile"
+                onClick={() => {
+                  navigate(`/${mod.name}`);
+                  onClose();
+                }}
               >
-                {mod.icon || mod.display_name[0]}
-              </span>
-              <span className="app-tile-name">{mod.display_name}</span>
-            </button>
-          ))}
+                <span
+                  className="app-tile-icon"
+                  style={{ backgroundColor: mod.color || "#714B67" }}
+                  aria-hidden="true"
+                >
+                  <Icon />
+                </span>
+                <span className="app-tile-name">{mod.display_name}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

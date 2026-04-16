@@ -1,0 +1,270 @@
+/* AppLayout + TopNavbar + Sidebar + AppSwitcher styles
+ * Targets existing JSX class names (no markup changes required).
+ */
+
+/* ── Shell ─────────────────────────────────────────────────────────── */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+/* ── Top navbar ────────────────────────────────────────────────────── */
+.top-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--topnav-height);
+  padding: 0 var(--space-4);
+  color: var(--color-text-inverted);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topnav);
+  /* backgroundColor is set inline via company.brand_color — see TopNavbar.tsx */
+}
+
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.navbar-toggle,
+.app-switcher-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-inverted);
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.navbar-toggle:hover,
+.app-switcher-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.navbar-toggle:focus-visible,
+.app-switcher-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.company-name {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  letter-spacing: 0.01em;
+}
+
+.user-name {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+}
+
+.logout-btn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-inverted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  min-height: 28px;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-3) 0;
+  overflow-y: auto;
+  z-index: var(--z-sidebar);
+}
+
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-left: 3px solid transparent;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+  min-height: 36px;
+}
+
+.sidebar-link:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.sidebar-link.active {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  border-left-color: var(--accent);
+}
+
+.sidebar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+.sidebar-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.75;
+}
+
+.sidebar-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── App switcher (modal grid) ─────────────────────────────────────── */
+.app-switcher-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.5);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: calc(var(--topnav-height) + var(--space-5));
+  z-index: var(--z-modal-backdrop);
+  animation: app-switcher-fade var(--duration-fast) var(--ease-out);
+}
+
+@keyframes app-switcher-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.app-switcher {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-5);
+  width: min(720px, calc(100% - var(--space-6)));
+  max-height: calc(100vh - var(--topnav-height) - var(--space-6));
+  overflow-y: auto;
+  z-index: var(--z-modal);
+}
+
+.app-switcher h2 {
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-3);
+}
+
+.app-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.app-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.app-tile:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.app-tile-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+  /* backgroundColor set inline from module.color */
+}
+
+.app-tile-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.75;
+}
+
+.app-tile-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  text-align: center;
+}

@@ -1,0 +1,283 @@
+/* Globals — reset + base rules targeting semantic HTML so pages inherit
+ * the look without per-page CSS. See D33 (plain CSS + variables).
+ */
+
+/* ── modern-normalize (trimmed to essentials) ─────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  line-height: var(--line-height-normal);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ── Typography ───────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 var(--space-3) 0;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  line-height: var(--line-height-tight);
+}
+
+h1 { font-size: var(--font-size-2xl); }
+h2 { font-size: var(--font-size-xl); }
+h3 { font-size: var(--font-size-lg); }
+
+p {
+  margin: 0 0 var(--space-3) 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+a:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
+}
+
+/* ── Focus-visible (accessibility) ────────────────────────────────── */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Base form primitives ─────────────────────────────────────────── */
+button {
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  min-height: 36px;
+  line-height: 1.4;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+  width: 100%;
+  max-width: 420px;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background: var(--color-surface-muted);
+  color: var(--color-text-subtle);
+  cursor: not-allowed;
+}
+
+label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-1);
+}
+
+/* ── Page layout scaffolding ──────────────────────────────────────── */
+main {
+  padding: var(--space-5) var(--space-6);
+}
+
+main > div > h1:first-child {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ── "New X" links styled as secondary buttons ────────────────────── */
+main a[href$="/new"] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+main a[href$="/new"]:hover {
+  background: var(--accent-strong);
+  color: var(--accent-fg);
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Generic form pattern ─────────────────────────────────────────── */
+main form {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 640px;
+  background: var(--color-surface);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+main form > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+main form button[type="submit"] {
+  justify-self: start;
+  padding: var(--space-2) var(--space-5);
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+  min-height: 40px;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+main form button[type="submit"]:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+/* ── Generic table pattern (applied to bare <table> in pages) ─────── */
+main table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  font-size: var(--font-size-sm);
+}
+
+main thead {
+  background: var(--color-surface-muted);
+}
+
+main th,
+main td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  vertical-align: middle;
+}
+
+main th {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+main tbody tr {
+  border-bottom: 1px solid var(--color-divider);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+main tbody tr:last-child {
+  border-bottom: none;
+}
+
+main tbody tr:hover {
+  background: var(--color-surface-muted);
+}
+
+main td a {
+  color: var(--accent);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ── Loading + error states ───────────────────────────────────────── */
+main > div > div:not([role]) {
+  /* Naked loading <div>Loading...</div> inherits subtle styling */
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-sm);
+  padding: var(--space-5) 0;
+}
+
+[role="alert"] {
+  display: block;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  border-left: 3px solid var(--color-danger);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+}
+
+/* ── Utility ──────────────────────────────────────────────────────── */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
