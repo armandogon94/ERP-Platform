@@ -868,6 +868,56 @@ Entities: `invoicing.Invoice` (`INV`), `invoicing.CreditNote` (`CN`), `purchasin
 
 ---
 
+## Slice 10.8 — Design system & visual layer
+
+**Description:** Ship the design system and visual layer so every page looks polished before more modules land. See D33 (plain CSS + variables), D34 (Odoo-inspired), D35 (Lucide icons). Discovered 2026-04-16 when Slice 10.5 preview revealed the frontend has zero CSS files — every page is raw HTML. Adding this now prevents 6 more module slices (11–16) from compounding the problem.
+
+**Why this slice is inserted here:** The next slice (11 Fleet) ships ~6 more pages, and Slices 12–16 ship ~30 more. Every new page should land on top of the design system, not before it — otherwise each future slice pays the retrofit cost again. 10.6 (Partner) and 10.7 (Sequence) don't ship new visible-UI pages, but they also benefit because the Partner CRUD pages will use the new component styles.
+
+**Dependency:** Slice 10.5 merged (uses the now-consistent useTerminology / page markup that 10.5 unified).
+
+**Reference industries:** Preview sweep hits `admin@tablesync.com` (hospitality terminology + burgundy brand color `#9F1239`) and `admin@novapay.com` (fintech + blue `#2563EB`) to prove per-company theming works.
+
+**Scope:** L (~20 files)
+
+### Tasks
+
+| # | Task | Phase | Scope |
+|---|------|-------|-------|
+| 10.8.1 | Install `lucide-react` | — | XS |
+| 10.8.2 | Design tokens `frontend/src/styles/tokens.css` (colors, spacing 4/8/12/16/24/32/48, radius sm/md/lg, shadows, type scale 12/14/16/18/24/32, font stack) | GREEN | S |
+| 10.8.3 | Reset + globals `frontend/src/styles/globals.css` (modern-normalize, body/html, focus-visible, base rules for `<table>`/`<form>`/`<h1>`/`<label>`) | GREEN | S |
+| 10.8.4 | Import both CSS files from `frontend/src/main.tsx` | GREEN | XS |
+| 10.8.5 | Style shared UI (`Button`, `Input`, `Select`, `Modal`, `Badge`) via `frontend/src/components/ui/ui.css`; JSX unchanged | GREEN | M |
+| 10.8.6 | Style `AppLayout` shell (topnav + sidebar grid) via `AppLayout.css` targeting existing class names | GREEN | S |
+| 10.8.7 | Style `TopNavbar` (accent strip via `var(--accent)`, hamburger, logout) | GREEN | S |
+| 10.8.8 | Style `Sidebar` (active highlight) + `AppSwitcher` (4-col grid, brand dot, hover lift) | GREEN | S |
+| 10.8.9 | **RED** test: AppLayout asserts Lucide `<svg>` present instead of emoji for sidebar entries | RED | S |
+| 10.8.10 | Replace emoji icons in `DEFAULT_SIDEBAR_ITEMS`, `modulesToSidebarItems`, `AppSwitcher` with Lucide components via new `frontend/src/components/moduleIcons.tsx` mapping | GREEN | M |
+| 10.8.11 | Style `LoginPage` — centered card on gradient, visible focus rings | GREEN | S |
+| 10.8.12 | Add `.page-header` + table base rules in globals so every ListPage inherits the look | GREEN | S |
+| 10.8.13 | Add `.form-stack` / `.form-field` rules in globals so every FormPage inherits the look | GREEN | S |
+| 10.8.14 | **RED** test for per-company theming — `AppLayout.test.tsx` seeds authStore with `brand_color: "#9F1239"`, asserts `document.documentElement.style.getPropertyValue("--accent") === "#9F1239"` | RED | S |
+| 10.8.15 | Implement theming — `AppLayout` useEffect reads `authStore.company.brand_color` and sets `--accent` on html root | GREEN | S |
+| 10.8.16 | **RED** a11y tests: `frontend/src/styles/contrast.test.ts` verifies token pairs meet WCAG AA 4.5:1 using a tiny inline luminance helper | RED | S |
+| 10.8.17 | Tune tokens until contrast tests pass | GREEN | S |
+| 10.8.18 | Preview sweep: login as `admin@tablesync.com` then `admin@novapay.com`, screenshot Login / Home / Sales Orders list / Quotation form; verify zero console errors and visibly different brand colors | VERIFY | M |
+| 10.8.19 | Full vitest + pytest green + commit `feat: Slice 10.8 — design system, Lucide icons, per-company theming` | VERIFY | S |
+
+### Checkpoint: Slice 10.8
+- [ ] `tokens.css` + `globals.css` imported from main.tsx
+- [ ] Button/Input/Select/Modal/Badge visibly styled
+- [ ] AppLayout shell looks professional
+- [ ] Lucide icons replace emojis
+- [ ] LoginPage redesigned with centered card
+- [ ] `--accent` CSS var driven by active company's `brand_color`
+- [ ] TableSync (burgundy) and NovaPay (blue) visibly differ at login + logged-in header
+- [ ] 229+ frontend tests green (plus ~3 new tests for theming + icons + contrast)
+- [ ] Zero console errors in preview sweep
+- [ ] Commit `feat: Slice 10.8 — design system, Lucide icons, per-company theming`
+
+---
+
 ## Slice 11 — Fleet module (Module Scaffold Pattern)
 
 **Description:** Track vehicles, drivers, maintenance, fuel, and services. Reference industry SwiftRoute.

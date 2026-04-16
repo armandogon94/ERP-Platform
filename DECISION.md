@@ -442,11 +442,54 @@ This provides meaningful access control without the N² complexity of field-leve
 
 ---
 
+## D33: CSS Approach — Plain CSS + CSS Variables
+
+**Decision:** Add a `frontend/src/styles/` directory containing token and component CSS, imported once from `main.tsx`. Use **plain CSS with custom properties** (CSS variables), no Tailwind/CSS-in-JS/CSS Modules. Semantic tokens (`--color-bg`, `--space-4`, `--radius-md`, etc.) are declared on `:root` and overridden per company on `html[data-company=<slug>]` via an inline style set by AppLayout.
+
+**Alternatives:**
+- (a) Plain CSS + CSS variables (chosen)
+- (b) Tailwind CSS (utility-first, new build config + PostCSS pipeline + 23 JSX files to retrofit with utilities)
+- (c) CSS-in-JS (emotion / styled-components) — runtime cost, server-side-rendering complexity
+- (d) CSS Modules — scoped but verbose import ceremony per component
+
+**Rationale:** We ship 23 existing React pages and ~8 shared components that currently have **no CSS at all** — adding Tailwind would require touching every JSX file to add utility classes, doubling the diff. Plain CSS lets us style the 6 shared components (Button, Input, Select, Modal, Badge, table patterns) and the AppLayout shell once, then every page picks up the look automatically via native HTML semantics (`<table>`, `<button>`, `<form>`, `<h1>`). CSS variables give us per-company theming for free — `--accent: {brand_color}` on the html root overrides across every descendant. No new build-time dependency.
+
+---
+
+## D34: Visual Style — Odoo-inspired Professional Density
+
+**Decision:** Adopt an **Odoo-inspired** visual language: dense information, purple primary accent (default `#714B67`, overridable per company), light neutral surfaces, subtle 1px borders, 2–4px shadows, system font stack headed by `-apple-system, "Segoe UI", Roboto` for cross-platform native feel. Design tokens live in `frontend/src/styles/tokens.css`.
+
+**Alternatives:**
+- (a) Odoo-inspired professional density (chosen)
+- (b) iOS-style card-based with heavy shadows and large whitespace
+- (c) Material Design 3 with elevation scale
+- (d) Minimalist/brutalist
+
+**Rationale:** SPEC.md §Objective opens with "Odoo-inspired multi-tenant ERP platform" — the user's reference frame is already Odoo. Dense tables and sidebar-driven navigation are load-bearing for ERP users who scan hundreds of rows. Card-heavy iOS style (b) wastes vertical space. Material Design (c) brings a Google aesthetic at odds with ERP expectations. Minimalist (d) sacrifices information density. The purple accent matches the existing `AppLayout.DEFAULT_MODULES` color `#714B67` (already Odoo brand) and pairs cleanly with per-company brand color overrides as the accent.
+
+---
+
+## D35: Icon Library — Lucide React
+
+**Decision:** Replace emoji icons (currently used in `AppLayout.DEFAULT_SIDEBAR_ITEMS` for modules: 💰 📄 📦 etc.) with **Lucide React** (`lucide-react` npm package). Add a single mapping `{ moduleName → LucideIcon }`. Keep an emoji fallback for modules whose API-returned icon string is unrecognized.
+
+**Alternatives:**
+- (a) Lucide React (chosen)
+- (b) Heroicons (Tailwind's default)
+- (c) Material Icons / Material Symbols
+- (d) Keep emoji
+
+**Rationale:** Per ui-ux-pro-max "common rules for professional UI": emoji as structural icons is the #1 anti-pattern. They render inconsistently across OS versions, can't be color-themed via CSS, and can't be sized with design tokens. Lucide is tree-shakable (we bundle only the ~15 icons we use), has a consistent 1.5–2px stroke width, and is React-idiomatic (`<Warehouse />` not `<svg>...</svg>`). Heroicons is fine but its outlined/solid split means twice as many imports for the same coverage. Material Symbols requires loading a variable font (~200KB). Emoji (d) is the current state and looks unprofessional per user feedback 2026-04-16.
+
+---
+
 ## Decision Log
 
 | Date | Decision | Status |
 |------|----------|--------|
 | 2026-04-11 | D1–D20 | Active |
 | 2026-04-16 | D21–D32 | Active |
+| 2026-04-16 | D33–D35 | Active |
 
 All decisions are subject to revision as implementation reveals new constraints. Updates will be appended with rationale for the change.

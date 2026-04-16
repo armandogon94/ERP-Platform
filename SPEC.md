@@ -916,6 +916,22 @@ As of 2026-04-16, 628 tests passing (418 backend + 210 frontend). Each was shipp
 
 ---
 
+#### Slice 10.8 — Design system & visual layer (inserted 2026-04-16)
+**Scope:** (see D33, D34, D35) — ship tokens + globals + Lucide icons + per-company `--accent` CSS variable theming. The frontend currently has **zero CSS files**; this slice adds `frontend/src/styles/tokens.css`, `frontend/src/styles/globals.css`, styled shared components (`Button`, `Input`, `Select`, `Modal`, `Badge`), styled AppLayout/TopNavbar/Sidebar/AppSwitcher, redesigned LoginPage, and per-company theming driven by `Company.brand_color`.
+
+**Entities touched:** No new DB models. Pure frontend + a single `lucide-react` npm dep.
+
+**Acceptance:**
+- `frontend/src/styles/tokens.css` + `globals.css` imported from `main.tsx`.
+- All existing 229 frontend tests still pass; ~3 new tests added for Lucide icons, `--accent` theming, and WCAG AA contrast.
+- Preview sweep as `admin@tablesync.com` and `admin@novapay.com` shows visibly different brand colors (burgundy vs blue) in the topnav strip and primary buttons.
+- Zero emoji icons remain in structural UI.
+- Zero console errors.
+
+**Commit:** `feat: Slice 10.8 — design system, Lucide icons, per-company theming`
+
+---
+
 ### Remaining Module Slices (11–16)
 
 Each of these uses the 9-step Module Scaffold Pattern (memory `feedback_module_scaffold`, locked by D28). Each slice must satisfy the Verification Gate (below) before commit. All three new tech-debt slices must ship before Slice 11.

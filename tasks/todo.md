@@ -141,6 +141,27 @@ See `SPEC.md §Vertical Slice Definitions` for full acceptance criteria per slic
 - [ ] 10.7.5 Back-fill migrations (7 modules)
 - [ ] 10.7.6 Verification Gate + commit `feat: Slice 10.7 — sequence auto-generation signals`
 
+**Slice 10.8 — Design system & visual layer** (inserted 2026-04-16, see D33–D35)
+- [ ] 10.8.1 Install `lucide-react`
+- [ ] 10.8.2 Design tokens `frontend/src/styles/tokens.css`
+- [ ] 10.8.3 Reset + globals `frontend/src/styles/globals.css`
+- [ ] 10.8.4 Import CSS from `frontend/src/main.tsx`
+- [ ] 10.8.5 Style shared UI (Button/Input/Select/Modal/Badge) via `components/ui/ui.css`
+- [ ] 10.8.6 Style AppLayout shell via `AppLayout.css`
+- [ ] 10.8.7 Style TopNavbar (accent strip, hamburger, logout)
+- [ ] 10.8.8 Style Sidebar (active highlight) + AppSwitcher (grid, brand dots)
+- [ ] 10.8.9 Lucide-icons test (RED)
+- [ ] 10.8.10 Replace emojis with Lucide components via `moduleIcons.tsx` (GREEN)
+- [ ] 10.8.11 Style LoginPage (centered card)
+- [ ] 10.8.12 Add `.page-header` + table base rules in globals
+- [ ] 10.8.13 Add `.form-stack` + `.form-field` rules in globals
+- [ ] 10.8.14 Per-company theming test — `--accent` from brand_color (RED)
+- [ ] 10.8.15 AppLayout useEffect sets `--accent` (GREEN)
+- [ ] 10.8.16 Contrast-ratio tests for token pairs (RED)
+- [ ] 10.8.17 Tune tokens until contrast passes WCAG AA 4.5:1 (GREEN)
+- [ ] 10.8.18 Preview sweep as TableSync + NovaPay (different brand colors visible)
+- [ ] 10.8.19 Full vitest + pytest green + commit `feat: Slice 10.8 — design system, Lucide icons, per-company theming`
+
 ### Remaining module slices (Module Scaffold Pattern, 9 steps)
 
 **Slice 11 — Fleet**
