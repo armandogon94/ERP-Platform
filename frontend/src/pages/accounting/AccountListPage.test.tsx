@@ -110,4 +110,13 @@ describe("AccountListPage", () => {
       expect(screen.getByText("asset")).toBeInTheDocument();
     });
   });
+
+  it("uses terminology for the page heading", async () => {
+    mockFetchAccounts.mockResolvedValueOnce(sampleAccounts);
+    useConfigStore.setState({ terminology: { Account: "Ledger Line" } });
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getAllByText(/Ledger Line/i).length).toBeGreaterThan(0);
+    });
+  });
 });

@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTerminology } from "../../hooks/useTerminology";
 import { type Account, fetchAccountsApi } from "../../api/accounting";
 
 export default function AccountListPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const accountLabel = useTerminology("Account", "Account");
 
   useEffect(() => {
     fetchAccountsApi()
@@ -16,9 +19,9 @@ export default function AccountListPage() {
 
   return (
     <div>
-      <h1>Chart of Accounts</h1>
+      <h1>Chart of {accountLabel}s</h1>
 
-      <Link to="/accounting/accounts/new">New Account</Link>
+      <Link to="/accounting/accounts/new">New {accountLabel}</Link>
 
       {isLoading && <div>Loading...</div>}
       {error && <div role="alert">{error}</div>}

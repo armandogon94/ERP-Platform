@@ -148,4 +148,12 @@ describe("JournalEntryFormPage", () => {
       expect(mockUpdateEntry).toHaveBeenCalledWith(1, expect.any(Object));
     });
   });
+
+  it("uses terminology for the form heading", async () => {
+    useConfigStore.setState({ terminology: { "Journal Entry": "Booking" } });
+    renderNewForm();
+    await waitFor(() => {
+      expect(screen.getByText(/Booking/i)).toBeInTheDocument();
+    });
+  });
 });

@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTerminology } from "../../hooks/useTerminology";
 import { type Vendor, fetchVendorsApi } from "../../api/purchasing";
 
 export default function VendorListPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const vendorLabel = useTerminology("Vendor", "Vendor");
 
   useEffect(() => {
     fetchVendorsApi()
@@ -16,9 +19,9 @@ export default function VendorListPage() {
 
   return (
     <div>
-      <h1>Vendors</h1>
+      <h1>{vendorLabel}s</h1>
 
-      <Link to="/purchasing/vendors/new">New Vendor</Link>
+      <Link to="/purchasing/vendors/new">New {vendorLabel}</Link>
 
       {isLoading && <div>Loading...</div>}
       {error && <div role="alert">{error}</div>}

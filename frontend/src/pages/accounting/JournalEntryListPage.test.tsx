@@ -108,4 +108,13 @@ describe("JournalEntryListPage", () => {
       expect(screen.getByText("draft")).toBeInTheDocument();
     });
   });
+
+  it("uses terminology for the page heading", async () => {
+    mockFetchEntries.mockResolvedValueOnce(sampleEntries);
+    useConfigStore.setState({ terminology: { "Journal Entry": "Booking" } });
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getAllByText(/Booking/i).length).toBeGreaterThan(0);
+    });
+  });
 });

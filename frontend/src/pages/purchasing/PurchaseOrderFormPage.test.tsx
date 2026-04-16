@@ -160,4 +160,12 @@ describe("PurchaseOrderFormPage", () => {
       expect(mockUpdatePO).toHaveBeenCalledWith(1, expect.any(Object));
     });
   });
+
+  it("uses terminology for the form heading", async () => {
+    useConfigStore.setState({ terminology: { "Purchase Order": "Supply Request" } });
+    renderNewForm();
+    await waitFor(() => {
+      expect(screen.getByText(/Supply Request/i)).toBeInTheDocument();
+    });
+  });
 });

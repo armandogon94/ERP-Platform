@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTerminology } from "../../hooks/useTerminology";
 import { type Invoice, fetchInvoicesApi } from "../../api/invoicing";
 
 export default function InvoiceListPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const invoiceLabel = useTerminology("Invoice", "Invoice");
 
   useEffect(() => {
     fetchInvoicesApi()
@@ -16,9 +19,9 @@ export default function InvoiceListPage() {
 
   return (
     <div>
-      <h1>Invoices</h1>
+      <h1>{invoiceLabel}s</h1>
 
-      <Link to="/invoicing/invoices/new">New Invoice</Link>
+      <Link to="/invoicing/invoices/new">New {invoiceLabel}</Link>
 
       {isLoading && <div>Loading...</div>}
       {error && <div role="alert">{error}</div>}

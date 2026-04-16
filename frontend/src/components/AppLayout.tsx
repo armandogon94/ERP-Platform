@@ -42,11 +42,18 @@ export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [appSwitcherOpen, setAppSwitcherOpen] = useState(false);
 
-  const { modules, fetchModules } = useConfigStore();
+  const { modules, fetchModules, fetchModuleConfig } = useConfigStore();
 
   useEffect(() => {
     fetchModules();
   }, [fetchModules]);
+
+  useEffect(() => {
+    // Prefetch each module's config so terminology is populated globally.
+    for (const m of modules) {
+      fetchModuleConfig(m.id, m.name);
+    }
+  }, [modules, fetchModuleConfig]);
 
   const sidebarItems =
     modules.length > 0 ? modulesToSidebarItems(modules) : DEFAULT_SIDEBAR_ITEMS;

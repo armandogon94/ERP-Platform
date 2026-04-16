@@ -143,4 +143,12 @@ describe("SalesOrderFormPage", () => {
       expect(mockUpdateOrder).toHaveBeenCalledWith(1, expect.any(Object));
     });
   });
+
+  it("uses terminology for the form heading", async () => {
+    useConfigStore.setState({ terminology: { "Sales Order": "Guest Check" } });
+    renderNewForm();
+    await waitFor(() => {
+      expect(screen.getByText(/Guest Check/i)).toBeInTheDocument();
+    });
+  });
 });

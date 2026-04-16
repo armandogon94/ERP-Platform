@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTerminology } from "../../hooks/useTerminology";
 import {
   type SalesOrder,
   createSalesOrderApi,
@@ -32,6 +33,7 @@ export default function SalesOrderFormPage() {
   const [isLoading, setIsLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
 
+  const orderLabel = useTerminology("Sales Order", "Sales Order");
   const headingPrefix = isEdit ? "Edit" : "New";
 
   useEffect(() => {
@@ -81,7 +83,9 @@ export default function SalesOrderFormPage() {
 
   return (
     <div>
-      <h1>{headingPrefix} Sales Order</h1>
+      <h1>
+        {headingPrefix} {orderLabel}
+      </h1>
 
       {error && <div role="alert">{error}</div>}
 

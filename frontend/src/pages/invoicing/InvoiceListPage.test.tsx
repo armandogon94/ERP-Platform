@@ -128,4 +128,13 @@ describe("InvoiceListPage", () => {
       expect(screen.getByText("500.00")).toBeInTheDocument();
     });
   });
+
+  it("uses terminology for the page heading", async () => {
+    mockFetchInvoices.mockResolvedValueOnce(sampleInvoices);
+    useConfigStore.setState({ terminology: { Invoice: "Guest Check" } });
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getAllByText(/Guest Check/i).length).toBeGreaterThan(0);
+    });
+  });
 });

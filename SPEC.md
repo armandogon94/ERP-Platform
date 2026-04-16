@@ -39,7 +39,7 @@ Build an Odoo-inspired multi-tenant ERP platform serving 10 distinct industries 
 | Containers | Docker + Docker Compose | latest |
 | State Mgmt | Zustand | latest |
 | DnD | @dnd-kit/core | latest |
-| Charting | Recharts or Chart.js | latest |
+| Charting | Recharts (locked by D24) | latest |
 
 ## Commands
 
@@ -836,31 +836,224 @@ POST /api/v1/auth/refresh/
 
 ## Vertical Slice Definitions
 
-See the approved plan at `.claude/plans/precious-tickling-comet.md` for complete slice definitions including:
-- 19 slices with dependency ordering
-- What gets built per slice (models, APIs, frontend, tests)
-- Definition of Done per slice
-- Reference industry per slice
-- Suggested build prompts per slice
+### Shipped — Slices 0–10 (frozen reference)
+
+As of 2026-04-16, 628 tests passing (418 backend + 210 frontend). Each was shipped in one atomic commit with all backend + frontend + tests + migrations.
+
+| # | Module / Focus | Commit | Tests |
+|---|----------------|--------|-------|
+| 0 | Docker + project scaffold | `3fe3cfc` | 7 |
+| 1 | Core multi-tenancy + auth + RBAC + layout | `4724a21` | 101 |
+| 2 | View system (List/Form/Kanban) + component library | `ce125c3` / `8580dde` | 77 |
+| 3 | Industry config (YAML → 3-tier merge → Redis cache) | `f497ca2` | 73 |
+| 4 | HR — Employee, Department, LeaveRequest, Payroll | `0d6653c` | 68 |
+| 5 | Calendar — Event, Resource, Attendee, Reminder, `external_uid` | `1200726` | 45 |
+| 6 | Inventory — Product, StockLocation, StockMove, StockLot, ReorderRule | `569057f` | 70 |
+| 7 | Purchasing — Vendor, PO, POLine, RFQ, RFQLine | `b71c0a8` | 63 |
+| 8 | Sales — Quotation, SalesOrder, SalesOrderLine | `1623619` | 51 |
+| 9 | Accounting — Account, Journal, JournalEntry, JournalEntryLine | `62343d6` | 59 |
+| 10 | Invoicing — Invoice, InvoiceLine, CreditNote | `e1b424d` | 45 |
+
+**Frozen:** These slices will not be modified except by the three tech-debt slices below (10.5/10.6/10.7) and by Slice 19 (polish pass).
+
+### Remaining Tech-Debt Slices (10.5 → 10.6 → 10.7, see D31/D32)
+
+#### Slice 10.5 — Tech-debt cleanup (UI consistency)
+**Scope:**
+- Commit the pending modified `frontend/src/pages/invoicing/InvoiceFormPage.test.tsx`.
+- Add `frontend/src/pages/sales/QuotationFormPage.tsx` + register `/sales/quotations/new` and `/sales/quotations/:id/edit` in `App.tsx`. Its test must follow the "form page test structure" memory (`fireEvent`, `api/config` mock, `configStore.setState` beforeEach).
+- Retrofit `useTerminology()` into the 11 pages currently missing it: `sales/QuotationListPage`, `sales/SalesOrderListPage`, `sales/SalesOrderFormPage`, `purchasing/VendorListPage`, `purchasing/VendorFormPage`, `purchasing/PurchaseOrderListPage`, `purchasing/PurchaseOrderFormPage`, `accounting/AccountListPage`, `accounting/JournalEntryListPage`, `accounting/JournalEntryFormPage`, `invoicing/InvoiceListPage`, `invoicing/InvoiceFormPage`.
+
+**Acceptance:**
+- New QuotationFormPage tests pass (create + edit paths).
+- All 23 module pages call `useTerminology()` for user-visible labels.
+- `make test` green; Preview-tab sweep shows TableSync and DentaFlow terminology swaps across all 7 modules' list headers.
+
+**Commit:** `refactor: Slice 10.5 — Quotation form, terminology retrofit`
+
+---
+
+#### Slice 10.6 — Partner model
+**Scope:** (see D21)
+- Add `core.Partner(TenantModel)` with: `name`, `email`, `phone`, `is_customer`, `is_vendor`, `tax_id`, `payment_terms_days`, `credit_limit`, `industry_tags` (JSONB), `address_json`.
+- Add `PartnerFactory`, model tests, `PartnerViewSet` with `IsCompanyMember` + `CompanyScopedFilterBackend` + `pagination_class = None`, API tests, serializer, register under `/api/v1/core/partners/`.
+- Frontend: `api/partners.ts`, `PartnerListPage`, `PartnerFormPage`, routes.
+- **Migrate existing FKs:** add nullable `customer = FK(Partner)` to SalesQuotation, SalesOrder, Invoice; add nullable `partner = FK(Partner)` to PurchaseOrder (alongside legacy `vendor` FK — mark vendor deprecated). Data migration: for each row with `customer_name` set, upsert a Partner (`is_customer=True` and/or `is_vendor=True`) in the same company and set the FK. Leave `customer_name` populated as denormalized display fallback.
+
+**Acceptance:**
+- `/api/v1/core/partners/` CRUD works, company-scoped.
+- Creating a SalesOrder via API lets caller pass either `customer_name` (legacy) or `customer_id` (new); when `customer_id` is passed, `customer_name` is auto-populated from `partner.name`.
+- Data migration reversible; downgrade leaves strings intact.
+- `make test` green; Preview sweep creates a Partner, then creates a Quotation referencing that Partner, sees the name render in the list.
+
+**Commit:** `feat: Slice 10.6 — Partner model unifies customers and vendors`
+
+---
+
+#### Slice 10.7 — Sequence auto-generation signals
+**Scope:** (see D22)
+- For each numbered entity, override `save()` to call `core.sequence.get_next_sequence(self.company, prefix)` when the number field is blank. Entities + prefixes:
+
+| Model | Field | Prefix |
+|-------|-------|--------|
+| `invoicing.Invoice` | `invoice_number` | `INV` |
+| `invoicing.CreditNote` | `credit_note_number` | `CN` |
+| `purchasing.PurchaseOrder` | `po_number` | `PO` |
+| `purchasing.RequestForQuote` | `rfq_number` | `RFQ` |
+| `sales.SalesQuotation` | `quotation_number` | `QUO` |
+| `sales.SalesOrder` | `order_number` | `SO` |
+| `accounting.JournalEntry` | `reference` | `JE` |
+
+- Format: `{PREFIX}-{YYYY}-{NNNN}` (e.g., `INV-2026-0001`).
+- New unit tests per model asserting (a) blank → auto-generated, (b) pre-set → preserved, (c) concurrent saves across two companies don't collide.
+
+**Acceptance:**
+- Creating any of the above entities via API with no number field returns the entity with a sequence-formatted number.
+- Existing rows with blank numbers get back-filled by a one-off migration.
+- `make test` green; Preview sweep creates a new Invoice, sees `INV-2026-…` in the list.
+
+**Commit:** `feat: Slice 10.7 — sequence auto-generation signals`
+
+---
+
+### Remaining Module Slices (11–16)
+
+Each of these uses the 9-step Module Scaffold Pattern (memory `feedback_module_scaffold`, locked by D28). Each slice must satisfy the Verification Gate (below) before commit. All three new tech-debt slices must ship before Slice 11.
+
+#### Slice 11 — Fleet
+**Entities:** `Vehicle` (make, model, year, license_plate, VIN, status: active/maintenance/retired, `driver = FK(Driver, null=True)`, mileage), `Driver` (name, license_number, license_expiry, phone, status: active/inactive, optional `employee = FK(hr.Employee)`), `MaintenanceLog` (vehicle FK, date, description, cost, mechanic, status: scheduled/completed/cancelled), `FuelLog` (vehicle FK, date, liters, cost_per_liter, total_cost, mileage_at_fill), `VehicleService` (vehicle FK, service_type, scheduled_date, completed_date, cost, notes).
+
+**API:** `/api/v1/fleet/{vehicles,drivers,maintenance-logs,fuel-logs,services}/`. Filters: Vehicle by status + driver; MaintenanceLog by status + vehicle; FuelLog by vehicle.
+
+**Frontend:** VehicleListPage + VehicleFormPage, DriverListPage + DriverFormPage, MaintenanceLogListPage, FuelLogListPage.
+
+**Reference industry:** SwiftRoute.
+
+---
+
+#### Slice 12 — Projects
+**Entities:** `Project` (name, code, `customer = FK(core.Partner)`, start_date, end_date, status: planned/active/on_hold/completed/cancelled, budget), `Task` (project FK, name, assignee = FK(hr.Employee), status: todo/in_progress/review/done/cancelled, priority, due_date, parent_task self-FK for subtasks), `Milestone` (project FK, name, due_date, completed), `ProjectTimesheet` (project FK, employee FK, task FK null, date, hours, billable, description).
+
+**API:** `/api/v1/projects/{projects,tasks,milestones,timesheets}/`. Include `@action GET /projects/{id}/progress/` returning `{total_tasks, done, hours_logged, budget_consumed_pct}`.
+
+**Frontend:** ProjectListPage + ProjectFormPage, TaskListPage (with Kanban view option), MilestoneListPage. Task's KanbanView groups by status.
+
+**Reference industry:** CraneStack.
+
+---
+
+#### Slice 13 — Manufacturing
+**Entities:** `BillOfMaterials` (product FK to inventory.Product, version, active), `BOMLine` (bom FK, component FK to inventory.Product, quantity, uom), `WorkOrder` (product FK, quantity_target, quantity_done, status: draft/confirmed/in_progress/done/cancelled, start_date, end_date), `ProductionCost` (work_order FK, cost_type: material/labor/overhead, amount, notes).
+
+**API:** `/api/v1/manufacturing/{boms,bom-lines,work-orders,costs}/`. Include `@action POST /work-orders/{id}/start/` (status → in_progress), `/complete/` (status → done, creates inventory.StockMove entries for consumed components and finished product).
+
+**Frontend:** BOMListPage + BOMFormPage (with child lines), WorkOrderListPage + WorkOrderFormPage.
+
+**Reference industry:** TableSync (recipes as BOMs).
+
+---
+
+#### Slice 14 — Point of Sale
+**Entities:** `POSSession` (station: CharField, cash_on_open, cash_on_close null, opened_by FK user, opened_at, closed_at null, status: open/closed), `POSOrder` (session FK, order_number auto-seq `POS`, customer FK(core.Partner) null, subtotal, tax_amount, total, status: draft/paid/refunded), `POSOrderLine` (order FK, product FK(inventory.Product), quantity, unit_price, tax_rate, total), `CashMovement` (session FK, type: in/out, amount, reason, at_time).
+
+**API:** `/api/v1/pos/{sessions,orders,order-lines,cash-movements}/`. Include `@action POST /sessions/{id}/close/` computing expected vs. actual cash.
+
+**Frontend:** POSSessionListPage + POSSessionFormPage, POSOrderListPage + POSOrderFormPage (touch-friendly).
+
+**Reference industry:** TableSync (restaurant POS).
+
+---
+
+#### Slice 15 — Helpdesk
+**Entities:** `TicketCategory` (name, sla_hours, industry_tag), `SLAConfig` (category FK, priority: low/normal/high/urgent, response_hours, resolution_hours), `Ticket` (ticket_number auto-seq `TKT`, title, description, category FK, reporter FK(core.Partner) or FK(auth.User), assignee FK(auth.User) null, priority, status: new/assigned/in_progress/resolved/closed, created_at, resolved_at null, sla_breached bool), `KnowledgeArticle` (title, slug, body Markdown, category, published bool, tags JSONB).
+
+**API:** `/api/v1/helpdesk/{tickets,categories,sla-configs,articles}/`. Include `@action POST /tickets/{id}/resolve/` + `/tickets/{id}/reopen/`.
+
+**Frontend:** TicketListPage + TicketFormPage (with KanbanView by status), CategoryListPage, ArticleListPage + ArticleFormPage.
+
+**Reference industry:** MedVista (patient support) or NovaPay (merchant support).
+
+---
+
+#### Slice 16 — Reports / BI (with Pivot + Graph)
+**Scope:** (see D23, D24)
+- Backend models: `ReportTemplate` (name, model_name, default_filters JSONB, default_group_by JSONB, default_measures JSONB, industry_tag), `PivotDefinition` (name, model_name, rows JSONB, cols JSONB, measure, aggregator), `ScheduledExport` (report FK, cron, format: pdf/csv/xlsx, recipients JSONB, last_run null).
+- Extend `ViewDefinition.view_type` to include `pivot` and `graph`.
+- **Generic `/aggregate/` action** on every module ViewSet: `GET /<path>/aggregate/?group_by=<field>&measure=<field>&op=<sum|count|avg>&filter=<field>__<lookup>=<value>&...`. Returns `[{group: <value>, value: <number>}, …]`. Reuses `CompanyScopedFilterBackend`.
+- **Frontend:** `frontend/src/views/PivotView.tsx` (grid with row/col pivot, renders from `ViewDefinition.config`). `frontend/src/views/GraphView.tsx` (Recharts: bar/line/pie/area, config-driven). ReportBuilderPage stitches these together.
+
+**Acceptance:**
+- `/api/v1/invoicing/invoices/aggregate/?group_by=status&measure=total_amount&op=sum` returns per-status totals.
+- Any `ViewDefinition` with `view_type=pivot` renders a functional pivot table for the configured model.
+- Any `ViewDefinition` with `view_type=graph` renders a Recharts chart.
+- Preview-tab sweep opens the Reports page, builds an invoice-by-month line chart, screenshots it.
+
+**Reference industry:** NovaPay (financial reports), TableSync (food cost pivot).
+
+---
+
+### Platform Slices (17–19)
+
+#### Slice 17 — Industry demo seeding (see D26)
+Per-module `seed_<module>_demo --company <slug> [--reset]` commands for each of the 13 modules. Meta-command `seed_industry_demo --company <slug>` reads per-industry module subset from `INDUSTRY-BRANDING-CONTEXT.md` and dispatches. Idempotent. Adds 10–30 sample records per module per company.
+
+**Acceptance:** `docker compose run --rm django python manage.py seed_industry_demo --company dentaflow` produces a browseable demo dataset across Calendar, Inventory, HR, Invoicing with DentaFlow terminology.
+
+---
+
+#### Slice 18 — Calendar polling sync (see D27)
+**Endpoints:**
+- `GET /api/v1/calendar/events/?updated_since=<iso8601>` — returns events updated after timestamp, includes `external_uid` and `updated_at`.
+- `POST /api/v1/calendar/events/` — upsert by `external_uid`; LWW on `updated_at`.
+- `POST /api/v1/calendar/events/bulk/` — accepts array for 5-min polling batches.
+
+**Acceptance:** A separate client script can fetch, mutate, and push back events; conflict resolution verified via test that mutates on both sides and asserts LWW outcome.
+
+---
+
+#### Slice 19 — Polish pass
+- `ErrorBoundary.tsx` wrapping all routes, `Skeleton.tsx` for list loading, `EmptyState.tsx` for empty tables, `Breadcrumbs.tsx` derived from router.
+- Per-company theming: CSS custom properties from `Company.brand_color` (accent + accent-fg + accent-hover) applied at AppLayout mount.
+- WebSocket notifications: Django Channels consumer on `/ws/notifications/`, frontend `useNotifications` hook + bell badge. Triggers: new Ticket, new Invoice, StockMove done.
+- Audit log timeline page at `/settings/audit-log`.
+- Lightweight HomePage with 4–6 ORM-aggregate KPIs per active industry (no materialized views — see D25).
+
+**Acceptance:** `make test` green + manual Preview sweep of all 10 industry admin logins shows correct brand color, 13 modules visible, no console errors, notification bell works.
+
+---
+
+### Verification Gate (non-negotiable for every slice)
+
+Before committing any slice:
+1. `docker compose run --rm django python -m pytest --tb=short -q` — all green (including new tests).
+2. `docker compose run --rm react npx vitest run --reporter=verbose` — all green.
+3. **Preview tab sweep** (`mcp__Claude_Preview__*` tools):
+   - `preview_start http://localhost:14500`
+   - Log in as the slice's reference-industry admin
+   - Navigate to each new page; `preview_screenshot`, `preview_console_logs`, `preview_network`
+   - Zero console errors; zero 4xx/5xx; data renders correctly; terminology override visible
+4. `git log -1 --format="%an %ae"` shows `Armando Gonzalez <armandogon94@gmail.com>`, no Co-Authored-By.
+5. One atomic commit per slice with conventional-commit prefix.
 
 ---
 
 ## Success Criteria
 
-1. `docker-compose up --build` starts all 6 services on Apple Silicon Mac
-2. Login as admin@novapay.com → see NovaPay-branded dashboard with correct KPIs
-3. Login as admin@dentaflow.com → see DentaFlow-branded dashboard with different KPIs
-4. All 13 modules accessible from App Switcher
-5. CRUD operations work for all module entities via Form and List views
-6. Kanban drag-drop updates entity state
-7. Company A's data never visible when logged into Company B
-8. Role-based access: user without module permission gets 403
-9. Sequence system generates INV/2026/00001 format IDs
-10. Invoice posting creates corresponding accounting journal entry
-11. PO receiving creates inventory stock moves
-12. `make test` passes with 80%+ coverage on both backend and frontend
-13. `make seed` populates all 10 industries with demo data
+**Cycle-level (what must be true when Slices 10.5–19 all ship):**
+
+1. `make clean && make dev` starts all 6 services on Apple Silicon Mac in under 3 minutes.
+2. `make migrate && make seed && docker compose run --rm django python manage.py seed_industry_demo --company dentaflow` produces a browseable demo.
+3. Logging in as `admin@<company>.com / admin` for each of the 10 industries loads that company's brand color in the navbar, its 13-module AppSwitcher, and its terminology overrides (e.g., DentaFlow sidebar says "Supply Room" not "Warehouse").
+4. Every one of the 13 modules has a List page, Form page (for primary entities), and at least one Kanban/Pivot/Graph view where useful.
+5. Creating any numbered entity via API with a blank number returns a sequence-formatted number (`INV-2026-0001`, `PO-2026-0001`, etc.).
+6. Sales/Invoicing/Purchasing/Projects/POS/Helpdesk all reference `core.Partner` (customer or vendor), not ad-hoc string columns.
+7. Reports module renders at least one functional pivot and one functional Recharts graph over real seeded data.
+8. Calendar sync: two separate processes polling `?updated_since` end up eventually-consistent with LWW.
+9. Company A's data never visible to Company B (tested by cross-company assertions in every module's test suite).
+10. Role-based access: a user without a given module's `access: true` receives 403 from that module's list endpoint.
+11. `make test` passes with ≥80% coverage on both backend and frontend.
+12. No Co-Authored-By trailer in any commit since `e1b424d`.
 
 ## Open Questions
 
-None — all design decisions documented in DECISION.md. If implementation reveals new constraints, decisions will be updated.
+None — all design decisions documented in DECISION.md (D1–D32). If implementation reveals new constraints, decisions will be appended with rationale.

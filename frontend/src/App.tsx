@@ -11,6 +11,7 @@ import VendorListPage from "./pages/purchasing/VendorListPage";
 import PurchaseOrderListPage from "./pages/purchasing/PurchaseOrderListPage";
 import PurchaseOrderFormPage from "./pages/purchasing/PurchaseOrderFormPage";
 import QuotationListPage from "./pages/sales/QuotationListPage";
+import QuotationFormPage from "./pages/sales/QuotationFormPage";
 import SalesOrderListPage from "./pages/sales/SalesOrderListPage";
 import SalesOrderFormPage from "./pages/sales/SalesOrderFormPage";
 import AccountListPage from "./pages/accounting/AccountListPage";
@@ -72,6 +73,8 @@ export default function App() {
           element={<PurchaseOrderFormPage />}
         />
         <Route path="/sales/quotations" element={<QuotationListPage />} />
+        <Route path="/sales/quotations/new" element={<QuotationFormPage />} />
+        <Route path="/sales/quotations/:id/edit" element={<QuotationFormPage />} />
         <Route path="/sales/orders" element={<SalesOrderListPage />} />
         <Route path="/sales/orders/new" element={<SalesOrderFormPage />} />
         <Route path="/sales/orders/:id/edit" element={<SalesOrderFormPage />} />

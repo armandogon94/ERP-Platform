@@ -48,10 +48,7 @@ function renderNewForm() {
   return render(
     <MemoryRouter initialEntries={["/invoicing/invoices/new"]}>
       <Routes>
-        <Route
-          path="/invoicing/invoices/new"
-          element={<InvoiceFormPage />}
-        />
+        <Route path="/invoicing/invoices/new" element={<InvoiceFormPage />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -61,10 +58,7 @@ function renderEditForm(id = 1) {
   return render(
     <MemoryRouter initialEntries={[`/invoicing/invoices/${id}/edit`]}>
       <Routes>
-        <Route
-          path="/invoicing/invoices/:id/edit"
-          element={<InvoiceFormPage />}
-        />
+        <Route path="/invoicing/invoices/:id/edit" element={<InvoiceFormPage />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -151,6 +145,14 @@ describe("InvoiceFormPage", () => {
 
     await waitFor(() => {
       expect(mockUpdateInvoice).toHaveBeenCalledWith(1, expect.any(Object));
+    });
+  });
+
+  it("uses terminology for the form heading", async () => {
+    useConfigStore.setState({ terminology: { Invoice: "Guest Check" } });
+    renderNewForm();
+    await waitFor(() => {
+      expect(screen.getByText(/Guest Check/i)).toBeInTheDocument();
     });
   });
 });

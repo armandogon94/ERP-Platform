@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTerminology } from "../../hooks/useTerminology";
 import {
   type Journal,
   type JournalEntry,
@@ -35,6 +36,7 @@ export default function JournalEntryFormPage() {
   const [isLoading, setIsLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
 
+  const entryLabel = useTerminology("Journal Entry", "Journal Entry");
   const headingPrefix = isEdit ? "Edit" : "New";
 
   useEffect(() => {
@@ -95,7 +97,9 @@ export default function JournalEntryFormPage() {
 
   return (
     <div>
-      <h1>{headingPrefix} Journal Entry</h1>
+      <h1>
+        {headingPrefix} {entryLabel}
+      </h1>
 
       {error && <div role="alert">{error}</div>}
 

@@ -112,4 +112,13 @@ describe("VendorListPage", () => {
       expect(screen.getAllByText(/yes/i).length).toBeGreaterThan(0);
     });
   });
+
+  it("uses terminology for the page heading", async () => {
+    mockFetchVendors.mockResolvedValueOnce(sampleVendors);
+    useConfigStore.setState({ terminology: { Vendor: "Supplier" } });
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getAllByText(/Supplier/i).length).toBeGreaterThan(0);
+    });
+  });
 });

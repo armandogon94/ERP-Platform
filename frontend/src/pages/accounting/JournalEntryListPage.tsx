@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTerminology } from "../../hooks/useTerminology";
 import { type JournalEntry, fetchJournalEntriesApi } from "../../api/accounting";
 
 export default function JournalEntryListPage() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const entryLabel = useTerminology("Journal Entry", "Journal Entry");
 
   useEffect(() => {
     fetchJournalEntriesApi()
@@ -16,9 +19,9 @@ export default function JournalEntryListPage() {
 
   return (
     <div>
-      <h1>Journal Entries</h1>
+      <h1>{entryLabel === "Journal Entry" ? "Journal Entries" : `${entryLabel}s`}</h1>
 
-      <Link to="/accounting/entries/new">New Journal Entry</Link>
+      <Link to="/accounting/entries/new">New {entryLabel}</Link>
 
       {isLoading && <div>Loading...</div>}
       {error && <div role="alert">{error}</div>}

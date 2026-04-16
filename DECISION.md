@@ -279,10 +279,174 @@ This provides meaningful access control without the N² complexity of field-leve
 
 ---
 
+## D21: Partner Model (Unified Customer + Vendor)
+
+**Decision:** Introduce a unified `Partner` model in `backend/core/` (Odoo-style: one entity with `is_customer` / `is_vendor` flags). Add FK from `SalesQuotation.customer`, `SalesOrder.customer`, `Invoice.customer`, `PurchaseOrder.vendor`. Keep existing `customer_name` CharField as a denormalized display fallback during the data migration; populate from Partner name going forward.
+
+**Alternatives:**
+- (a) Unified Partner model with `is_customer`/`is_vendor` flags (chosen, Odoo pattern)
+- (b) Separate Customer and Vendor models
+- (c) Keep `customer_name` CharField forever (no FK)
+
+**Rationale:** Slices 7–10 shipped with `customer_name` as a CharField and a bare `Vendor` table inside the Purchasing module. Project 14's own kickoff decisions planned a unified Partner model (referenced in SPEC.md line 619 for Sales) but it was never built. Centralizing lets us track credit limits, contact history, payment terms, industry-specific segmentation, and duplicate detection in one place. Separate models (b) duplicate columns and require synchronization when a single entity (e.g., a construction sub-contractor who both buys and supplies) plays both roles. Staying with strings (c) blocks reporting, credit workflows, and Projects/POS/Helpdesk from referencing the same customer consistently.
+
+---
+
+## D22: Sequence Auto-Generation Trigger
+
+**Decision:** Auto-generate sequence numbers (INV-2026-001, PO-2026-001, SO-2026-001, QUO-2026-001, JE-2026-001, CN-2026-001) via `save()` override + `pre_save` signal that calls the existing `core.sequence.get_next_sequence(company, prefix)` helper — but **only when the number field is blank**.
+
+**Alternatives:**
+- (a) `save()` override + pre_save signal, only when blank (chosen)
+- (b) Database trigger (PostgreSQL `BEFORE INSERT`)
+- (c) Explicit call at serializer/viewset `perform_create` time
+- (d) Require callers to always set the number (status quo)
+
+**Rationale:** Matches this project's signals-for-cache-invalidation pattern (Slice 3). `save()` + signal is Python-level and visible in tests/tracebacks; DB triggers (b) hide logic from Django and complicate migrations. Serializer-level (c) misses records created via admin, management commands, or shell — sequence must fire on every write path. Status quo (d) means the field is perpetually blank (actual current bug). Guarding on `if not self.number:` preserves explicit overrides (e.g., during data imports).
+
+---
+
+## D23: Pivot & Graph View Implementation
+
+**Decision:** Build `PivotView.tsx` and `GraphView.tsx` as generic JSON-config components using the existing `ViewDefinition` model (extend `view_type` choices to include `pivot` and `graph`). Back them with a new DRF action on every module ViewSet: `GET /{model}/aggregate/?group_by=<field>&measure=<field>&op=<sum|count|avg>&filter=<...>`.
+
+**Alternatives:**
+- (a) JSON-config components + per-ViewSet `/aggregate/` action (chosen)
+- (b) Separate reporting stack (Metabase / Superset embedded)
+- (c) Hardcoded per-module pivot pages
+- (d) Client-side aggregation over paginated list responses
+
+**Rationale:** Reuses the Odoo-style JSON view infrastructure we already built in Slice 2 — PivotView and GraphView become two more `view_type` values, not a parallel system. A `/aggregate/` action per ViewSet inherits the existing `CompanyScopedFilterBackend` so multi-tenancy and RBAC work for free. Embedding Metabase (b) would need SSO bridging, its own auth, and would not respect our Role permissions. Hardcoded pages (c) violate the "configuration not code" principle. Client-side aggregation (d) breaks at scale and can't be filtered securely.
+
+---
+
+## D24: Chart Library — Recharts
+
+**Decision:** Use **Recharts** for GraphView (bar, line, pie, area).
+
+**Alternatives:**
+- (a) Recharts (chosen)
+- (b) Chart.js + react-chartjs-2
+- (c) Apache ECharts
+- (d) Visx / D3 from scratch
+
+**Rationale:** Recharts is React-idiomatic (declarative JSX, no imperative refs), tree-shakable (we only bundle the chart types we use), and has sufficient coverage for our 4 chart types. Chart.js (b) uses an imperative canvas API that fights React's reconciliation. ECharts (c) is more powerful but ships ~900KB minified (our entire current frontend bundle is smaller). Visx (d) is a toolkit, not a library — too much custom code for bar/line/pie. SPEC.md line 42 already listed "Recharts or Chart.js" — this locks the choice.
+
+---
+
+## D25: Dashboards Scope for This Cycle
+
+**Decision:** **Defer** the full materialized-view dashboard system (originally D6) past this cycle. Build a lightweight HomePage in Slice 19 that shows 4–6 per-company KPIs using plain Django ORM aggregates (`.aggregate(Sum(...))`, `.annotate()`), not materialized views.
+
+**Alternatives:**
+- (a) Defer MV dashboards; build ORM-aggregate HomePage in Slice 19 (chosen)
+- (b) Build full materialized-view dashboards per D6 inside this cycle
+- (c) Skip homepage entirely; default route goes to first module
+
+**Rationale:** Materialized-view dashboards (D6) require: the MV SQL, Celery Beat refresh schedule per view, refresh-failure handling, and per-role dashboard_config JSON. That's ~1 full slice of infrastructure for KPIs most demos don't need. Plain ORM aggregates over the seeded data (Slice 17) are fast enough for 10 companies × demo-scale data, and the same HomePage component can later swap its data source to MVs without any UI change. This reverses D6's implementation depth but preserves its architecture — the JSONB dashboard config and materialized views remain on the roadmap, just post-cycle.
+
+---
+
+## D26: Industry Demo Seeding Structure
+
+**Decision:** One idempotent `seed_<module>_demo` Django management command per module (`seed_hr_demo`, `seed_inventory_demo`, etc.), each accepting `--company <slug>` and `--reset`. A meta-command `seed_industry_demo --company <slug>` dispatches to the per-module commands that apply for that industry per `INDUSTRY-BRANDING-CONTEXT.md`.
+
+**Alternatives:**
+- (a) Per-module commands + meta-command dispatcher (chosen)
+- (b) One monolithic `seed_all --company <slug>` command
+- (c) YAML/JSON fixtures loaded via `loaddata`
+- (d) pytest factories reused directly as a seeding entry point
+
+**Rationale:** Per-module commands are testable in isolation (unit-test each seeder) and composable per industry subset — TableSync needs Inventory+Manufacturing+POS seeded but not Fleet. A monolithic command (b) either forces all industries into the same seed set or grows into a 1000-line switch statement. Fixtures (c) break when models evolve (common during this cycle). Using factories directly (d) couples test infrastructure to production data paths — bad. Idempotency (`--reset` flag + existence checks) makes re-running safe.
+
+---
+
+## D27: Calendar Sync Implementation Depth
+
+**Decision:** Ship a **polling-only MVP** in Slice 18: `GET /api/v1/calendar/events/?updated_since=<iso8601>` and `POST /api/v1/calendar/events/` with conflict resolution by last-write-wins on `updated_at`. No webhooks. The Event model already has `external_uid` from Slice 5.
+
+**Alternatives:**
+- (a) Polling-only MVP (chosen)
+- (b) Full webhook + polling fallback per CALENDAR-SYNC-API-SPEC.md
+- (c) Continue deferring entirely
+
+**Rationale:** Matches D19 (calendar sync deferred past core platform). Polling at the CRM's 5-minute cadence is enough to demonstrate bidirectional sync for 10 industry demos; the webhook path requires shared secrets, retry logic, and signing — disproportionate to the single demo use case. `external_uid` and `updated_since` are already in the Event model, so this slice is a thin API + a small polling client in CRM's direction. Fully deferring (c) leaves the sync story untold at the end of this cycle — we want at least a working polling demo.
+
+---
+
+## D28: Module Scaffolding Pattern — Reuse, Do Not Refactor
+
+**Decision:** For Slices 11–15 (Fleet, Projects, Manufacturing, POS, Helpdesk) use the 9-step Module Scaffold Pattern verbatim (memory `feedback_module_scaffold`), which drove Slices 4–10 with zero regressions.
+
+**Alternatives:**
+- (a) Reuse the 9-step pattern verbatim (chosen)
+- (b) Refactor to a cookiecutter-style generator
+- (c) Write a `manage.py scaffold_module` command
+
+**Rationale:** The pattern is load-bearing: backend RED → GREEN → API RED → GREEN → frontend RED → GREEN → routes → commit. It produced 7 consecutive modules and an average 45 tests each without regression. Introducing a generator (b) or management command (c) now adds a meta-layer we'd have to maintain and debug — risk without reward when the remaining module count is 5. Post-cycle, generators are fair game.
+
+---
+
+## D29: Test Strategy — Unit + Preview Tab, No Headless E2E
+
+**Decision:** Backend: pytest + factory_boy for models and API. Frontend: vitest + RTL (`fireEvent`, not `userEvent`). **No headless Playwright/Cypress suite.** Instead, every slice runs a Claude Code Preview tab sweep (`mcp__Claude_Preview__*`) that (1) `preview_start`s `http://localhost:14500`, (2) logs in as the industry admin most relevant to the slice, (3) navigates each new page, (4) captures `preview_screenshot` + `preview_console_logs` + `preview_network`, (5) flags visual/data bugs before the slice commits.
+
+**Alternatives:**
+- (a) Preview tab sweep per slice + unit tests (chosen)
+- (b) Full Playwright E2E suite
+- (c) Unit tests only, no browser verification
+
+**Rationale:** Headless E2E doubles maintenance cost (selectors, fixtures, CI orchestration) for a platform that isn't in CI yet. The Preview tab gives us what E2E tests are meant to prove — page actually loads, console clean, network clean, data renders right, terminology swapped — without the fixture tax. Unit tests alone (c) let bugs through that only manifest with real API data (Slice 10 would have caught the missing Quotation form earlier if we'd run a preview sweep). Post-cycle, a Playwright smoke test over the 13 module list pages is a reasonable follow-up.
+
+---
+
+## D30: `/ship` Opt-Out for This Cycle
+
+**Decision:** **Skip `/ship`** (shipping-and-launch skill and any production-deployment steps) for this cycle. User runs everything locally on Mac via Docker Compose; there is no staging or production environment yet.
+
+**Alternatives:**
+- (a) Skip `/ship` (chosen — explicit user instruction)
+- (b) Run `/ship` at the end of the cycle
+
+**Rationale:** User stated "no need to execute the ship skill at the end of the workflow just yet." Going through `/ship` without an environment to ship to would generate CI/CD config, container-registry steps, and secrets hygiene checks that the user would then have to unwind. When user is ready to deploy, they can run `/ship` as a standalone pass.
+
+---
+
+## D31: Tech-Debt Slices Before New Modules
+
+**Decision:** Execute three small tech-debt slices (**10.5, 10.6, 10.7**) before Slice 11 begins, in this order:
+1. **10.5** — Commit pending `InvoiceFormPage.test.tsx`, add missing `QuotationFormPage` + `/sales/quotations/new` and `/:id/edit` routes, retrofit `useTerminology` across the 11 pages that lack it (sales/purchasing/accounting/invoicing list+form pages).
+2. **10.6** — Introduce the Partner model (D21) and migrate Sales/Invoicing/Purchasing FKs.
+3. **10.7** — Wire sequence auto-generation signals (D22) for all existing numbered entities.
+
+**Alternatives:**
+- (a) Three tech-debt slices first, then 11 (chosen)
+- (b) Fold tech debt into Slice 19 (polish)
+- (c) Fold tech debt into each future module as encountered
+- (d) Skip tech debt — ship as-is
+
+**Rationale:** Partner (D21) is used by Fleet (no — Fleet has Driver, not Customer), **but** used directly by Projects (12 → client FK), Manufacturing (13 → rarely), POS (14 → customer FK), Helpdesk (15 → reporter FK). If Partner lands after those modules ship, we do a breaking refactor across 4 modules instead of 1. Folding into Slice 19 (b) means every new module ships with known inconsistency. Per-module cleanup (c) multiplies the retrofit work. Skipping (d) bakes in inconsistency permanently. The three slices are tiny (~1–2 hours each), sequenced so dependencies flow: 10.5 first (pure FE cleanup, no DB changes), then 10.6 (new model + data migration), then 10.7 (signals, which may reference Partner-owned records).
+
+---
+
+## D32: Ordering of All Remaining Slices
+
+**Decision:** Execute remaining slices in this order: **10.5 → 10.6 → 10.7 → 11 → 12 → 13 → 14 → 15 → 16 → 17 → 18 → 19.**
+
+**Alternatives:**
+- (a) Tech debt → modules in CLAUDE.md table order (chosen)
+- (b) Modules first, tech debt last (Slice 19)
+- (c) Parallel module development
+
+**Rationale:** Dependency chain: Partner (10.6) blocks consistent customer/client FKs in 12/14/15; sequence auto-gen (10.7) must precede 11 to avoid new modules being the 11th place to fix the same bug; Reports/BI (16) needs module data to aggregate so must come after 11–15; demo seeding (17) needs all modules to exist; calendar sync (18) needs seeded events to sync; polish (19) touches every shipped module. Reordering would break each of these preconditions. Parallel development (c) isn't viable — one developer (agent-assisted) working Docker-linearly.
+
+---
+
 ## Decision Log
 
 | Date | Decision | Status |
 |------|----------|--------|
 | 2026-04-11 | D1–D20 | Active |
+| 2026-04-16 | D21–D32 | Active |
 
 All decisions are subject to revision as implementation reveals new constraints. Updates will be appended with rationale for the change.

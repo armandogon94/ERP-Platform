@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTerminology } from "../../hooks/useTerminology";
 import { type PurchaseOrder, fetchPurchaseOrdersApi } from "../../api/purchasing";
 
 export default function PurchaseOrderListPage() {
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const poLabel = useTerminology("Purchase Order", "Purchase Order");
 
   useEffect(() => {
     fetchPurchaseOrdersApi()
@@ -16,9 +19,9 @@ export default function PurchaseOrderListPage() {
 
   return (
     <div>
-      <h1>Purchase Orders</h1>
+      <h1>{poLabel}s</h1>
 
-      <Link to="/purchasing/purchase-orders/new">New Purchase Order</Link>
+      <Link to="/purchasing/purchase-orders/new">New {poLabel}</Link>
 
       {isLoading && <div>Loading...</div>}
       {error && <div role="alert">{error}</div>}

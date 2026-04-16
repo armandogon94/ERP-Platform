@@ -122,4 +122,13 @@ describe("SalesOrderListPage", () => {
       expect(screen.getByText("500.00")).toBeInTheDocument();
     });
   });
+
+  it("uses terminology for the page heading", async () => {
+    mockFetchOrders.mockResolvedValueOnce(sampleOrders);
+    useConfigStore.setState({ terminology: { "Sales Order": "Guest Check" } });
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getAllByText(/Guest Check/i).length).toBeGreaterThan(0);
+    });
+  });
 });

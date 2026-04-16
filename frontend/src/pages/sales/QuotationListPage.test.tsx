@@ -110,4 +110,13 @@ describe("QuotationListPage", () => {
       expect(screen.getByText("draft")).toBeInTheDocument();
     });
   });
+
+  it("uses terminology for the page heading", async () => {
+    mockFetchQuotations.mockResolvedValueOnce(sampleQuotations);
+    useConfigStore.setState({ terminology: { Quotation: "Proposal" } });
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getAllByText(/Proposal/i).length).toBeGreaterThan(0);
+    });
+  });
 });

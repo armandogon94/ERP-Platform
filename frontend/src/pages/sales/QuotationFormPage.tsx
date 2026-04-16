@@ -2,35 +2,31 @@ import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import {
-  type Invoice,
-  createInvoiceApi,
-  fetchInvoiceApi,
-  updateInvoiceApi,
-} from "../../api/invoicing";
+  type SalesQuotation,
+  createQuotationApi,
+  fetchQuotationApi,
+  updateQuotationApi,
+} from "../../api/sales";
 
 interface FormState {
-  invoice_number: string;
-  invoice_type: string;
-  status: string;
+  quotation_number: string;
   customer_name: string;
   customer_email: string;
-  invoice_date: string;
-  due_date: string;
+  status: string;
+  valid_until: string;
   notes: string;
 }
 
 const EMPTY_FORM: FormState = {
-  invoice_number: "",
-  invoice_type: "customer",
-  status: "draft",
+  quotation_number: "",
   customer_name: "",
   customer_email: "",
-  invoice_date: "",
-  due_date: "",
+  status: "draft",
+  valid_until: "",
   notes: "",
 };
 
-export default function InvoiceFormPage() {
+export default function QuotationFormPage() {
   const { id } = useParams<{ id?: string }>();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
@@ -39,28 +35,26 @@ export default function InvoiceFormPage() {
   const [isLoading, setIsLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
 
-  const invoiceLabel = useTerminology("Invoice", "Invoice");
+  const quotationLabel = useTerminology("Quotation", "Quotation");
   const headingPrefix = isEdit ? "Edit" : "New";
 
   useEffect(() => {
     if (!isEdit || !id) return;
 
-    fetchInvoiceApi(Number(id))
-      .then((inv: Invoice) => {
+    fetchQuotationApi(Number(id))
+      .then((q: SalesQuotation) => {
         setForm({
-          invoice_number: inv.invoice_number,
-          invoice_type: inv.invoice_type,
-          status: inv.status,
-          customer_name: inv.customer_name,
-          customer_email: inv.customer_email,
-          invoice_date: inv.invoice_date ?? "",
-          due_date: inv.due_date ?? "",
-          notes: inv.notes,
+          quotation_number: q.quotation_number,
+          customer_name: q.customer_name,
+          customer_email: q.customer_email,
+          status: q.status,
+          valid_until: q.valid_until ?? "",
+          notes: q.notes,
         });
         setIsLoading(false);
       })
       .catch((err: Error) => {
-        setError(err.message || "Error loading invoice");
+        setError(err.message || "Error loading quotation");
         setIsLoading(false);
       });
   }, [id, isEdit]);
@@ -76,16 +70,15 @@ export default function InvoiceFormPage() {
     e.preventDefault();
     const payload = {
       ...form,
-      invoice_date: form.invoice_date || null,
-      due_date: form.due_date || null,
+      valid_until: form.valid_until || null,
     };
     try {
       if (isEdit && id) {
-        await updateInvoiceApi(Number(id), payload);
+        await updateQuotationApi(Number(id), payload);
       } else {
-        await createInvoiceApi(payload);
+        await createQuotationApi(payload);
       }
-      navigate("/invoicing/invoices");
+      navigate("/sales/quotations");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
     }
@@ -98,43 +91,20 @@ export default function InvoiceFormPage() {
   return (
     <div>
       <h1>
-        {headingPrefix} {invoiceLabel}
+        {headingPrefix} {quotationLabel}
       </h1>
 
       {error && <div role="alert">{error}</div>}
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="invoice_number">Invoice Number</label>
+          <label htmlFor="quotation_number">{quotationLabel} Number</label>
           <input
-            id="invoice_number"
-            name="invoice_number"
-            value={form.invoice_number}
+            id="quotation_number"
+            name="quotation_number"
+            value={form.quotation_number}
             onChange={handleChange}
           />
-        </div>
-
-        <div>
-          <label htmlFor="invoice_type">Invoice Type</label>
-          <select
-            id="invoice_type"
-            name="invoice_type"
-            value={form.invoice_type}
-            onChange={handleChange}
-          >
-            <option value="customer">Customer Invoice</option>
-            <option value="vendor">Vendor Bill</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="status">Status</label>
-          <select id="status" name="status" value={form.status} onChange={handleChange}>
-            <option value="draft">Draft</option>
-            <option value="posted">Posted</option>
-            <option value="paid">Paid</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
         </div>
 
         <div>
@@ -159,23 +129,23 @@ export default function InvoiceFormPage() {
         </div>
 
         <div>
-          <label htmlFor="invoice_date">Invoice Date</label>
-          <input
-            id="invoice_date"
-            name="invoice_date"
-            type="date"
-            value={form.invoice_date}
-            onChange={handleChange}
-          />
+          <label htmlFor="status">Status</label>
+          <select id="status" name="status" value={form.status} onChange={handleChange}>
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="accepted">Accepted</option>
+            <option value="declined">Declined</option>
+            <option value="expired">Expired</option>
+          </select>
         </div>
 
         <div>
-          <label htmlFor="due_date">Due Date</label>
+          <label htmlFor="valid_until">Valid Until</label>
           <input
-            id="due_date"
-            name="due_date"
+            id="valid_until"
+            name="valid_until"
             type="date"
-            value={form.due_date}
+            value={form.valid_until}
             onChange={handleChange}
           />
         </div>

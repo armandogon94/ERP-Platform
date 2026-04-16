@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTerminology } from "../../hooks/useTerminology";
 import { type SalesOrder, fetchSalesOrdersApi } from "../../api/sales";
 
 export default function SalesOrderListPage() {
   const [orders, setOrders] = useState<SalesOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const orderLabel = useTerminology("Sales Order", "Sales Order");
 
   useEffect(() => {
     fetchSalesOrdersApi()
@@ -16,9 +19,9 @@ export default function SalesOrderListPage() {
 
   return (
     <div>
-      <h1>Sales Orders</h1>
+      <h1>{orderLabel}s</h1>
 
-      <Link to="/sales/orders/new">New Sales Order</Link>
+      <Link to="/sales/orders/new">New {orderLabel}</Link>
 
       {isLoading && <div>Loading...</div>}
       {error && <div role="alert">{error}</div>}

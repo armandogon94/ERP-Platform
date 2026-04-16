@@ -98,7 +98,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:${DJANGO_PORT:-14000}
+      - VITE_API_URL=http://localhost:${DJANGO_PORT:-14000}/api
 
 volumes:
   postgres_data:

@@ -1,4 +1,10 @@
-# Implementation Plan: ERP Platform — Slices 0 & 1
+# Implementation Plan: ERP Platform — All Slices (0–19)
+
+> **Navigation:** Slices 0–1 are detailed below as the original plan. Slices 2–10 shipped using the same TDD/vertical-slice pattern (see `tasks/todo.md` for their checkpoint status and git commits `3fe3cfc` through `e1b424d`). The remaining slices (**10.5–19**) are in **Part 2** at the bottom of this file.
+
+---
+
+## Part 1: Original Plan (Slices 0–1) — FROZEN REFERENCE
 
 ## Overview
 
@@ -630,3 +636,554 @@ Slice 1: Core Multi-Tenancy
 | 1.7 | `incremental-implementation` | — |
 | 1.8 | `test-driven-development` | `frontend-ui-engineering` |
 | 1.9 | `test-driven-development` | `frontend-ui-engineering` |
+
+---
+
+# Part 2: Remaining Slices (10.5 → 19)
+
+**Scope:** 12 slices. Every slice is a thin vertical slice (model → serializer → API → React → tests). Every slice commits atomically. Every slice passes the Verification Gate (`SPEC.md §Verification Gate`) before commit.
+
+**Order is locked by DECISION.md D32:** 10.5 → 10.6 → 10.7 → 11 → 12 → 13 → 14 → 15 → 16 → 17 → 18 → 19.
+
+**Module Scaffold Pattern (applies verbatim to Slices 11–15, D28):**
+
+| Step | Phase | Description |
+|------|-------|-------------|
+| 1 | — | Backend directory scaffold (`backend/modules/<name>/` with `apps.py`, `models.py`, `migrations/`, `tests/`) |
+| 2 | RED | Write failing model tests (`test_models.py`) — run via Docker pytest |
+| 3 | GREEN | Implement models + factories + add to `INSTALLED_APPS` + `makemigrations` |
+| 4 | RED | Write failing API tests (`test_api.py`) |
+| 5 | GREEN | Implement serializers + viewsets + `urls.py` + include in `api/v1/urls.py` |
+| 6 | RED | Write failing frontend tests (`{Entity}ListPage.test.tsx`, `{Entity}FormPage.test.tsx`) with `api/config` mock and `configStore.setState` boilerplate |
+| 7 | GREEN | Implement `api/<name>.ts` client + `{Entity}ListPage.tsx` + `{Entity}FormPage.tsx` (with `useTerminology`) |
+| 8 | — | Register routes in `frontend/src/App.tsx` |
+| 9 | VERIFY | Full suite green + Preview-tab sweep + atomic commit |
+
+**TDD ordering rule:** Every implementation task (`GREEN`) must be preceded by a failing-test task (`RED`) for the same unit. Never skip RED.
+
+**Verification Gate per slice (non-negotiable):**
+1. `docker compose run --rm django python -m pytest --tb=short -q` → green
+2. `docker compose run --rm react npx vitest run --reporter=verbose` → green
+3. Preview-tab sweep (`mcp__Claude_Preview__*`): login as reference-industry admin → navigate each new page → `preview_screenshot` + `preview_console_logs` + `preview_network` → zero console errors, zero 4xx/5xx, terminology override visible
+4. Single atomic commit, author `Armando Gonzalez <armandogon94@gmail.com>`, **no Co-Authored-By**
+
+---
+
+## Slice 10.5 — Tech-debt cleanup (UI consistency)
+
+**Description:** Clear accumulated frontend tech debt before starting new modules. Add the missing Quotation form page, commit the uncommitted InvoiceFormPage test, and retrofit `useTerminology()` across the 11 pages that still use hard-coded labels. Ref D31.
+
+**Dependency:** None (must land first).
+
+**Reference industry:** Any — TableSync is a good terminology smoke-test target.
+
+**Scope:** M (~12 files)
+
+### Task 10.5.1 — Commit pending InvoiceFormPage.test.tsx
+**RED → GREEN:** No new tests. The file is modified in git status; inspect diff, ensure it passes locally, include in the slice's final commit.
+- **Acceptance:** `git status` shows no modified tracked files after the slice's commit; `docker compose run --rm react npx vitest run src/pages/invoicing/` green.
+- **Files:** `frontend/src/pages/invoicing/InvoiceFormPage.test.tsx`
+- **Size:** XS
+
+### Task 10.5.2 — QuotationFormPage tests (RED)
+**RED:** Create `frontend/src/pages/sales/QuotationFormPage.test.tsx` following the memory-documented form-page test structure (mock `api/config`, `api/sales`, reset `configStore`, use `fireEvent`). Tests required:
+- "New Quotation" heading renders on `/sales/quotations/new`
+- "Edit Quotation" heading + pre-fill on `/sales/quotations/:id/edit`
+- `createQuotationApi` called when submitting a new form
+- `updateQuotationApi` called with `(id, payload)` when submitting edit
+- **Acceptance:** Run `vitest` → all four tests FAIL (no component yet).
+- **Files:** new `frontend/src/pages/sales/QuotationFormPage.test.tsx`
+- **Size:** S
+
+### Task 10.5.3 — QuotationFormPage component (GREEN)
+**GREEN:** Implement `frontend/src/pages/sales/QuotationFormPage.tsx` mirroring `SalesOrderFormPage.tsx` pattern: `useParams().id` → isEdit, `EMPTY_FORM` state, `useEffect` pre-fill, `handleChange`/`handleSubmit` → create or update → navigate. Add `createQuotationApi`/`updateQuotationApi`/`fetchQuotationItemApi` to `frontend/src/api/sales.ts` if missing.
+- **Acceptance:** Tests from 10.5.2 pass.
+- **Files:** `frontend/src/pages/sales/QuotationFormPage.tsx`, `frontend/src/api/sales.ts`
+- **Size:** S
+
+### Task 10.5.4 — Register Quotation routes
+- Add `<Route path="/sales/quotations/new" element={<QuotationFormPage />} />` and `.../:id/edit` in `App.tsx`. Update `QuotationListPage`'s "New" button + per-row edit link to these routes.
+- **Acceptance:** Clicking "New Quotation" in the browser reaches the form; editing a row opens it pre-filled.
+- **Files:** `frontend/src/App.tsx`, `frontend/src/pages/sales/QuotationListPage.tsx`
+- **Size:** XS
+
+### Task 10.5.5 — Terminology retrofit tests (RED)
+**RED:** For each of the 11 pages listed below, add a test that mounts the page with a `configStore.setState({ terminology: {Invoice: "Merchant Bill"} })` and asserts the overridden label renders. (One test per page is enough; don't test all override permutations.)
+
+Pages to retrofit: `sales/QuotationListPage`, `sales/SalesOrderListPage`, `sales/SalesOrderFormPage`, `purchasing/VendorListPage`, `purchasing/VendorFormPage`, `purchasing/PurchaseOrderListPage`, `purchasing/PurchaseOrderFormPage`, `accounting/AccountListPage`, `accounting/JournalEntryListPage`, `accounting/JournalEntryFormPage`, `invoicing/InvoiceListPage`, `invoicing/InvoiceFormPage`.
+
+- **Acceptance:** 11 new tests, each FAILING (pages still hard-code labels).
+- **Files:** 11 updated `.test.tsx` files (one per page).
+- **Size:** M
+
+### Task 10.5.6 — Apply `useTerminology` across 11 pages (GREEN)
+**GREEN:** For each page, `import { useTerminology } from "@/hooks/useTerminology"`, destructure `const { t } = useTerminology()`, replace hard-coded strings like `"Invoice"` with `t("Invoice")`, `"Customer"` with `t("Customer")`, etc. Preserve non-label strings (placeholders, button copy) unless they map to a terminology key.
+- **Acceptance:** All tests from 10.5.5 pass. No regressions in existing tests.
+- **Files:** 11 updated `.tsx` files (one per page listed above).
+- **Size:** M
+
+### Task 10.5.7 — Verification Gate + commit
+- Run full pytest + vitest suites.
+- Preview-tab sweep: login as `admin@tablesync.com` → Sales/Purchasing/Accounting/Invoicing list pages → confirm TableSync terminology (e.g., "Guest" for customer, "Menu Item" for product) appears in column headers.
+- Commit: `refactor: Slice 10.5 — Quotation form, terminology retrofit, commit pending test`
+
+### Checkpoint: Slice 10.5
+- [ ] `git status` clean after commit
+- [ ] 11 pages call `useTerminology()`
+- [ ] QuotationFormPage accessible at `/sales/quotations/new` and `:id/edit`
+- [ ] Preview sweep green with TableSync overrides visible
+
+---
+
+## Slice 10.6 — Partner model (D21)
+
+**Description:** Introduce unified `core.Partner` (Odoo pattern) with `is_customer`/`is_vendor` flags. Add nullable FKs from `sales.SalesQuotation`, `sales.SalesOrder`, `invoicing.Invoice`, `purchasing.PurchaseOrder`. Data-migrate existing rows' `customer_name` into Partner records. Keep `customer_name` populated as denormalized display fallback.
+
+**Dependency:** Slice 10.5 merged.
+
+**Reference industry:** NovaPay (has both customers and vendors in the same dataset).
+
+**Scope:** L (~15 files)
+
+### Task 10.6.1 — Partner model tests (RED)
+- Test: create Partner, `__str__`, `is_customer`/`is_vendor` flags, unique-per-company name+tax_id constraint, company isolation.
+- **Files:** new `backend/core/tests/test_partner_model.py`
+- **Size:** S
+
+### Task 10.6.2 — Partner model + factory + migration (GREEN)
+- Add `Partner(TenantModel)` in `backend/core/models.py` with fields per SPEC.md §Slice 10.6.
+- Add `PartnerFactory` in `backend/core/factories.py` with `skip_postgeneration_save = True`.
+- `makemigrations core`.
+- **Acceptance:** Tests from 10.6.1 pass.
+- **Files:** `backend/core/models.py`, `backend/core/factories.py`, new migration
+- **Size:** S
+
+### Task 10.6.3 — Partner API tests (RED)
+- Test: list (company-scoped), create, retrieve, update, delete; cross-company isolation returns 404.
+- **Files:** new `backend/core/tests/test_partner_api.py`
+- **Size:** S
+
+### Task 10.6.4 — Partner ViewSet + serializer + URL (GREEN)
+- Add `PartnerSerializer` to `backend/core/serializers.py`.
+- Add `PartnerViewSet` (IsCompanyMember + CompanyScopedFilterBackend + `pagination_class = None`, `perform_create` sets company).
+- Register at `/api/v1/core/partners/` in `backend/api/v1/urls.py` or `backend/core/urls.py`.
+- **Acceptance:** Tests from 10.6.3 pass.
+- **Files:** `backend/core/serializers.py`, `backend/core/views.py`, `backend/core/urls.py`
+- **Size:** S
+
+### Task 10.6.5 — Add nullable Partner FKs to existing models (RED → GREEN)
+- **RED:** Tests in each of `sales/tests/`, `invoicing/tests/`, `purchasing/tests/` asserting that the new FK field exists, accepts a Partner from the same company, rejects a Partner from another company.
+- **GREEN:** Add `customer = models.ForeignKey("core.Partner", null=True, blank=True, on_delete=models.PROTECT, related_name="+")` to `SalesQuotation`, `SalesOrder`, `Invoice`. Add `partner = models.ForeignKey("core.Partner", null=True, blank=True, on_delete=models.PROTECT, related_name="+")` to `PurchaseOrder` (keep existing `vendor` FK; mark deprecated in comments).
+- `makemigrations`.
+- **Files:** `backend/modules/sales/models.py`, `backend/modules/sales/tests/test_models.py`, `backend/modules/invoicing/models.py`, `backend/modules/invoicing/tests/test_models.py`, `backend/modules/purchasing/models.py`, `backend/modules/purchasing/tests/test_models.py`, 3 new migrations
+- **Size:** M
+
+### Task 10.6.6 — Serializer support for Partner FK (GREEN)
+- SalesQuotation/SalesOrder/Invoice/PurchaseOrder serializers accept either `customer_id` (new) or `customer_name` (legacy). When `customer_id` is passed, populate `customer_name` from `partner.name` in `validate()` or `create()`.
+- API tests verifying both paths.
+- **Files:** 4 updated serializer modules + their test modules
+- **Size:** M
+
+### Task 10.6.7 — Data migration: string → Partner
+- Django data migration `RunPython` upserting a Partner for each distinct `(company, customer_name)` tuple across SalesQuotation/SalesOrder/Invoice, setting `is_customer=True`. Similarly for Purchasing vendors: since Purchasing already has a Vendor table, copy each Vendor into Partner with `is_vendor=True` and link `PurchaseOrder.partner`.
+- Reverse migration clears FK but leaves Partner records (safe rollback).
+- **Files:** new migration in `backend/core/migrations/`
+- **Size:** M
+
+### Task 10.6.8 — Partner frontend (RED → GREEN)
+- **RED:** `PartnerListPage.test.tsx` + `PartnerFormPage.test.tsx` following form-page pattern.
+- **GREEN:** `frontend/src/api/partners.ts`, `PartnerListPage.tsx`, `PartnerFormPage.tsx`, routes in `App.tsx` at `/partners`, `/partners/new`, `/partners/:id/edit`. Sidebar link under a "Contacts" section.
+- **Files:** 5 new files + `App.tsx`
+- **Size:** M
+
+### Task 10.6.9 — Quotation/Order/Invoice forms accept Partner picker
+- **RED:** Update existing form-page tests to assert a `<select>` for Partner appears alongside `customer_name`.
+- **GREEN:** Add a `<select>` populated by `fetchPartnersApi({is_customer: true})` on SalesQuotation, SalesOrder, Invoice forms. Selecting updates both `customer_id` and `customer_name`. Typing in `customer_name` directly still works (legacy path).
+- **Files:** `sales/QuotationFormPage.tsx`, `sales/SalesOrderFormPage.tsx`, `invoicing/InvoiceFormPage.tsx` + tests
+- **Size:** M
+
+### Task 10.6.10 — Verification Gate + commit
+- Preview sweep: as NovaPay admin, create a Partner, then a Quotation selecting that Partner from the dropdown, see their name on the list.
+- Commit: `feat: Slice 10.6 — Partner model unifies customers and vendors`
+
+### Checkpoint: Slice 10.6
+- [ ] `/api/v1/core/partners/` CRUD works
+- [ ] SalesQuotation/SalesOrder/Invoice/PurchaseOrder all expose `customer_id`/`partner_id`
+- [ ] Data migration populated Partners for all existing rows
+- [ ] PartnerListPage + PartnerFormPage live at `/partners/*`
+- [ ] `make test` green; preview sweep green
+
+---
+
+## Slice 10.7 — Sequence auto-generation signals (D22)
+
+**Description:** Auto-generate `INV-2026-0001`-style numbers for all numbered entities via `save()` override that calls `core.sequence.get_next_sequence(self.company, prefix)` when the field is blank. Back-fill existing blank rows via migration.
+
+**Dependency:** Slice 10.6 merged (no hard dep, but keeps sequencing story tight).
+
+**Reference industry:** NovaPay.
+
+**Scope:** M (~10 files)
+
+### Task 10.7.1 — Sequence helper tests (RED)
+- Test `core.sequence.get_next_sequence(company, prefix)` directly: produces `{PREFIX}-{YYYY}-{0001}`, increments per-company-per-prefix, never collides across companies, year rolls over.
+- **Files:** extend `backend/core/tests/test_sequence.py` (or create if missing)
+- **Size:** S
+
+### Task 10.7.2 — Sequence helper finalize (GREEN)
+- Ensure `get_next_sequence` exists and matches format. If not, implement using a `Sequence` model row per `(company, prefix, year)` with a `SELECT … FOR UPDATE` under an atomic transaction.
+- **Files:** `backend/core/sequence.py` (or wherever helper lives) + its tests
+- **Size:** S
+
+### Task 10.7.3 — Per-model `save()` override tests (RED)
+For each of the 7 numbered entities, one test:
+- Create with blank number → number set to `{PREFIX}-{YYYY}-0001`.
+- Create with pre-set number `"MANUAL-1"` → number preserved.
+- Two back-to-back creates → second gets `…-0002`.
+- Two different companies each get their own `…-0001`.
+
+Entities: `invoicing.Invoice` (`INV`), `invoicing.CreditNote` (`CN`), `purchasing.PurchaseOrder` (`PO`), `purchasing.RequestForQuote` (`RFQ`), `sales.SalesQuotation` (`QUO`), `sales.SalesOrder` (`SO`), `accounting.JournalEntry` (`JE`).
+
+- **Files:** add to each module's `test_models.py`
+- **Size:** M
+
+### Task 10.7.4 — `save()` overrides (GREEN)
+- Each of the 7 models: override `save()` to call `get_next_sequence` when the number field is blank, before `super().save()`.
+- **Files:** 7 model files
+- **Size:** M
+
+### Task 10.7.5 — Back-fill migration
+- Django data migration iterating blank-numbered rows per company and assigning sequence numbers (preserving `created_at` order for stable numbering).
+- **Files:** one migration per module (7 migrations)
+- **Size:** S
+
+### Task 10.7.6 — Preview sweep + commit
+- As NovaPay admin: create a new Invoice, Quotation, SO, PO, JE via the UI — all show auto-generated numbers.
+- Commit: `feat: Slice 10.7 — sequence auto-generation signals`
+
+### Checkpoint: Slice 10.7
+- [ ] All 7 numbered entities auto-generate numbers on blank save
+- [ ] Existing blank rows back-filled
+- [ ] `make test` green; preview sweep shows `INV-2026-…` etc.
+
+---
+
+## Slice 11 — Fleet module (Module Scaffold Pattern)
+
+**Description:** Track vehicles, drivers, maintenance, fuel, and services. Reference industry SwiftRoute.
+
+**Dependency:** Slice 10.7 merged.
+
+**Entities:** `Vehicle`, `Driver`, `MaintenanceLog`, `FuelLog`, `VehicleService` (see SPEC.md §Slice 11).
+
+**Scope:** L (~22 files)
+
+Follow the 9-step Module Scaffold Pattern exactly. Task breakdown:
+
+| # | Task | Phase | Scope |
+|---|------|-------|-------|
+| 11.1 | Scaffold `backend/modules/fleet/` (apps.py, models.py stub, migrations/, tests/) | — | XS |
+| 11.2 | Model tests for Vehicle, Driver, MaintenanceLog, FuelLog, VehicleService (creation, `__str__`, FKs, uniqueness, company isolation) | RED | M |
+| 11.3 | Implement 5 models + factories + `INSTALLED_APPS` += `modules.fleet` + `makemigrations fleet` | GREEN | M |
+| 11.4 | API tests — for each of 5 endpoints: list/create/retrieve/update/delete + filters (Vehicle by status+driver; MaintenanceLog by status+vehicle; FuelLog by vehicle) + cross-company isolation | RED | M |
+| 11.5 | Serializers + ViewSets (`IsCompanyMember` + `CompanyScopedFilterBackend` + `pagination_class = None` + `perform_create` sets company) + `backend/modules/fleet/urls.py` + include in `backend/api/v1/urls.py` at `fleet/` | GREEN | M |
+| 11.6 | Frontend tests — `VehicleListPage.test.tsx`, `VehicleFormPage.test.tsx`, `DriverListPage.test.tsx`, `DriverFormPage.test.tsx`, `MaintenanceLogListPage.test.tsx`, `FuelLogListPage.test.tsx` (mock `api/config`, reset `configStore`, use `fireEvent`, use `useTerminology`) | RED | M |
+| 11.7 | `frontend/src/api/fleet.ts` + 6 page components (lists use `useTerminology`, forms handle create+edit) | GREEN | M |
+| 11.8 | Register routes in `App.tsx`: `/fleet/vehicles`, `/fleet/vehicles/new`, `/fleet/vehicles/:id/edit`, same pattern for drivers; list-only routes for maintenance and fuel logs | — | XS |
+| 11.9 | Preview sweep (SwiftRoute admin: create Driver, create Vehicle assigning that Driver, log maintenance, log fuel — all visible in lists with SwiftRoute terminology) + full suite green + commit `feat: implement Slice 11 Fleet module` | VERIFY | S |
+
+### Checkpoint: Slice 11
+- [ ] 5 Fleet models migrated
+- [ ] 5 endpoints under `/api/v1/fleet/`
+- [ ] 6 frontend pages routed
+- [ ] Preview sweep clean for SwiftRoute admin
+- [ ] Commit `feat: implement Slice 11 Fleet module`
+
+---
+
+## Slice 12 — Projects module (Module Scaffold Pattern + Kanban + Partner FK)
+
+**Description:** Project management with kanban-able Tasks, Milestones, and Timesheets. Uses Partner FK for client. Reference industry CraneStack.
+
+**Dependency:** Slice 11 merged.
+
+**Entities:** `Project` (with `customer = FK(core.Partner)`), `Task` (parent_task self-FK), `Milestone`, `ProjectTimesheet` (see SPEC.md §Slice 12).
+
+**Scope:** L (~22 files)
+
+| # | Task | Phase | Scope |
+|---|------|-------|-------|
+| 12.1 | Scaffold `backend/modules/projects/` | — | XS |
+| 12.2 | Model tests (4 entities, Task self-FK, Project-Partner FK, company isolation) | RED | M |
+| 12.3 | Implement models + factories + `INSTALLED_APPS` + migration | GREEN | M |
+| 12.4 | API tests + `@action GET /projects/{id}/progress/` returning aggregates | RED | M |
+| 12.5 | Serializers + ViewSets + `/progress/` action + URL registration | GREEN | M |
+| 12.6 | Frontend tests — ProjectListPage/FormPage, TaskListPage (with Kanban toggle), MilestoneListPage | RED | M |
+| 12.7 | API client + page components; Task page uses existing `KanbanView.tsx` component grouped by status | GREEN | M |
+| 12.8 | Routes in `App.tsx`: `/projects/projects`, `/new`, `/:id/edit`, `/projects/tasks`, `/projects/milestones` | — | XS |
+| 12.9 | Preview sweep (CraneStack admin: create Project assigned to a Partner "client", create Tasks, drag across kanban, log Timesheet) + commit `feat: implement Slice 12 Projects module` | VERIFY | S |
+
+### Checkpoint: Slice 12
+- [ ] Project FK to Partner works
+- [ ] Task Kanban drag-drop changes status
+- [ ] `/projects/progress/` returns aggregates
+- [ ] Commit `feat: implement Slice 12 Projects module`
+
+---
+
+## Slice 13 — Manufacturing module (Module Scaffold Pattern + Inventory integration)
+
+**Description:** Bills of materials, work orders, and production cost. Integrates with Inventory (consume components, produce finished goods). Reference industry TableSync (BOMs = recipes).
+
+**Dependency:** Slice 12 merged.
+
+**Entities:** `BillOfMaterials`, `BOMLine`, `WorkOrder`, `ProductionCost` (see SPEC.md §Slice 13).
+
+**Scope:** L (~24 files)
+
+| # | Task | Phase | Scope |
+|---|------|-------|-------|
+| 13.1 | Scaffold `backend/modules/manufacturing/` | — | XS |
+| 13.2 | Model tests (4 entities, BOMLine references `inventory.Product`, WorkOrder status transitions, company isolation) | RED | M |
+| 13.3 | Implement models + factories + migration | GREEN | M |
+| 13.4 | API tests: CRUD for 4 entities + `@action POST /work-orders/{id}/start/` (validates status=draft→in_progress) + `/complete/` (creates `StockMove` rows for each BOMLine consumed and for finished product) | RED | M |
+| 13.5 | Serializers + ViewSets + actions + URL include | GREEN | M |
+| 13.6 | Frontend tests — BOMListPage, BOMFormPage (with child BOMLines inline), WorkOrderListPage, WorkOrderFormPage, "Start" / "Complete" buttons invoke actions | RED | M |
+| 13.7 | API client + page components | GREEN | M |
+| 13.8 | Routes in `App.tsx`: `/manufacturing/boms`, `/manufacturing/work-orders` + edit | — | XS |
+| 13.9 | Preview sweep (TableSync admin: create Recipe BOM with 3 ingredient lines, create WorkOrder, Start, Complete, verify StockMoves appear in Inventory) + commit `feat: implement Slice 13 Manufacturing module` | VERIFY | S |
+
+### Checkpoint: Slice 13
+- [ ] WorkOrder completion creates correct StockMoves in Inventory
+- [ ] BOM form supports adding/removing lines inline
+- [ ] Commit `feat: implement Slice 13 Manufacturing module`
+
+---
+
+## Slice 14 — Point of Sale module (Module Scaffold Pattern + Partner FK + Sequence + Inventory integration)
+
+**Description:** POS sessions, orders with lines, cash movements. Uses Partner FK for customer. Reference industry TableSync.
+
+**Dependency:** Slice 13 merged.
+
+**Entities:** `POSSession`, `POSOrder`, `POSOrderLine`, `CashMovement` (see SPEC.md §Slice 14).
+
+**Scope:** L (~22 files)
+
+| # | Task | Phase | Scope |
+|---|------|-------|-------|
+| 14.1 | Scaffold `backend/modules/pos/` | — | XS |
+| 14.2 | Model tests (Session open/close, Order uses Partner FK, OrderLine references inventory.Product, CashMovement types, company isolation) | RED | M |
+| 14.3 | Implement models + factories + migration; POSOrder uses Slice 10.7 sequence auto-gen with prefix `POS` | GREEN | M |
+| 14.4 | API tests: CRUD + `@action POST /sessions/{id}/close/` computing cash variance + POSOrder create with nested lines in one POST | RED | M |
+| 14.5 | Serializers + ViewSets + actions + URL include | GREEN | M |
+| 14.6 | Frontend tests — POSSessionListPage, POSSessionFormPage, POSOrderListPage, POSOrderFormPage | RED | M |
+| 14.7 | API client + pages (form is touch-friendly with big buttons) | GREEN | M |
+| 14.8 | Routes in `App.tsx`: `/pos/sessions`, `/pos/orders` + edit | — | XS |
+| 14.9 | Preview sweep (TableSync admin: open session with $100 cash, create order with 3 menu items, close session, verify variance) + commit `feat: implement Slice 14 POS module` | VERIFY | S |
+
+### Checkpoint: Slice 14
+- [ ] Session close computes variance correctly
+- [ ] POSOrder number auto-generates (`POS-2026-…`)
+- [ ] Commit `feat: implement Slice 14 POS module`
+
+---
+
+## Slice 15 — Helpdesk module (Module Scaffold Pattern + Kanban)
+
+**Description:** Support tickets with SLA tracking and a knowledge base. Ticket status runs on a Kanban. Reference industry MedVista (patient support) or NovaPay (merchant support).
+
+**Dependency:** Slice 14 merged.
+
+**Entities:** `TicketCategory`, `SLAConfig`, `Ticket` (with auto-seq `TKT` per Slice 10.7 pattern, reporter = FK Partner or User, assignee = User), `KnowledgeArticle` (see SPEC.md §Slice 15).
+
+**Scope:** L (~22 files)
+
+| # | Task | Phase | Scope |
+|---|------|-------|-------|
+| 15.1 | Scaffold `backend/modules/helpdesk/` | — | XS |
+| 15.2 | Model tests (4 entities, Ticket sequence, SLA deadline computation, company isolation) | RED | M |
+| 15.3 | Implement models + factories + migration; add `TKT` prefix to sequence auto-gen list | GREEN | M |
+| 15.4 | API tests: CRUD + `@action POST /tickets/{id}/resolve/` + `/reopen/` + filter by status/category/assignee | RED | M |
+| 15.5 | Serializers + ViewSets + actions + URL include | GREEN | M |
+| 15.6 | Frontend tests — CategoryListPage, TicketListPage (with Kanban toggle), TicketFormPage, ArticleListPage, ArticleFormPage | RED | M |
+| 15.7 | API client + pages; TicketListPage has kanban/list toggle using existing `KanbanView.tsx` | GREEN | M |
+| 15.8 | Routes in `App.tsx`: `/helpdesk/tickets`, `/helpdesk/categories`, `/helpdesk/articles` + edit routes | — | XS |
+| 15.9 | Preview sweep (MedVista admin: create Category with SLA, open Ticket, assign, resolve, verify timestamps) + commit `feat: implement Slice 15 Helpdesk module` | VERIFY | S |
+
+### Checkpoint: Slice 15
+- [ ] Ticket auto-generates `TKT-…` number
+- [ ] Ticket Kanban toggle works
+- [ ] Resolve action sets `resolved_at`
+- [ ] Commit `feat: implement Slice 15 Helpdesk module`
+
+---
+
+## Slice 16 — Reports / BI + Pivot + Graph views (D23, D24)
+
+**Description:** Build the reporting surface that's been deferred since Slice 2: `PivotView.tsx` and `GraphView.tsx` generic renderers + a new `/aggregate/` DRF action on every module ViewSet + ReportTemplate / PivotDefinition / ScheduledExport models for saved reports.
+
+**Dependency:** Slice 15 merged (needs all modules shipping first to have data to aggregate).
+
+**Scope:** XL (~28 files) — largest slice. Consider splitting if it runs long; see "Split option" below.
+
+### Tasks
+
+| # | Task | Phase | Scope |
+|---|------|-------|-------|
+| 16.1 | Install `recharts` frontend dep (`package.json` + lock) | — | XS |
+| 16.2 | Scaffold `backend/modules/reports/` | — | XS |
+| 16.3 | Model tests: ReportTemplate, PivotDefinition, ScheduledExport (creation, company isolation, default filters JSONB) | RED | S |
+| 16.4 | Models + factories + migration + extend `ViewDefinition.view_type` choices to include `pivot` and `graph` | GREEN | S |
+| 16.5 | Shared `/aggregate/` mixin for ViewSets — TDD: backend test asserting `/api/v1/invoicing/invoices/aggregate/?group_by=status&measure=total_amount&op=sum` returns `[{group:…, value:…}]`, respects company-scoping, rejects invalid fields | RED | M |
+| 16.6 | Implement `AggregationMixin` with Django `values(group_by).annotate(Sum/Count/Avg(measure))`, validate fields against serializer-declared aggregatable set, inherit `CompanyScopedFilterBackend` | GREEN | M |
+| 16.7 | Apply mixin to existing module ViewSets (Invoice, Sales, PO, JournalEntry, Product, Ticket, WorkOrder, etc.) — one commit-worth of wiring with a shared abstract viewset base | GREEN | M |
+| 16.8 | Frontend tests — `PivotView.test.tsx`, `GraphView.test.tsx`, `ReportBuilderPage.test.tsx` (render from config, call aggregate endpoint, render values / Recharts bars) | RED | M |
+| 16.9 | Implement `PivotView.tsx` (HTML table with row/col drilldown from JSON config), `GraphView.tsx` (Recharts `BarChart`/`LineChart`/`PieChart`/`AreaChart` switched on config.chart_type), `ReportBuilderPage.tsx` (picks model, group_by, measure, view type) | GREEN | L |
+| 16.10 | Report module list/form pages (existing pattern) + routes `/reports`, `/reports/builder` | RED → GREEN | M |
+| 16.11 | Preview sweep (NovaPay admin: open Reports, build "Invoices by Status" pivot + bar chart, save as template, reload) + commit `feat: implement Slice 16 Reports BI + Pivot + Graph` | VERIFY | S |
+
+**Split option (only if slice exceeds 1 day):** Split into 16A (aggregate endpoint + PivotView + ReportBuilderPage) and 16B (GraphView + ScheduledExport + ReportTemplate CRUD). Both must ship before Slice 17.
+
+### Checkpoint: Slice 16
+- [ ] `/aggregate/` action works on at least 8 existing ViewSets
+- [ ] PivotView + GraphView render from `ViewDefinition` configs
+- [ ] Preview sweep shows functional pivot and bar chart
+- [ ] Commit `feat: implement Slice 16 Reports BI + Pivot + Graph`
+
+---
+
+## Slice 17 — Industry demo seeding (D26)
+
+**Description:** Per-module `seed_<module>_demo` commands + a meta-command `seed_industry_demo --company <slug>` that dispatches based on `INDUSTRY-BRANDING-CONTEXT.md`. Idempotent (`--reset` flag). Produces 10–30 records per module per company.
+
+**Dependency:** Slice 16 merged (all modules must exist).
+
+**Scope:** L (~18 files)
+
+### Tasks
+
+| # | Task | Phase | Scope |
+|---|------|-------|-------|
+| 17.1 | Shared test harness: `backend/core/tests/test_seed_commands.py` asserts each `seed_<module>_demo --company <slug>` creates N records and is idempotent on re-run | RED | S |
+| 17.2 | Implement `seed_hr_demo`, `seed_inventory_demo`, `seed_calendar_demo`, `seed_sales_demo`, `seed_purchasing_demo`, `seed_invoicing_demo`, `seed_accounting_demo` (7 commands covering shipped modules) | GREEN | M |
+| 17.3 | Implement `seed_fleet_demo`, `seed_projects_demo`, `seed_manufacturing_demo`, `seed_pos_demo`, `seed_helpdesk_demo` (5 commands for Slices 11–15 modules) | GREEN | M |
+| 17.4 | Implement `seed_reports_demo` (creates sample ReportTemplate + PivotDefinition rows) | GREEN | S |
+| 17.5 | Test for meta-command `seed_industry_demo --company <slug>` reading industry → module subset mapping | RED | S |
+| 17.6 | Implement meta-command; mapping table lives in `backend/core/industry_modules.py` (derived from INDUSTRY-BRANDING-CONTEXT §module subsets per industry) | GREEN | S |
+| 17.7 | Preview sweep (run `seed_industry_demo --company dentaflow` then login as admin@dentaflow.com; confirm Employees, Products, Appointments, Invoices all seeded with DentaFlow terminology) + commit `feat: implement Slice 17 industry demo seeding` | VERIFY | S |
+
+### Checkpoint: Slice 17
+- [ ] Each of 13 module commands idempotent
+- [ ] Meta-command composes correctly per industry
+- [ ] Preview sweep shows rich demo data for at least 3 industries
+- [ ] Commit `feat: implement Slice 17 industry demo seeding`
+
+---
+
+## Slice 18 — Calendar polling sync (D27)
+
+**Description:** Enable bidirectional calendar sync via polling. `external_uid` already exists on Event from Slice 5.
+
+**Dependency:** Slice 17 merged (easier to test with seeded events).
+
+**Scope:** M (~10 files)
+
+### Tasks
+
+| # | Task | Phase | Scope |
+|---|------|-------|-------|
+| 18.1 | API tests — `GET /api/v1/calendar/events/?updated_since=<iso8601>` returns events updated after the timestamp, includes `external_uid`; respects company isolation | RED | S |
+| 18.2 | Implement `updated_since` filter in `EventViewSet.get_queryset` (already partially scoped in Slice 5 — verify + extend) | GREEN | S |
+| 18.3 | API tests — `POST /api/v1/calendar/events/` upserts by `external_uid` with last-write-wins on `updated_at`; test LWW: same event submitted twice, older version wins when older `updated_at` | RED | S |
+| 18.4 | Implement upsert-by-external_uid in `EventViewSet.create` + LWW logic | GREEN | S |
+| 18.5 | API tests — `POST /api/v1/calendar/events/bulk/` accepts array of up to 500 events, returns per-item status | RED | S |
+| 18.6 | Implement `@action(detail=False, methods=["post"]) def bulk` on EventViewSet | GREEN | S |
+| 18.7 | Document the sync contract in `docs/CALENDAR-SYNC-POLLING.md` (links to CALENDAR-SYNC-API-SPEC.md for full design) | — | XS |
+| 18.8 | Manual verification: use `curl` or a scratch Python script to round-trip an event between two companies; verify LWW. Commit `feat: implement Slice 18 calendar polling sync` | VERIFY | S |
+
+### Checkpoint: Slice 18
+- [ ] Two-way sync via `/events/` + `/events/bulk/` works
+- [ ] LWW conflict resolution verified via test
+- [ ] Commit `feat: implement Slice 18 calendar polling sync`
+
+---
+
+## Slice 19 — Polish pass (D25)
+
+**Description:** UI polish, per-company theming, WebSocket notifications, audit log timeline, lightweight HomePage with ORM-aggregate KPIs. Final slice of this cycle.
+
+**Dependency:** Slice 18 merged.
+
+**Scope:** XL (~25 files) — same caveat as Slice 16; split if needed into 19A (UI polish + theming) and 19B (WebSocket + audit UI + HomePage).
+
+### Tasks
+
+| # | Task | Phase | Scope |
+|---|------|-------|-------|
+| 19.1 | Frontend tests for `ErrorBoundary.tsx`, `Skeleton.tsx`, `EmptyState.tsx`, `Breadcrumbs.tsx` | RED | S |
+| 19.2 | Implement those four shared components in `frontend/src/components/` | GREEN | S |
+| 19.3 | Wrap `App.tsx` routes in `<ErrorBoundary>`; replace ad-hoc `<div>Loading...</div>` with `<Skeleton />` in list pages; replace empty tables with `<EmptyState />`; add `<Breadcrumbs />` to AppLayout | GREEN | M |
+| 19.4 | Test for per-company theming: mounting `AppLayout` with `Company.brand_color = "#EA580C"` sets `document.documentElement.style.setProperty('--accent', …)` | RED | S |
+| 19.5 | Apply CSS custom properties (`--accent`, `--accent-fg`, `--accent-hover`) from brand color; update `globals.css` so all primary buttons/links use them | GREEN | S |
+| 19.6 | Test for WebSocket notification consumer: connecting to `/ws/notifications/` with a JWT, then creating a Ticket for the connected user's company, results in a websocket event | RED | S |
+| 19.7 | Django Channels consumer at `/ws/notifications/`, routing in `config/routing.py`, signal handlers on `Ticket` / `Invoice` / `StockMove` post_save | GREEN | M |
+| 19.8 | Frontend test for `useNotifications()` hook: connects, receives event, updates bell badge count | RED | S |
+| 19.9 | `useNotifications` hook + `NotificationBell` in TopNavbar | GREEN | M |
+| 19.10 | Test for `AuditLogTimelinePage` at `/settings/audit-log` — renders most recent AuditLog entries for active company, filters by entity type | RED | S |
+| 19.11 | Implement `AuditLogTimelinePage.tsx` + route | GREEN | S |
+| 19.12 | Test for HomePage KPIs: renders 4–6 ORM-aggregate tiles per industry (e.g., "Open Invoices", "Pending Tickets", "Low Stock Items") — tiles come from a `/api/v1/core/home-kpis/` endpoint | RED | S |
+| 19.13 | Implement `/api/v1/core/home-kpis/` returning per-industry KPI list (computed from ORM aggregates, no materialized views — D25) + `HomePage.tsx` at `/` | GREEN | M |
+| 19.14 | Preview sweep across all 10 industry admins: brand color correct, HomePage KPIs correct, AppSwitcher shows 13 modules, notification bell works, audit log populated, no console errors. Commit `feat: implement Slice 19 polish pass` | VERIFY | M |
+
+### Checkpoint: Slice 19 / Cycle complete
+- [ ] All 10 industry admins log in cleanly with correct branding
+- [ ] Every one of 13 modules has functional List + Form pages
+- [ ] Pivot and Graph reports render from seeded data
+- [ ] Sequence numbers auto-generate on every numbered entity
+- [ ] Partner FK consistently used across Sales/Invoicing/Purchasing/Projects/POS/Helpdesk
+- [ ] `make test` green with ≥80% coverage
+- [ ] Commit `feat: implement Slice 19 polish pass` (final commit of this cycle)
+- [ ] Ready for `/review` (Phase E of the approved plan — NOT `/ship`, per D30)
+
+---
+
+## Part 2 — Risks & Mitigations
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Partner data migration (10.6.7) damages existing prod-ish data | High | Test migration on `docker compose down -v && up && migrate && seed` fresh DB first; include reverse migration; commit before running on any live branch |
+| Sequence signals (10.7) clobber user-supplied numbers during import | Medium | Guard clause: only auto-gen when field is blank; test asserts pre-set numbers preserved |
+| `/aggregate/` endpoint (16.6) opens query injection via `group_by` param | High — security | Whitelist: each ViewSet declares `aggregatable_fields` list; reject other values with 400; unit-test rejects non-whitelisted |
+| Recharts bundle size balloons frontend | Low | Tree-shake: import only `BarChart`, `LineChart`, `PieChart`, `AreaChart` + their children; check bundle with `vite build --report` at Slice 16 end |
+| WebSocket infrastructure (19.7) flaky under Docker ASGI config | Medium | Django Channels already in tech stack; test with `pytest-asyncio` + Channels test client; if complex, scope 19 to HTTP polling fallback first and add WS later |
+| Seed command idempotency bugs cause dupes on re-run | Medium | Every seeder checks `get_or_create` or `update_or_create` keyed on `(company, natural_key)`; tests verify re-run yields same count |
+
+---
+
+## Part 2 — Skills Used Per Slice
+
+| Slice | Primary Skill | Supporting Skills |
+|-------|---------------|-------------------|
+| 10.5 | `incremental-implementation` | `test-driven-development`, `frontend-ui-engineering` |
+| 10.6 | `test-driven-development` | `api-and-interface-design`, `security-and-hardening` (FK cross-company access) |
+| 10.7 | `test-driven-development` | `incremental-implementation` |
+| 11–15 | `incremental-implementation` | `test-driven-development`, `source-driven-development`, `frontend-ui-engineering` |
+| 16 | `test-driven-development` | `api-and-interface-design`, `security-and-hardening` (whitelist fields), `frontend-ui-engineering` |
+| 17 | `incremental-implementation` | `test-driven-development` |
+| 18 | `test-driven-development` | `api-and-interface-design` |
+| 19 | `incremental-implementation` | `test-driven-development`, `frontend-ui-engineering`, `security-and-hardening` (WS auth) |
+
+---
+
+## Parallelization Notes
+
+- **Do NOT parallelize across slices.** D32 orders them by dependency; each slice modifies shared files (`App.tsx`, `INSTALLED_APPS`, `api/v1/urls.py`). Running two slices in parallel would merge-conflict.
+- **Within a slice, sequential order is the 9-step pattern.** No parallel sub-tasks.
+- **Acceptable parallelism:** Writing frontend tests (RED step) while backend is still being implemented is fine since they touch different files.
+
+---
+
+## Open Questions for this plan
+
+None. All design decisions are in DECISION.md (D1–D32). If a slice uncovers new constraints, append a new Decision and update this plan.

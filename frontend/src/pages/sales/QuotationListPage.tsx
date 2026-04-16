@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTerminology } from "../../hooks/useTerminology";
 import { type SalesQuotation, fetchQuotationsApi } from "../../api/sales";
 
 export default function QuotationListPage() {
   const [quotations, setQuotations] = useState<SalesQuotation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const quotationLabel = useTerminology("Quotation", "Quotation");
 
   useEffect(() => {
     fetchQuotationsApi()
@@ -16,9 +19,9 @@ export default function QuotationListPage() {
 
   return (
     <div>
-      <h1>Quotations</h1>
+      <h1>{quotationLabel}s</h1>
 
-      <Link to="/sales/quotations/new">New Quotation</Link>
+      <Link to="/sales/quotations/new">New {quotationLabel}</Link>
 
       {isLoading && <div>Loading...</div>}
       {error && <div role="alert">{error}</div>}

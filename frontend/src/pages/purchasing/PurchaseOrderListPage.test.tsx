@@ -112,4 +112,13 @@ describe("PurchaseOrderListPage", () => {
       expect(screen.getByText("draft")).toBeInTheDocument();
     });
   });
+
+  it("uses terminology for the page heading", async () => {
+    mockFetchPOs.mockResolvedValueOnce(samplePOs);
+    useConfigStore.setState({ terminology: { "Purchase Order": "Supply Request" } });
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getAllByText(/Supply Request/i).length).toBeGreaterThan(0);
+    });
+  });
 });

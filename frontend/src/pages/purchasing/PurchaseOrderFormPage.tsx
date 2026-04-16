@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTerminology } from "../../hooks/useTerminology";
 import {
   type PurchaseOrder,
   type Vendor,
@@ -33,6 +34,8 @@ export default function PurchaseOrderFormPage() {
   const [isLoading, setIsLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
 
+  const poLabel = useTerminology("Purchase Order", "Purchase Order");
+  const vendorLabel = useTerminology("Vendor", "Vendor");
   const headingPrefix = isEdit ? "Edit" : "New";
 
   useEffect(() => {
@@ -91,13 +94,15 @@ export default function PurchaseOrderFormPage() {
 
   return (
     <div>
-      <h1>{headingPrefix} Purchase Order</h1>
+      <h1>
+        {headingPrefix} {poLabel}
+      </h1>
 
       {error && <div role="alert">{error}</div>}
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="vendor">Vendor</label>
+          <label htmlFor="vendor">{vendorLabel}</label>
           <select id="vendor" name="vendor" value={form.vendor} onChange={handleChange}>
             <option value="">-- Select vendor --</option>
             {vendors.map((v) => (
