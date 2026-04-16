@@ -3,6 +3,7 @@ import apiClient from "./client";
 export interface SalesQuotation {
   id: number;
   quotation_number: string;
+  customer: number | null;
   customer_name: string;
   customer_email: string;
   status: string;
@@ -16,6 +17,7 @@ export interface SalesQuotation {
 export interface SalesOrder {
   id: number;
   order_number: string;
+  customer: number | null;
   customer_name: string;
   customer_email: string;
   quotation: number | null;

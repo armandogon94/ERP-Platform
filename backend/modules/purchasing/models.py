@@ -50,6 +50,13 @@ class PurchaseOrder(TenantModel):
         on_delete=models.PROTECT,
         related_name="purchase_orders",
     )
+    partner = models.ForeignKey(
+        "core.Partner",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="+",
+    )
     po_number = models.CharField(max_length=100, blank=True, default="")
     status = models.CharField(
         max_length=20,

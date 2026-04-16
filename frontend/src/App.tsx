@@ -19,6 +19,8 @@ import JournalEntryListPage from "./pages/accounting/JournalEntryListPage";
 import JournalEntryFormPage from "./pages/accounting/JournalEntryFormPage";
 import InvoiceListPage from "./pages/invoicing/InvoiceListPage";
 import InvoiceFormPage from "./pages/invoicing/InvoiceFormPage";
+import PartnerListPage from "./pages/partners/PartnerListPage";
+import PartnerFormPage from "./pages/partners/PartnerFormPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -85,6 +87,9 @@ export default function App() {
         <Route path="/invoicing/invoices" element={<InvoiceListPage />} />
         <Route path="/invoicing/invoices/new" element={<InvoiceFormPage />} />
         <Route path="/invoicing/invoices/:id/edit" element={<InvoiceFormPage />} />
+        <Route path="/partners" element={<PartnerListPage />} />
+        <Route path="/partners/new" element={<PartnerFormPage />} />
+        <Route path="/partners/:id/edit" element={<PartnerFormPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

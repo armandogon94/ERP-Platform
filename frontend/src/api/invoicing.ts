@@ -5,6 +5,7 @@ export interface Invoice {
   invoice_number: string;
   invoice_type: string;
   status: string;
+  customer: number | null;
   customer_name: string;
   customer_email: string;
   invoice_date: string | null;

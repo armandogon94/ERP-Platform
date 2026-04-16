@@ -28,6 +28,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             "invoice_number",
             "invoice_type",
             "status",
+            "customer",
             "customer_name",
             "customer_email",
             "invoice_date",
@@ -41,6 +42,12 @@ class InvoiceSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate(self, attrs):
+        partner = attrs.get("customer")
+        if partner and not attrs.get("customer_name"):
+            attrs["customer_name"] = partner.name
+        return attrs
 
 
 class CreditNoteSerializer(serializers.ModelSerializer):

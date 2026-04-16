@@ -4,10 +4,11 @@ from rest_framework.response import Response
 
 from api.v1.filters import CompanyScopedFilterBackend
 from api.v1.permissions import IsCompanyAdmin, IsCompanyMember
-from core.models import ModuleConfig, ModuleRegistry, ViewDefinition
+from core.models import ModuleConfig, ModuleRegistry, Partner, ViewDefinition
 from core.serializers import (
     ConfigPatchSerializer,
     ModuleSerializer,
+    PartnerSerializer,
     ResolvedConfigSerializer,
     ViewDefinitionSerializer,
 )
@@ -119,3 +120,26 @@ class ViewDefinitionViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({"detail": "No default view found"}, status=404)
         serializer = self.get_serializer(view)
         return Response(serializer.data)
+
+
+class PartnerViewSet(viewsets.ModelViewSet):
+    """CRUD for company-scoped Partner records (Slice 10.6, D21)."""
+
+    serializer_class = PartnerSerializer
+    permission_classes = [IsCompanyMember]
+    filter_backends = [CompanyScopedFilterBackend]
+    queryset = Partner.objects.all()
+    pagination_class = None
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        is_customer = self.request.query_params.get("is_customer")
+        is_vendor = self.request.query_params.get("is_vendor")
+        if is_customer is not None:
+            qs = qs.filter(is_customer=(is_customer.lower() == "true"))
+        if is_vendor is not None:
+            qs = qs.filter(is_vendor=(is_vendor.lower() == "true"))
+        return qs
+
+    def perform_create(self, serializer):
+        serializer.save(company=self.request.company)

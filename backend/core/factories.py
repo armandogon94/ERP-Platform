@@ -6,6 +6,7 @@ from core.models import (
     Industry,
     IndustryConfigTemplate,
     IndustryRoleTemplate,
+    Partner,
     Permission,
     Role,
     RoleLevel,
@@ -110,3 +111,18 @@ class RoleFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: f"Role {n}")
     role_level = RoleLevel.OPERATIONAL
     is_system = False
+
+
+class PartnerFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Partner
+        skip_postgeneration_save = True
+
+    company = factory.SubFactory(CompanyFactory)
+    name = factory.Sequence(lambda n: f"Partner {n}")
+    email = factory.LazyAttribute(
+        lambda o: f"{o.name.lower().replace(' ', '.')}@example.com"
+    )
+    is_customer = True
+    is_vendor = False
+    tax_id = factory.Sequence(lambda n: f"TAX-{n:05d}")

@@ -164,8 +164,6 @@ describe("AppLayout", () => {
       isAuthenticated: true,
     });
     renderLayout();
-    expect(document.documentElement.style.getPropertyValue("--accent")).toBe(
-      "#9F1239",
-    );
+    expect(document.documentElement.style.getPropertyValue("--accent")).toBe("#9F1239");
   });
 });

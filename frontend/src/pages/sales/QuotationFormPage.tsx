@@ -7,9 +7,11 @@ import {
   fetchQuotationApi,
   updateQuotationApi,
 } from "../../api/sales";
+import { type Partner, fetchPartnersApi } from "../../api/partners";
 
 interface FormState {
   quotation_number: string;
+  customer: string;
   customer_name: string;
   customer_email: string;
   status: string;
@@ -19,6 +21,7 @@ interface FormState {
 
 const EMPTY_FORM: FormState = {
   quotation_number: "",
+  customer: "",
   customer_name: "",
   customer_email: "",
   status: "draft",
@@ -32,11 +35,18 @@ export default function QuotationFormPage() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
 
   const quotationLabel = useTerminology("Quotation", "Quotation");
   const headingPrefix = isEdit ? "Edit" : "New";
+
+  useEffect(() => {
+    fetchPartnersApi({ is_customer: "true" })
+      .then(setPartners)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isEdit || !id) return;
@@ -45,6 +55,7 @@ export default function QuotationFormPage() {
       .then((q: SalesQuotation) => {
         setForm({
           quotation_number: q.quotation_number,
+          customer: q.customer != null ? String(q.customer) : "",
           customer_name: q.customer_name,
           customer_email: q.customer_email,
           status: q.status,
@@ -63,13 +74,24 @@ export default function QuotationFormPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      if (name === "customer") {
+        const partner = partners.find((p) => String(p.id) === value);
+        return {
+          ...prev,
+          customer: value,
+          customer_name: partner ? partner.name : prev.customer_name,
+        };
+      }
+      return { ...prev, [name]: value };
+    });
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const payload = {
       ...form,
+      customer: form.customer ? Number(form.customer) : null,
       valid_until: form.valid_until || null,
     };
     try {
@@ -105,6 +127,23 @@ export default function QuotationFormPage() {
             value={form.quotation_number}
             onChange={handleChange}
           />
+        </div>
+
+        <div>
+          <label htmlFor="customer">Customer</label>
+          <select
+            id="customer"
+            name="customer"
+            value={form.customer}
+            onChange={handleChange}
+          >
+            <option value="">-- Free text below --</option>
+            {partners.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>

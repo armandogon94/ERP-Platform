@@ -29,6 +29,13 @@ class Invoice(TenantModel):
         choices=Status.choices,
         default=Status.DRAFT,
     )
+    customer = models.ForeignKey(
+        "core.Partner",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="+",
+    )
     customer_name = models.CharField(max_length=300, blank=True, default="")
     customer_email = models.EmailField(blank=True, default="")
     invoice_date = models.DateField(null=True, blank=True)

@@ -47,6 +47,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
             "id",
             "vendor",
             "vendor_name",
+            "partner",
             "po_number",
             "status",
             "order_date",

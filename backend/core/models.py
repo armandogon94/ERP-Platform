@@ -479,6 +479,40 @@ class IndustryConfigTemplate(models.Model):
         return f"Config: {self.get_industry_display()}"
 
 
+class Partner(TenantModel):
+    """Unified customer + vendor entity (Odoo-style, D21).
+
+    A Partner can be a customer (receives invoices), a vendor (issues them),
+    or both. Replaces per-module `customer_name` CharField and per-module
+    Vendor tables with a single source of truth per company.
+    """
+
+    name = models.CharField(max_length=255)
+    email = models.EmailField(blank=True, default="")
+    phone = models.CharField(max_length=40, blank=True, default="")
+    is_customer = models.BooleanField(default=False)
+    is_vendor = models.BooleanField(default=False)
+    tax_id = models.CharField(max_length=64, blank=True, default="")
+    payment_terms_days = models.PositiveIntegerField(default=0)
+    credit_limit = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    industry_tags = models.JSONField(default=list, blank=True)
+    address_json = models.JSONField(default=dict, blank=True)
+    notes = models.TextField(blank=True, default="")
+
+    class Meta(TenantModel.Meta):
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["company", "name", "tax_id"],
+                condition=models.Q(deleted_at__isnull=True),
+                name="unique_partner_name_tax_id_per_company",
+            ),
+        ]
+
+    def __str__(self):
+        return self.name
+
+
 class Setting(models.Model):
     """Global or per-company settings."""
 

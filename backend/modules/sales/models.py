@@ -16,6 +16,13 @@ class SalesQuotation(TenantModel):
         EXPIRED = "expired", "Expired"
 
     quotation_number = models.CharField(max_length=100, blank=True, default="")
+    customer = models.ForeignKey(
+        "core.Partner",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="+",
+    )
     customer_name = models.CharField(max_length=300, blank=True, default="")
     customer_email = models.EmailField(blank=True, default="")
     status = models.CharField(
@@ -47,6 +54,13 @@ class SalesOrder(TenantModel):
         CANCELLED = "cancelled", "Cancelled"
 
     order_number = models.CharField(max_length=100, blank=True, default="")
+    customer = models.ForeignKey(
+        "core.Partner",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="+",
+    )
     customer_name = models.CharField(max_length=300, blank=True, default="")
     customer_email = models.EmailField(blank=True, default="")
     quotation = models.OneToOneField(

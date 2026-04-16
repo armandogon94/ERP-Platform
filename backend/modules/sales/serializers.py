@@ -9,6 +9,7 @@ class SalesQuotationSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "quotation_number",
+            "customer",
             "customer_name",
             "customer_email",
             "status",
@@ -19,6 +20,13 @@ class SalesQuotationSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate(self, attrs):
+        # If a Partner is passed, populate customer_name from it (denormalized fallback).
+        partner = attrs.get("customer")
+        if partner and not attrs.get("customer_name"):
+            attrs["customer_name"] = partner.name
+        return attrs
 
 
 class SalesOrderLineSerializer(serializers.ModelSerializer):
@@ -43,6 +51,7 @@ class SalesOrderSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "order_number",
+            "customer",
             "customer_name",
             "customer_email",
             "quotation",
@@ -55,3 +64,9 @@ class SalesOrderSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate(self, attrs):
+        partner = attrs.get("customer")
+        if partner and not attrs.get("customer_name"):
+            attrs["customer_name"] = partner.name
+        return attrs

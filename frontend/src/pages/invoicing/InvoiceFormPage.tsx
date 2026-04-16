@@ -7,11 +7,13 @@ import {
   fetchInvoiceApi,
   updateInvoiceApi,
 } from "../../api/invoicing";
+import { type Partner, fetchPartnersApi } from "../../api/partners";
 
 interface FormState {
   invoice_number: string;
   invoice_type: string;
   status: string;
+  customer: string;
   customer_name: string;
   customer_email: string;
   invoice_date: string;
@@ -23,6 +25,7 @@ const EMPTY_FORM: FormState = {
   invoice_number: "",
   invoice_type: "customer",
   status: "draft",
+  customer: "",
   customer_name: "",
   customer_email: "",
   invoice_date: "",
@@ -36,11 +39,18 @@ export default function InvoiceFormPage() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
 
   const invoiceLabel = useTerminology("Invoice", "Invoice");
   const headingPrefix = isEdit ? "Edit" : "New";
+
+  useEffect(() => {
+    fetchPartnersApi({ is_customer: "true" })
+      .then(setPartners)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isEdit || !id) return;
@@ -51,6 +61,7 @@ export default function InvoiceFormPage() {
           invoice_number: inv.invoice_number,
           invoice_type: inv.invoice_type,
           status: inv.status,
+          customer: inv.customer != null ? String(inv.customer) : "",
           customer_name: inv.customer_name,
           customer_email: inv.customer_email,
           invoice_date: inv.invoice_date ?? "",
@@ -69,13 +80,24 @@ export default function InvoiceFormPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      if (name === "customer") {
+        const partner = partners.find((p) => String(p.id) === value);
+        return {
+          ...prev,
+          customer: value,
+          customer_name: partner ? partner.name : prev.customer_name,
+        };
+      }
+      return { ...prev, [name]: value };
+    });
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const payload = {
       ...form,
+      customer: form.customer ? Number(form.customer) : null,
       invoice_date: form.invoice_date || null,
       due_date: form.due_date || null,
     };
@@ -134,6 +156,23 @@ export default function InvoiceFormPage() {
             <option value="posted">Posted</option>
             <option value="paid">Paid</option>
             <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="customer">Customer</label>
+          <select
+            id="customer"
+            name="customer"
+            value={form.customer}
+            onChange={handleChange}
+          >
+            <option value="">-- Free text below --</option>
+            {partners.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
           </select>
         </div>
 

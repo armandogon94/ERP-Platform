@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from core.models import Company, ModuleConfig, ModuleRegistry, ViewDefinition
+from core.models import Company, ModuleConfig, ModuleRegistry, Partner, ViewDefinition
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -63,3 +63,25 @@ class ViewDefinitionSerializer(serializers.ModelSerializer):
             "id", "model_name", "view_type", "name",
             "is_default", "priority", "config",
         ]
+
+
+class PartnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Partner
+        fields = [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "is_customer",
+            "is_vendor",
+            "tax_id",
+            "payment_terms_days",
+            "credit_limit",
+            "industry_tags",
+            "address_json",
+            "notes",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]

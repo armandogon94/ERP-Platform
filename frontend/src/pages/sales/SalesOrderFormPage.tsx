@@ -7,9 +7,11 @@ import {
   fetchSalesOrderApi,
   updateSalesOrderApi,
 } from "../../api/sales";
+import { type Partner, fetchPartnersApi } from "../../api/partners";
 
 interface FormState {
   order_number: string;
+  customer: string;
   customer_name: string;
   customer_email: string;
   status: string;
@@ -18,6 +20,7 @@ interface FormState {
 
 const EMPTY_FORM: FormState = {
   order_number: "",
+  customer: "",
   customer_name: "",
   customer_email: "",
   status: "confirmed",
@@ -30,11 +33,18 @@ export default function SalesOrderFormPage() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
 
   const orderLabel = useTerminology("Sales Order", "Sales Order");
   const headingPrefix = isEdit ? "Edit" : "New";
+
+  useEffect(() => {
+    fetchPartnersApi({ is_customer: "true" })
+      .then(setPartners)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isEdit || !id) return;
@@ -43,6 +53,7 @@ export default function SalesOrderFormPage() {
       .then((so: SalesOrder) => {
         setForm({
           order_number: so.order_number,
+          customer: so.customer != null ? String(so.customer) : "",
           customer_name: so.customer_name,
           customer_email: so.customer_email,
           status: so.status,
@@ -60,16 +71,30 @@ export default function SalesOrderFormPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      if (name === "customer") {
+        const partner = partners.find((p) => String(p.id) === value);
+        return {
+          ...prev,
+          customer: value,
+          customer_name: partner ? partner.name : prev.customer_name,
+        };
+      }
+      return { ...prev, [name]: value };
+    });
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const payload = {
+      ...form,
+      customer: form.customer ? Number(form.customer) : null,
+    };
     try {
       if (isEdit && id) {
-        await updateSalesOrderApi(Number(id), form);
+        await updateSalesOrderApi(Number(id), payload);
       } else {
-        await createSalesOrderApi(form);
+        await createSalesOrderApi(payload);
       }
       navigate("/sales/orders");
     } catch (err) {
@@ -98,6 +123,23 @@ export default function SalesOrderFormPage() {
             value={form.order_number}
             onChange={handleChange}
           />
+        </div>
+
+        <div>
+          <label htmlFor="customer">Customer</label>
+          <select
+            id="customer"
+            name="customer"
+            value={form.customer}
+            onChange={handleChange}
+          >
+            <option value="">-- Free text below --</option>
+            {partners.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
