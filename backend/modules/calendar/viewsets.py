@@ -1,5 +1,10 @@
-from rest_framework import viewsets
+from datetime import datetime
+
+from django.utils.dateparse import parse_datetime
+from rest_framework import status as http_status, viewsets
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
+from rest_framework.response import Response
 
 from api.v1.filters import CompanyScopedFilterBackend
 from api.v1.permissions import IsCompanyMember
@@ -12,9 +17,19 @@ from modules.calendar.serializers import (
 )
 
 
-class ResourceViewSet(viewsets.ModelViewSet):
-    """CRUD for bookable resources within the authenticated user's company."""
+# Calendar-sync contract: see docs/CALENDAR-SYNC-POLLING.md
+MAX_BULK_EVENTS = 500
 
+
+def _parse_updated_at(raw: str | None) -> datetime | None:
+    """Parse an ISO-8601 timestamp tolerating URL-quoted `+` as space."""
+    if not raw:
+        return None
+    fixed = raw.replace(" ", "+")
+    return parse_datetime(fixed)
+
+
+class ResourceViewSet(viewsets.ModelViewSet):
     serializer_class = ResourceSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend, OrderingFilter]
@@ -26,7 +41,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
 
 
 class EventViewSet(viewsets.ModelViewSet):
-    """CRUD for calendar events with date-range and sync filtering."""
+    """CRUD + polling-sync surface for calendar events (Slice 18, D27)."""
 
     serializer_class = EventSerializer
     permission_classes = [IsCompanyMember]
@@ -48,8 +63,10 @@ class EventViewSet(viewsets.ModelViewSet):
         if event_type:
             qs = qs.filter(event_type=event_type)
 
-        updated_since = self.request.query_params.get("updated_since")
-        if updated_since:
+        updated_since = _parse_updated_at(
+            self.request.query_params.get("updated_since")
+        )
+        if updated_since is not None:
             qs = qs.filter(updated_at__gte=updated_since)
 
         start = self.request.query_params.get("start")
@@ -61,10 +78,107 @@ class EventViewSet(viewsets.ModelViewSet):
 
         return qs
 
+    # ─── Upsert via POST ────────────────────────────────────────────
+    def create(self, request, *args, **kwargs):
+        """Upsert an event by `external_uid` with last-write-wins on updated_at.
+
+        * If `external_uid` is empty → behave like a normal create.
+        * If an event with the same `external_uid` already exists for this
+          company:
+            - If the incoming payload's `updated_at` is older than the
+              stored record's, return the stored record with 200.
+            - Otherwise update the stored record (LWW win).
+        """
+        external_uid = request.data.get("external_uid")
+        if not external_uid:
+            return super().create(request, *args, **kwargs)
+
+        existing = Event.objects.filter(
+            company=request.company, external_uid=external_uid
+        ).first()
+        if existing is None:
+            return super().create(request, *args, **kwargs)
+
+        incoming_updated = _parse_updated_at(request.data.get("updated_at"))
+        if incoming_updated is not None and incoming_updated < existing.updated_at:
+            # Stored version wins.
+            return Response(
+                self.get_serializer(existing).data,
+                status=http_status.HTTP_200_OK,
+            )
+
+        serializer = self.get_serializer(existing, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data, status=http_status.HTTP_200_OK)
+
+    # ─── Bulk upsert ───────────────────────────────────────────────
+    @action(detail=False, methods=["post"])
+    def bulk(self, request):
+        payload = request.data
+        if not isinstance(payload, list):
+            return Response(
+                {"detail": "Expected a JSON array of event payloads."},
+                status=400,
+            )
+        if len(payload) > MAX_BULK_EVENTS:
+            return Response(
+                {
+                    "detail": (
+                        f"Bulk payload capped at {MAX_BULK_EVENTS} events; "
+                        f"received {len(payload)}."
+                    ),
+                },
+                status=400,
+            )
+
+        created = 0
+        updated = 0
+        skipped = 0
+        errors: list[dict] = []
+
+        for i, item in enumerate(payload):
+            uid = item.get("external_uid")
+            existing = None
+            if uid:
+                existing = Event.objects.filter(
+                    company=request.company, external_uid=uid
+                ).first()
+            if existing is None:
+                serializer = self.get_serializer(data=item)
+                if not serializer.is_valid():
+                    errors.append({"index": i, "errors": serializer.errors})
+                    continue
+                serializer.save(company=request.company)
+                created += 1
+            else:
+                incoming_updated = _parse_updated_at(item.get("updated_at"))
+                if (
+                    incoming_updated is not None
+                    and incoming_updated < existing.updated_at
+                ):
+                    skipped += 1
+                    continue
+                serializer = self.get_serializer(
+                    existing, data=item, partial=True
+                )
+                if not serializer.is_valid():
+                    errors.append({"index": i, "errors": serializer.errors})
+                    continue
+                serializer.save()
+                updated += 1
+
+        return Response(
+            {
+                "created": created,
+                "updated": updated,
+                "skipped": skipped,
+                "errors": errors,
+            }
+        )
+
 
 class EventAttendeeViewSet(viewsets.ModelViewSet):
-    """CRUD for event attendees within the authenticated user's company."""
-
     serializer_class = EventAttendeeSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
@@ -76,8 +190,6 @@ class EventAttendeeViewSet(viewsets.ModelViewSet):
 
 
 class ReminderViewSet(viewsets.ModelViewSet):
-    """CRUD for event reminders within the authenticated user's company."""
-
     serializer_class = ReminderSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
