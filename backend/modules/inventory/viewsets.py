@@ -39,7 +39,7 @@ class ProductViewSet(AggregationMixin, viewsets.ModelViewSet):
     queryset = Product.objects.select_related("category").order_by("name")
     pagination_class = None
 
-    aggregatable_fields = frozenset({"category", "uom", "is_active"})
+    aggregatable_fields = frozenset({"category", "unit_of_measure", "is_active"})
     aggregatable_measures = frozenset({"sale_price", "cost_price", "reorder_point"})
 
     def perform_create(self, serializer):

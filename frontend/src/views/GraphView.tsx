@@ -39,11 +39,7 @@ const COLORS = [
   "#166534",
 ];
 
-export default function GraphView({
-  rows,
-  chartType,
-  height = 320,
-}: GraphViewProps) {
+export default function GraphView({ rows, chartType, height = 320 }: GraphViewProps) {
   if (rows.length === 0) {
     return <div>No data</div>;
   }

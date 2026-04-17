@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  type ReportTemplate,
-  fetchReportTemplatesApi,
-} from "../../api/reports";
+import { type ReportTemplate, fetchReportTemplatesApi } from "../../api/reports";
 
 export default function ReportListPage() {
   const [rows, setRows] = useState<ReportTemplate[]>([]);

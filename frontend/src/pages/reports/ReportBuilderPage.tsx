@@ -56,7 +56,7 @@ const MODEL_OPTIONS: Array<{
   {
     label: "Products",
     model: "inventory/products",
-    group_by: ["uom", "is_active"],
+    group_by: ["unit_of_measure", "is_active"],
     measures: ["sale_price", "cost_price"],
   },
 ];
@@ -85,9 +85,7 @@ export default function ReportBuilderPage() {
   const currentModel = MODEL_OPTIONS[modelIndex];
   const [groupBy, setGroupBy] = useState(currentModel.group_by[0]);
   const [measure, setMeasure] = useState(currentModel.measures[0] ?? "id");
-  const [op, setOp] = useState<"sum" | "count" | "avg" | "min" | "max">(
-    "count",
-  );
+  const [op, setOp] = useState<"sum" | "count" | "avg" | "min" | "max">("count");
   const [viewMode, setViewMode] = useState<"pivot" | ChartType>("pivot");
   const [rows, setRows] = useState<AggregateRow[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -202,9 +200,7 @@ export default function ReportBuilderPage() {
           <select
             id="view"
             value={viewMode}
-            onChange={(e) =>
-              setViewMode(e.target.value as "pivot" | ChartType)
-            }
+            onChange={(e) => setViewMode(e.target.value as "pivot" | ChartType)}
           >
             {VIEW_OPTIONS.map((v) => (
               <option key={v.value} value={v.value}>
