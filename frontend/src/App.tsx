@@ -21,6 +21,12 @@ import InvoiceListPage from "./pages/invoicing/InvoiceListPage";
 import InvoiceFormPage from "./pages/invoicing/InvoiceFormPage";
 import PartnerListPage from "./pages/partners/PartnerListPage";
 import PartnerFormPage from "./pages/partners/PartnerFormPage";
+import VehicleListPage from "./pages/fleet/VehicleListPage";
+import VehicleFormPage from "./pages/fleet/VehicleFormPage";
+import DriverListPage from "./pages/fleet/DriverListPage";
+import DriverFormPage from "./pages/fleet/DriverFormPage";
+import MaintenanceLogListPage from "./pages/fleet/MaintenanceLogListPage";
+import FuelLogListPage from "./pages/fleet/FuelLogListPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -90,6 +96,14 @@ export default function App() {
         <Route path="/partners" element={<PartnerListPage />} />
         <Route path="/partners/new" element={<PartnerFormPage />} />
         <Route path="/partners/:id/edit" element={<PartnerFormPage />} />
+        <Route path="/fleet/vehicles" element={<VehicleListPage />} />
+        <Route path="/fleet/vehicles/new" element={<VehicleFormPage />} />
+        <Route path="/fleet/vehicles/:id/edit" element={<VehicleFormPage />} />
+        <Route path="/fleet/drivers" element={<DriverListPage />} />
+        <Route path="/fleet/drivers/new" element={<DriverFormPage />} />
+        <Route path="/fleet/drivers/:id/edit" element={<DriverFormPage />} />
+        <Route path="/fleet/maintenance-logs" element={<MaintenanceLogListPage />} />
+        <Route path="/fleet/fuel-logs" element={<FuelLogListPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
