@@ -31,9 +31,7 @@ export async function fetchPartnerApi(id: number): Promise<Partner> {
   return data;
 }
 
-export async function createPartnerApi(
-  payload: Partial<Partner>,
-): Promise<Partner> {
+export async function createPartnerApi(payload: Partial<Partner>): Promise<Partner> {
   const { data } = await apiClient.post<Partner>("/v1/core/partners/", payload);
   return data;
 }
@@ -42,10 +40,7 @@ export async function updatePartnerApi(
   id: number,
   payload: Partial<Partner>,
 ): Promise<Partner> {
-  const { data } = await apiClient.patch<Partner>(
-    `/v1/core/partners/${id}/`,
-    payload,
-  );
+  const { data } = await apiClient.patch<Partner>(`/v1/core/partners/${id}/`, payload);
   return data;
 }
 

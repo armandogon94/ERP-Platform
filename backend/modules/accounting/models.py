@@ -3,6 +3,7 @@
 from django.db import models
 
 from core.models import TenantModel
+from core.sequence import get_next_sequence
 
 
 class Account(TenantModel):
@@ -97,6 +98,11 @@ class JournalEntry(TenantModel):
 
     class Meta:
         ordering = ["-entry_date", "-created_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.reference and self.company_id:
+            self.reference = get_next_sequence(self.company, "JE")
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.reference or f"JE-{self.pk}"

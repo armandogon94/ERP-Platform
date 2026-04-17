@@ -134,12 +134,7 @@ export default function PartnerFormPage() {
 
         <div>
           <label htmlFor="phone">Phone</label>
-          <input
-            id="phone"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-          />
+          <input id="phone" name="phone" value={form.phone} onChange={handleChange} />
         </div>
 
         <div>

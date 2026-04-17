@@ -3,6 +3,7 @@
 from django.db import models
 
 from core.models import TenantModel
+from core.sequence import get_next_sequence
 
 
 class Vendor(TenantModel):
@@ -73,6 +74,11 @@ class PurchaseOrder(TenantModel):
     class Meta:
         ordering = ["-created_at"]
 
+    def save(self, *args, **kwargs):
+        if not self.po_number and self.company_id:
+            self.po_number = get_next_sequence(self.company, "PO")
+        super().save(*args, **kwargs)
+
     def __str__(self) -> str:
         return self.po_number or f"PO-{self.pk}"
 
@@ -104,6 +110,11 @@ class RequestForQuote(TenantModel):
 
     class Meta:
         ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.rfq_number and self.company_id:
+            self.rfq_number = get_next_sequence(self.company, "RFQ")
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.rfq_number or f"RFQ-{self.pk}"

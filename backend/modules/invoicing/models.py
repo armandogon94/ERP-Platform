@@ -3,6 +3,7 @@
 from django.db import models
 
 from core.models import TenantModel
+from core.sequence import get_next_sequence
 
 
 class Invoice(TenantModel):
@@ -49,6 +50,11 @@ class Invoice(TenantModel):
     class Meta:
         ordering = ["-invoice_date", "-created_at"]
 
+    def save(self, *args, **kwargs):
+        if not self.invoice_number and self.company_id:
+            self.invoice_number = get_next_sequence(self.company, "INV")
+        super().save(*args, **kwargs)
+
     def __str__(self) -> str:
         return self.invoice_number or f"INV-{self.pk}"
 
@@ -92,6 +98,11 @@ class CreditNote(TenantModel):
 
     class Meta:
         ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.credit_note_number and self.company_id:
+            self.credit_note_number = get_next_sequence(self.company, "CN")
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.credit_note_number or f"CN-{self.pk}"
