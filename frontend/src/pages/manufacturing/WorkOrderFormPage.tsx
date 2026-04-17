@@ -177,12 +177,7 @@ export default function WorkOrderFormPage() {
         </div>
         <div>
           <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-          >
+          <select id="status" name="status" value={form.status} onChange={handleChange}>
             <option value="draft">Draft</option>
             <option value="confirmed">Confirmed</option>
             <option value="in_progress">In Progress</option>

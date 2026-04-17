@@ -22,11 +22,7 @@ vi.mock("../../api/config", () => ({
   fetchModuleConfigApi: vi.fn(),
 }));
 
-import {
-  fetchBOMApi,
-  createBOMApi,
-  updateBOMApi,
-} from "../../api/manufacturing";
+import { fetchBOMApi, createBOMApi, updateBOMApi } from "../../api/manufacturing";
 
 const mockFetch = vi.mocked(fetchBOMApi);
 const mockCreate = vi.mocked(createBOMApi);

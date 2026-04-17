@@ -51,10 +51,9 @@ export interface ProductionCost {
 export async function fetchBOMsApi(
   params?: Record<string, string>,
 ): Promise<BillOfMaterials[]> {
-  const { data } = await apiClient.get<BillOfMaterials[]>(
-    "/v1/manufacturing/boms/",
-    { params },
-  );
+  const { data } = await apiClient.get<BillOfMaterials[]>("/v1/manufacturing/boms/", {
+    params,
+  });
   return data;
 }
 
@@ -90,16 +89,13 @@ export async function updateBOMApi(
 export async function fetchBOMLinesApi(
   params?: Record<string, string>,
 ): Promise<BOMLine[]> {
-  const { data } = await apiClient.get<BOMLine[]>(
-    "/v1/manufacturing/bom-lines/",
-    { params },
-  );
+  const { data } = await apiClient.get<BOMLine[]>("/v1/manufacturing/bom-lines/", {
+    params,
+  });
   return data;
 }
 
-export async function createBOMLineApi(
-  payload: Partial<BOMLine>,
-): Promise<BOMLine> {
+export async function createBOMLineApi(payload: Partial<BOMLine>): Promise<BOMLine> {
   const { data } = await apiClient.post<BOMLine>(
     "/v1/manufacturing/bom-lines/",
     payload,
@@ -115,10 +111,9 @@ export async function deleteBOMLineApi(id: number): Promise<void> {
 export async function fetchWorkOrdersApi(
   params?: Record<string, string>,
 ): Promise<WorkOrder[]> {
-  const { data } = await apiClient.get<WorkOrder[]>(
-    "/v1/manufacturing/work-orders/",
-    { params },
-  );
+  const { data } = await apiClient.get<WorkOrder[]>("/v1/manufacturing/work-orders/", {
+    params,
+  });
   return data;
 }
 

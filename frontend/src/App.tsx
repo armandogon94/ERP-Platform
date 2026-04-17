@@ -35,6 +35,10 @@ import BOMListPage from "./pages/manufacturing/BOMListPage";
 import BOMFormPage from "./pages/manufacturing/BOMFormPage";
 import WorkOrderListPage from "./pages/manufacturing/WorkOrderListPage";
 import WorkOrderFormPage from "./pages/manufacturing/WorkOrderFormPage";
+import POSSessionListPage from "./pages/pos/POSSessionListPage";
+import POSSessionFormPage from "./pages/pos/POSSessionFormPage";
+import POSOrderListPage from "./pages/pos/POSOrderListPage";
+import POSOrderFormPage from "./pages/pos/POSOrderFormPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -120,18 +124,18 @@ export default function App() {
         <Route path="/manufacturing/boms" element={<BOMListPage />} />
         <Route path="/manufacturing/boms/new" element={<BOMFormPage />} />
         <Route path="/manufacturing/boms/:id/edit" element={<BOMFormPage />} />
-        <Route
-          path="/manufacturing/work-orders"
-          element={<WorkOrderListPage />}
-        />
-        <Route
-          path="/manufacturing/work-orders/new"
-          element={<WorkOrderFormPage />}
-        />
+        <Route path="/manufacturing/work-orders" element={<WorkOrderListPage />} />
+        <Route path="/manufacturing/work-orders/new" element={<WorkOrderFormPage />} />
         <Route
           path="/manufacturing/work-orders/:id/edit"
           element={<WorkOrderFormPage />}
         />
+        <Route path="/pos/sessions" element={<POSSessionListPage />} />
+        <Route path="/pos/sessions/new" element={<POSSessionFormPage />} />
+        <Route path="/pos/sessions/:id/edit" element={<POSSessionFormPage />} />
+        <Route path="/pos/orders" element={<POSOrderListPage />} />
+        <Route path="/pos/orders/new" element={<POSOrderFormPage />} />
+        <Route path="/pos/orders/:id/edit" element={<POSOrderFormPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -36,9 +36,7 @@ export default function BOMListPage() {
             {rows.map((b) => (
               <tr key={b.id}>
                 <td>
-                  <Link to={`/manufacturing/boms/${b.id}/edit`}>
-                    {b.product_name}
-                  </Link>
+                  <Link to={`/manufacturing/boms/${b.id}/edit`}>{b.product_name}</Link>
                 </td>
                 <td>{b.version}</td>
                 <td>{b.active ? "Yes" : "No"}</td>
