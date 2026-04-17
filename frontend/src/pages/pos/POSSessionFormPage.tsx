@@ -167,12 +167,8 @@ export default function POSSessionFormPage() {
               disabled={!canClose}
             />
           </div>
-          {form.expected_cash && (
-            <div>Expected: {form.expected_cash}</div>
-          )}
-          {form.variance && (
-            <div>Variance: {form.variance}</div>
-          )}
+          {form.expected_cash && <div>Expected: {form.expected_cash}</div>}
+          {form.variance && <div>Variance: {form.variance}</div>}
           <button
             type="button"
             onClick={handleClose}

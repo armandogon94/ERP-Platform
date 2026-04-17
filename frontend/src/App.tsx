@@ -39,6 +39,11 @@ import POSSessionListPage from "./pages/pos/POSSessionListPage";
 import POSSessionFormPage from "./pages/pos/POSSessionFormPage";
 import POSOrderListPage from "./pages/pos/POSOrderListPage";
 import POSOrderFormPage from "./pages/pos/POSOrderFormPage";
+import CategoryListPage from "./pages/helpdesk/CategoryListPage";
+import TicketListPage from "./pages/helpdesk/TicketListPage";
+import TicketFormPage from "./pages/helpdesk/TicketFormPage";
+import ArticleListPage from "./pages/helpdesk/ArticleListPage";
+import ArticleFormPage from "./pages/helpdesk/ArticleFormPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -136,6 +141,13 @@ export default function App() {
         <Route path="/pos/orders" element={<POSOrderListPage />} />
         <Route path="/pos/orders/new" element={<POSOrderFormPage />} />
         <Route path="/pos/orders/:id/edit" element={<POSOrderFormPage />} />
+        <Route path="/helpdesk/categories" element={<CategoryListPage />} />
+        <Route path="/helpdesk/tickets" element={<TicketListPage />} />
+        <Route path="/helpdesk/tickets/new" element={<TicketFormPage />} />
+        <Route path="/helpdesk/tickets/:id/edit" element={<TicketFormPage />} />
+        <Route path="/helpdesk/articles" element={<ArticleListPage />} />
+        <Route path="/helpdesk/articles/new" element={<ArticleFormPage />} />
+        <Route path="/helpdesk/articles/:id/edit" element={<ArticleFormPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

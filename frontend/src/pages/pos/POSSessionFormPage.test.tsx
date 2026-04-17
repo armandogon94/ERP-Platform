@@ -57,10 +57,7 @@ function renderEditForm(id = 1) {
   return render(
     <MemoryRouter initialEntries={[`/pos/sessions/${id}/edit`]}>
       <Routes>
-        <Route
-          path="/pos/sessions/:id/edit"
-          element={<POSSessionFormPage />}
-        />
+        <Route path="/pos/sessions/:id/edit" element={<POSSessionFormPage />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -104,7 +101,9 @@ describe("POSSessionFormPage", () => {
     mockFetch.mockResolvedValueOnce(sample);
     renderEditForm();
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /close session/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /close session/i }),
+      ).toBeInTheDocument();
     });
   });
 

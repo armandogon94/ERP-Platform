@@ -74,10 +74,7 @@ export async function fetchPOSSessionApi(id: number): Promise<POSSession> {
 export async function createPOSSessionApi(
   payload: Partial<POSSession>,
 ): Promise<POSSession> {
-  const { data } = await apiClient.post<POSSession>(
-    "/v1/pos/sessions/",
-    payload,
-  );
+  const { data } = await apiClient.post<POSSession>("/v1/pos/sessions/", payload);
   return data;
 }
 
@@ -118,9 +115,7 @@ export async function fetchPOSOrderApi(id: number): Promise<POSOrder> {
   return data;
 }
 
-export async function createPOSOrderApi(
-  payload: Partial<POSOrder>,
-): Promise<POSOrder> {
+export async function createPOSOrderApi(payload: Partial<POSOrder>): Promise<POSOrder> {
   const { data } = await apiClient.post<POSOrder>("/v1/pos/orders/", payload);
   return data;
 }
@@ -129,10 +124,7 @@ export async function updatePOSOrderApi(
   id: number,
   payload: Partial<POSOrder>,
 ): Promise<POSOrder> {
-  const { data } = await apiClient.patch<POSOrder>(
-    `/v1/pos/orders/${id}/`,
-    payload,
-  );
+  const { data } = await apiClient.patch<POSOrder>(`/v1/pos/orders/${id}/`, payload);
   return data;
 }
 
@@ -140,10 +132,9 @@ export async function updatePOSOrderApi(
 export async function fetchPOSOrderLinesApi(
   params?: Record<string, string>,
 ): Promise<POSOrderLine[]> {
-  const { data } = await apiClient.get<POSOrderLine[]>(
-    "/v1/pos/order-lines/",
-    { params },
-  );
+  const { data } = await apiClient.get<POSOrderLine[]>("/v1/pos/order-lines/", {
+    params,
+  });
   return data;
 }
 
@@ -151,9 +142,8 @@ export async function fetchPOSOrderLinesApi(
 export async function fetchCashMovementsApi(
   params?: Record<string, string>,
 ): Promise<CashMovement[]> {
-  const { data } = await apiClient.get<CashMovement[]>(
-    "/v1/pos/cash-movements/",
-    { params },
-  );
+  const { data } = await apiClient.get<CashMovement[]>("/v1/pos/cash-movements/", {
+    params,
+  });
   return data;
 }

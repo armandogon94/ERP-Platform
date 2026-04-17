@@ -1,0 +1,8 @@
+from django.apps import AppConfig
+
+
+class HelpdeskConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "modules.helpdesk"
+    label = "helpdesk"
+    verbose_name = "Helpdesk"

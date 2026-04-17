@@ -28,7 +28,12 @@ const DEFAULT_SIDEBAR_ITEMS: SidebarItem[] = [
   { name: "purchasing", label: "Purchasing", icon: "\u{1F6D2}", url: "/purchasing" },
   { name: "calendar", label: "Calendar", icon: "\u{1F4C5}", url: "/calendar" },
   { name: "projects", label: "Projects", icon: "\u{1F4CB}", url: "/projects/projects" },
-  { name: "helpdesk", label: "Helpdesk", icon: "\u{1F3AB}", url: "/helpdesk" },
+  {
+    name: "helpdesk",
+    label: "Helpdesk",
+    icon: "\u{1F3AB}",
+    url: "/helpdesk/tickets",
+  },
   { name: "fleet", label: "Fleet", icon: "\u{1F69A}", url: "/fleet/vehicles" },
   {
     name: "manufacturing",

@@ -178,12 +178,7 @@ export default function POSOrderFormPage() {
         </div>
         <div>
           <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-          >
+          <select id="status" name="status" value={form.status} onChange={handleChange}>
             <option value="draft">Draft</option>
             <option value="paid">Paid</option>
             <option value="refunded">Refunded</option>
