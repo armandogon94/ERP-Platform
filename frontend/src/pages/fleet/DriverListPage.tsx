@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Driver, fetchDriversApi } from "../../api/fleet";
+import Skeleton from "../../components/Skeleton";
 
 export default function DriverListPage() {
   const [rows, setRows] = useState<Driver[]>([]);
@@ -23,7 +24,7 @@ export default function DriverListPage() {
 
       <Link to="/fleet/drivers/new">New {driverLabel}</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

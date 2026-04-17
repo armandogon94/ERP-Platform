@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type SalesOrder, fetchSalesOrdersApi } from "../../api/sales";
+import Skeleton from "../../components/Skeleton";
 
 export default function SalesOrderListPage() {
   const [orders, setOrders] = useState<SalesOrder[]>([]);
@@ -23,7 +24,7 @@ export default function SalesOrderListPage() {
 
       <Link to="/sales/orders/new">New {orderLabel}</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

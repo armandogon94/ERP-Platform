@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type SalesQuotation, fetchQuotationsApi } from "../../api/sales";
+import Skeleton from "../../components/Skeleton";
 
 export default function QuotationListPage() {
   const [quotations, setQuotations] = useState<SalesQuotation[]>([]);
@@ -23,7 +24,7 @@ export default function QuotationListPage() {
 
       <Link to="/sales/quotations/new">New {quotationLabel}</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

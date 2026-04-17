@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Product, fetchProductsApi } from "../../api/inventory";
+import Skeleton from "../../components/Skeleton";
 
 export default function ProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -25,7 +26,7 @@ export default function ProductListPage() {
     <div>
       <h1>{productLabel}s</h1>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
 
       {error && <div>Error: {error}</div>}
 

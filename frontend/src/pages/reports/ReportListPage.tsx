@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { type ReportTemplate, fetchReportTemplatesApi } from "../../api/reports";
+import Skeleton from "../../components/Skeleton";
 
 export default function ReportListPage() {
   const [rows, setRows] = useState<ReportTemplate[]>([]);
@@ -20,7 +21,7 @@ export default function ReportListPage() {
 
       <Link to="/reports/builder">New Report (Builder)</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

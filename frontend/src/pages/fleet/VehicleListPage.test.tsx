@@ -73,7 +73,7 @@ describe("VehicleListPage", () => {
   it("shows loading state", () => {
     mockFetch.mockReturnValueOnce(new Promise(() => {}));
     renderPage();
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: /loading/i })).toBeInTheDocument();
   });
 
   it("shows error on API failure", async () => {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Partner, fetchPartnersApi } from "../../api/partners";
+import Skeleton from "../../components/Skeleton";
 
 export default function PartnerListPage() {
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -23,7 +24,7 @@ export default function PartnerListPage() {
 
       <Link to="/partners/new">New {partnerLabel}</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { type WorkOrder, fetchWorkOrdersApi } from "../../api/manufacturing";
+import Skeleton from "../../components/Skeleton";
 
 export default function WorkOrderListPage() {
   const [rows, setRows] = useState<WorkOrder[]>([]);
@@ -20,7 +21,7 @@ export default function WorkOrderListPage() {
 
       <Link to="/manufacturing/work-orders/new">New Work Order</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

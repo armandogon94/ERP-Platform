@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Invoice, fetchInvoicesApi } from "../../api/invoicing";
+import Skeleton from "../../components/Skeleton";
 
 export default function InvoiceListPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -23,7 +24,7 @@ export default function InvoiceListPage() {
 
       <Link to="/invoicing/invoices/new">New {invoiceLabel}</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

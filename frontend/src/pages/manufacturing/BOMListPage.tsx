@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { type BillOfMaterials, fetchBOMsApi } from "../../api/manufacturing";
+import Skeleton from "../../components/Skeleton";
 
 export default function BOMListPage() {
   const [rows, setRows] = useState<BillOfMaterials[]>([]);
@@ -20,7 +21,7 @@ export default function BOMListPage() {
 
       <Link to="/manufacturing/boms/new">New BOM</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

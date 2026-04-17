@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { type TicketCategory, fetchCategoriesApi } from "../../api/helpdesk";
+import Skeleton from "../../components/Skeleton";
 
 export default function CategoryListPage() {
   const [rows, setRows] = useState<TicketCategory[]>([]);
@@ -17,7 +18,7 @@ export default function CategoryListPage() {
     <div>
       <h1>Ticket Categories</h1>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Vehicle, fetchVehiclesApi } from "../../api/fleet";
+import Skeleton from "../../components/Skeleton";
 
 export default function VehicleListPage() {
   const [rows, setRows] = useState<Vehicle[]>([]);
@@ -23,7 +24,7 @@ export default function VehicleListPage() {
 
       <Link to="/fleet/vehicles/new">New {vehicleLabel}</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

@@ -1,13 +1,23 @@
+from django.db.models import Count, Sum
 from rest_framework import viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 
 from api.v1.filters import CompanyScopedFilterBackend
 from api.v1.permissions import IsCompanyAdmin, IsCompanyMember
-from core.models import ModuleConfig, ModuleRegistry, Partner, ViewDefinition
+from core.models import (
+    AuditLog,
+    ModuleConfig,
+    ModuleRegistry,
+    Notification,
+    Partner,
+    ViewDefinition,
+)
 from core.serializers import (
+    AuditLogSerializer,
     ConfigPatchSerializer,
     ModuleSerializer,
+    NotificationSerializer,
     PartnerSerializer,
     ResolvedConfigSerializer,
     ViewDefinitionSerializer,
@@ -143,3 +153,155 @@ class PartnerViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
+
+
+class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read-only company-scoped audit log (Slice 19)."""
+
+    serializer_class = AuditLogSerializer
+    permission_classes = [IsCompanyMember]
+    filter_backends = [CompanyScopedFilterBackend]
+    queryset = AuditLog.objects.select_related("user").order_by("-timestamp")
+    pagination_class = None
+
+    def list(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())[:100]
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+
+class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
+    """User-scoped notifications (list, mark-read, unread-count) (Slice 19)."""
+
+    serializer_class = NotificationSerializer
+    permission_classes = [IsCompanyMember]
+    pagination_class = None
+
+    def get_queryset(self):
+        return Notification.objects.filter(
+            recipient=self.request.user
+        ).order_by("-created_at")
+
+    def list(self, request, *args, **kwargs):
+        qs = self.get_queryset()[:50]
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["post"])
+    def mark_read(self, request, pk=None):
+        n = Notification.objects.filter(
+            recipient=request.user, pk=pk
+        ).first()
+        if not n:
+            return Response({"detail": "Not found"}, status=404)
+        n.is_read = True
+        n.save(update_fields=["is_read"])
+        return Response(self.get_serializer(n).data)
+
+    @action(detail=False, methods=["get"])
+    def unread_count(self, request):
+        count = Notification.objects.filter(
+            recipient=request.user, is_read=False
+        ).count()
+        return Response({"count": count})
+
+
+@api_view(["GET"])
+@permission_classes([IsCompanyMember])
+def home_kpis(request):
+    """Lightweight home KPIs using plain ORM aggregates (no materialized views, D25).
+
+    Returns 4-6 tiles summarising the authenticated user's company. Modules
+    that aren't installed return a zero/absent tile rather than a crash.
+    """
+    company = request.company
+    tiles: list[dict] = []
+
+    # Invoicing — outstanding invoices (posted but not paid)
+    try:
+        from modules.invoicing.models import Invoice
+
+        outstanding = Invoice.objects.filter(
+            company=company, status="posted"
+        ).aggregate(total=Sum("total_amount"), count=Count("id"))
+        tiles.append({
+            "label": "Outstanding Invoices",
+            "value": f"{outstanding['count'] or 0}",
+            "detail": f"${outstanding['total'] or 0:.2f}",
+            "module": "invoicing",
+        })
+    except Exception:
+        pass
+
+    # Sales — open sales orders
+    try:
+        from modules.sales.models import SalesOrder
+
+        open_orders = SalesOrder.objects.filter(
+            company=company, status__in=["draft", "confirmed"]
+        ).count()
+        tiles.append({
+            "label": "Open Sales Orders",
+            "value": str(open_orders),
+            "module": "sales",
+        })
+    except Exception:
+        pass
+
+    # Purchasing — open POs
+    try:
+        from modules.purchasing.models import PurchaseOrder
+
+        open_pos = PurchaseOrder.objects.filter(
+            company=company, status__in=["draft", "sent", "confirmed"]
+        ).count()
+        tiles.append({
+            "label": "Open Purchase Orders",
+            "value": str(open_pos),
+            "module": "purchasing",
+        })
+    except Exception:
+        pass
+
+    # Helpdesk — open tickets
+    try:
+        from modules.helpdesk.models import Ticket
+
+        open_tickets = Ticket.objects.filter(
+            company=company
+        ).exclude(status__in=["resolved", "closed"]).count()
+        tiles.append({
+            "label": "Open Tickets",
+            "value": str(open_tickets),
+            "module": "helpdesk",
+        })
+    except Exception:
+        pass
+
+    # HR — active employees
+    try:
+        from modules.hr.models import Employee
+
+        employees = Employee.objects.filter(company=company).count()
+        tiles.append({
+            "label": "Active Employees",
+            "value": str(employees),
+            "module": "hr",
+        })
+    except Exception:
+        pass
+
+    # Inventory — products below reorder threshold
+    try:
+        from modules.inventory.models import Product
+
+        products = Product.objects.filter(company=company).count()
+        tiles.append({
+            "label": "Products in Catalog",
+            "value": str(products),
+            "module": "inventory",
+        })
+    except Exception:
+        pass
+
+    return Response({"tiles": tiles})

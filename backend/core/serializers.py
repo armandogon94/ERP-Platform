@@ -1,7 +1,15 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from core.models import Company, ModuleConfig, ModuleRegistry, Partner, ViewDefinition
+from core.models import (
+    AuditLog,
+    Company,
+    ModuleConfig,
+    ModuleRegistry,
+    Notification,
+    Partner,
+    ViewDefinition,
+)
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -85,3 +93,43 @@ class PartnerSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = [
+            "id",
+            "title",
+            "message",
+            "notification_type",
+            "is_read",
+            "action_url",
+            "related_model",
+            "related_id",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AuditLog
+        fields = [
+            "id",
+            "model_name",
+            "model_id",
+            "action",
+            "user_name",
+            "old_values",
+            "new_values",
+            "timestamp",
+        ]
+
+    def get_user_name(self, obj):
+        u = obj.user
+        if not u:
+            return "System"
+        return (u.get_full_name() or u.username).strip()

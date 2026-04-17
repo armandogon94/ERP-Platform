@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type PurchaseOrder, fetchPurchaseOrdersApi } from "../../api/purchasing";
+import Skeleton from "../../components/Skeleton";
 
 export default function PurchaseOrderListPage() {
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
@@ -23,7 +24,7 @@ export default function PurchaseOrderListPage() {
 
       <Link to="/purchasing/purchase-orders/new">New {poLabel}</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

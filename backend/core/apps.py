@@ -8,3 +8,5 @@ class CoreConfig(AppConfig):
 
     def ready(self):
         import core.signals  # noqa: F401
+
+        core.signals._register_notification_signals()

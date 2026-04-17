@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { type POSOrder, fetchPOSOrdersApi } from "../../api/pos";
+import Skeleton from "../../components/Skeleton";
 
 export default function POSOrderListPage() {
   const [rows, setRows] = useState<POSOrder[]>([]);
@@ -20,7 +21,7 @@ export default function POSOrderListPage() {
 
       <Link to="/pos/orders/new">New Order</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

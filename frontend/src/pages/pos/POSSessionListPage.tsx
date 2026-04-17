@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { type POSSession, fetchPOSSessionsApi } from "../../api/pos";
+import Skeleton from "../../components/Skeleton";
 
 export default function POSSessionListPage() {
   const [rows, setRows] = useState<POSSession[]>([]);
@@ -20,7 +21,7 @@ export default function POSSessionListPage() {
 
       <Link to="/pos/sessions/new">New Session</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

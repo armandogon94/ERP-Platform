@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Project, fetchProjectsApi } from "../../api/projects";
+import Skeleton from "../../components/Skeleton";
 
 export default function ProjectListPage() {
   const [rows, setRows] = useState<Project[]>([]);
@@ -23,7 +24,7 @@ export default function ProjectListPage() {
 
       <Link to="/projects/projects/new">New {projectLabel}</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

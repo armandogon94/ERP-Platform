@@ -1,4 +1,5 @@
 import { useAuthStore } from "../stores/authStore";
+import NotificationBell from "./NotificationBell";
 
 interface TopNavbarProps {
   onToggleSidebar: () => void;
@@ -38,6 +39,7 @@ export default function TopNavbar({
       </div>
 
       <div className="navbar-right">
+        <NotificationBell />
         <span className="user-name">
           {user?.first_name} {user?.last_name}
         </span>

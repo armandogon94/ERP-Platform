@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { type KnowledgeArticle, fetchArticlesApi } from "../../api/helpdesk";
+import Skeleton from "../../components/Skeleton";
 
 export default function ArticleListPage() {
   const [rows, setRows] = useState<KnowledgeArticle[]>([]);
@@ -20,7 +21,7 @@ export default function ArticleListPage() {
 
       <Link to="/helpdesk/articles/new">New Article</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

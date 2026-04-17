@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { type FuelLog, fetchFuelLogsApi } from "../../api/fleet";
+import Skeleton from "../../components/Skeleton";
 
 export default function FuelLogListPage() {
   const [rows, setRows] = useState<FuelLog[]>([]);
@@ -17,7 +18,7 @@ export default function FuelLogListPage() {
     <div>
       <h1>Fuel Logs</h1>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

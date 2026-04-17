@@ -54,3 +54,69 @@ def invalidate_on_module_config_change(sender, instance, **kwargs):
     from core.services.config_service import invalidate_company_config
 
     invalidate_company_config(instance.company_id)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Slice 19 — Notifications for key business events
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+def _notify_company_admins(company, title, message, notification_type="info",
+                            related_model="", related_id=None, action_url=""):
+    """Create a Notification for every company admin in this company."""
+    from core.models import Notification, UserProfile
+
+    admins = UserProfile.objects.filter(
+        company=company, is_company_admin=True
+    ).select_related("user")
+    for profile in admins:
+        Notification.objects.create(
+            recipient=profile.user,
+            title=title,
+            message=message,
+            notification_type=notification_type,
+            related_model=related_model,
+            related_id=related_id,
+            action_url=action_url,
+        )
+
+
+def _register_notification_signals():
+    """Wire up post_save handlers on business models. Called from apps.ready()."""
+    try:
+        from modules.helpdesk.models import Ticket
+
+        @receiver(post_save, sender=Ticket, weak=False)
+        def on_ticket_saved(sender, instance, created, **kwargs):
+            if not created:
+                return
+            _notify_company_admins(
+                instance.company,
+                title=f"New ticket: {instance.title}",
+                message=f"Priority {instance.priority} — {instance.ticket_number}",
+                notification_type="info",
+                related_model="Ticket",
+                related_id=instance.pk,
+                action_url=f"/helpdesk/tickets/{instance.pk}/edit",
+            )
+    except Exception:
+        pass
+
+    try:
+        from modules.invoicing.models import Invoice
+
+        @receiver(post_save, sender=Invoice, weak=False)
+        def on_invoice_saved(sender, instance, created, **kwargs):
+            if instance.status != "posted":
+                return
+            _notify_company_admins(
+                instance.company,
+                title=f"Invoice posted: {instance.invoice_number}",
+                message=f"{instance.customer_name} — ${instance.total_amount}",
+                notification_type="success",
+                related_model="Invoice",
+                related_id=instance.pk,
+                action_url=f"/invoicing/invoices/{instance.pk}/edit",
+            )
+    except Exception:
+        pass

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { type Ticket, fetchTicketsApi } from "../../api/helpdesk";
+import Skeleton from "../../components/Skeleton";
 
 const STATUSES: { value: string; label: string }[] = [
   { value: "new", label: "New" },
@@ -37,7 +38,7 @@ export default function TicketListPage() {
         {view === "list" ? "Kanban" : "List"} view
       </button>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && view === "list" && (

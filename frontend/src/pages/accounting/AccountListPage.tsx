@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Account, fetchAccountsApi } from "../../api/accounting";
+import Skeleton from "../../components/Skeleton";
 
 export default function AccountListPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -23,7 +24,7 @@ export default function AccountListPage() {
 
       <Link to="/accounting/accounts/new">New {accountLabel}</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

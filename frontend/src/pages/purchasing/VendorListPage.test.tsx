@@ -86,7 +86,7 @@ describe("VendorListPage", () => {
   it("shows loading state initially", () => {
     mockFetchVendors.mockReturnValueOnce(new Promise(() => {}));
     renderPage();
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: /loading/i })).toBeInTheDocument();
   });
 
   it("shows error message on API failure", async () => {

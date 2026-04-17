@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type CalendarEvent, fetchEventsApi } from "../../api/calendar";
+import Skeleton from "../../components/Skeleton";
 
 export default function EventListPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -25,7 +26,7 @@ export default function EventListPage() {
     <div>
       <h1>{eventLabel}s</h1>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
 
       {error && <div>Error: {error}</div>}
 

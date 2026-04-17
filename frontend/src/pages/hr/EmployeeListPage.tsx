@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Employee, fetchEmployeesApi } from "../../api/hr";
+import Skeleton from "../../components/Skeleton";
 
 export default function EmployeeListPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -25,7 +26,7 @@ export default function EmployeeListPage() {
     <div>
       <h1>{employeeLabel}s</h1>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
 
       {error && <div>Error: {error}</div>}
 

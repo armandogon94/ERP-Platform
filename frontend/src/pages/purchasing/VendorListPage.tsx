@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Vendor, fetchVendorsApi } from "../../api/purchasing";
+import Skeleton from "../../components/Skeleton";
 
 export default function VendorListPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -23,7 +24,7 @@ export default function VendorListPage() {
 
       <Link to="/purchasing/vendors/new">New {vendorLabel}</Link>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

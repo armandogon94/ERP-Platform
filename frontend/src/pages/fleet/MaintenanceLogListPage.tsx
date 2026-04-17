@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { type MaintenanceLog, fetchMaintenanceLogsApi } from "../../api/fleet";
+import Skeleton from "../../components/Skeleton";
 
 export default function MaintenanceLogListPage() {
   const [rows, setRows] = useState<MaintenanceLog[]>([]);
@@ -17,7 +18,7 @@ export default function MaintenanceLogListPage() {
     <div>
       <h1>Maintenance Logs</h1>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (

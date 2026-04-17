@@ -3,6 +3,8 @@ import { Outlet } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { useConfigStore } from "../stores/configStore";
 import AppSwitcher, { type AppModule } from "./AppSwitcher";
+import Breadcrumbs from "./Breadcrumbs";
+import ErrorBoundary from "./ErrorBoundary";
 import Sidebar, { type SidebarItem } from "./Sidebar";
 import TopNavbar from "./TopNavbar";
 import "./AppLayout.css";
@@ -113,7 +115,10 @@ export default function AppLayout() {
       <div className="app-body">
         <Sidebar items={sidebarItems} isOpen={sidebarOpen} />
         <main className="app-content">
-          <Outlet />
+          <Breadcrumbs />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
       <AppSwitcher

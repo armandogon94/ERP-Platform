@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { type Task, fetchTasksApi } from "../../api/projects";
+import Skeleton from "../../components/Skeleton";
 
 const STATUSES: { value: string; label: string }[] = [
   { value: "todo", label: "To Do" },
@@ -33,7 +34,7 @@ export default function TaskListPage() {
         {view === "list" ? "Kanban" : "List"} view
       </button>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && view === "list" && (

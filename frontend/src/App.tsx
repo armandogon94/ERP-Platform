@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
+import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import EmployeeListPage from "./pages/hr/EmployeeListPage";
 import EmployeeFormPage from "./pages/hr/EmployeeFormPage";
@@ -46,16 +47,8 @@ import ArticleListPage from "./pages/helpdesk/ArticleListPage";
 import ArticleFormPage from "./pages/helpdesk/ArticleFormPage";
 import ReportListPage from "./pages/reports/ReportListPage";
 import ReportBuilderPage from "./pages/reports/ReportBuilderPage";
+import AuditLogTimelinePage from "./pages/settings/AuditLogTimelinePage";
 import { useAuthStore } from "./stores/authStore";
-
-function Home() {
-  return (
-    <div>
-      <h1>ERP Platform</h1>
-      <p>Welcome to the ERP Platform.</p>
-    </div>
-  );
-}
 
 function NotFound() {
   return (
@@ -79,7 +72,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/hr/employees" element={<EmployeeListPage />} />
         <Route path="/hr/employees/new" element={<EmployeeFormPage />} />
         <Route path="/hr/employees/:id/edit" element={<EmployeeFormPage />} />
@@ -152,6 +145,7 @@ export default function App() {
         <Route path="/helpdesk/articles/:id/edit" element={<ArticleFormPage />} />
         <Route path="/reports" element={<ReportListPage />} />
         <Route path="/reports/builder" element={<ReportBuilderPage />} />
+        <Route path="/settings/audit-log" element={<AuditLogTimelinePage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

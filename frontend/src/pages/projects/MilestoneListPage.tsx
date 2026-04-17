@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { type Milestone, fetchMilestonesApi } from "../../api/projects";
+import Skeleton from "../../components/Skeleton";
 
 export default function MilestoneListPage() {
   const [rows, setRows] = useState<Milestone[]>([]);
@@ -17,7 +18,7 @@ export default function MilestoneListPage() {
     <div>
       <h1>Milestones</h1>
 
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Skeleton />}
       {error && <div role="alert">{error}</div>}
 
       {!isLoading && !error && (
