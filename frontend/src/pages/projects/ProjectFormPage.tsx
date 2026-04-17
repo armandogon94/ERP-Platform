@@ -142,12 +142,7 @@ export default function ProjectFormPage() {
         </div>
         <div>
           <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-          >
+          <select id="status" name="status" value={form.status} onChange={handleChange}>
             <option value="planned">Planned</option>
             <option value="active">Active</option>
             <option value="on_hold">On Hold</option>

@@ -80,13 +80,8 @@ export async function fetchProjectApi(id: number): Promise<Project> {
   return data;
 }
 
-export async function createProjectApi(
-  payload: Partial<Project>,
-): Promise<Project> {
-  const { data } = await apiClient.post<Project>(
-    "/v1/projects/projects/",
-    payload,
-  );
+export async function createProjectApi(payload: Partial<Project>): Promise<Project> {
+  const { data } = await apiClient.post<Project>("/v1/projects/projects/", payload);
   return data;
 }
 
@@ -101,9 +96,7 @@ export async function updateProjectApi(
   return data;
 }
 
-export async function fetchProjectProgressApi(
-  id: number,
-): Promise<ProjectProgress> {
+export async function fetchProjectProgressApi(id: number): Promise<ProjectProgress> {
   const { data } = await apiClient.get<ProjectProgress>(
     `/v1/projects/projects/${id}/progress/`,
   );
@@ -111,21 +104,13 @@ export async function fetchProjectProgressApi(
 }
 
 // ── Tasks ───────────────────────────────────────────────────────────
-export async function fetchTasksApi(
-  params?: Record<string, string>,
-): Promise<Task[]> {
+export async function fetchTasksApi(params?: Record<string, string>): Promise<Task[]> {
   const { data } = await apiClient.get<Task[]>("/v1/projects/tasks/", { params });
   return data;
 }
 
-export async function updateTaskApi(
-  id: number,
-  payload: Partial<Task>,
-): Promise<Task> {
-  const { data } = await apiClient.patch<Task>(
-    `/v1/projects/tasks/${id}/`,
-    payload,
-  );
+export async function updateTaskApi(id: number, payload: Partial<Task>): Promise<Task> {
+  const { data } = await apiClient.patch<Task>(`/v1/projects/tasks/${id}/`, payload);
   return data;
 }
 
@@ -133,10 +118,9 @@ export async function updateTaskApi(
 export async function fetchMilestonesApi(
   params?: Record<string, string>,
 ): Promise<Milestone[]> {
-  const { data } = await apiClient.get<Milestone[]>(
-    "/v1/projects/milestones/",
-    { params },
-  );
+  const { data } = await apiClient.get<Milestone[]>("/v1/projects/milestones/", {
+    params,
+  });
   return data;
 }
 
@@ -144,9 +128,8 @@ export async function fetchMilestonesApi(
 export async function fetchProjectTimesheetsApi(
   params?: Record<string, string>,
 ): Promise<ProjectTimesheet[]> {
-  const { data } = await apiClient.get<ProjectTimesheet[]>(
-    "/v1/projects/timesheets/",
-    { params },
-  );
+  const { data } = await apiClient.get<ProjectTimesheet[]>("/v1/projects/timesheets/", {
+    params,
+  });
   return data;
 }

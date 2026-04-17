@@ -31,6 +31,10 @@ import ProjectListPage from "./pages/projects/ProjectListPage";
 import ProjectFormPage from "./pages/projects/ProjectFormPage";
 import TaskListPage from "./pages/projects/TaskListPage";
 import MilestoneListPage from "./pages/projects/MilestoneListPage";
+import BOMListPage from "./pages/manufacturing/BOMListPage";
+import BOMFormPage from "./pages/manufacturing/BOMFormPage";
+import WorkOrderListPage from "./pages/manufacturing/WorkOrderListPage";
+import WorkOrderFormPage from "./pages/manufacturing/WorkOrderFormPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -113,6 +117,21 @@ export default function App() {
         <Route path="/projects/projects/:id/edit" element={<ProjectFormPage />} />
         <Route path="/projects/tasks" element={<TaskListPage />} />
         <Route path="/projects/milestones" element={<MilestoneListPage />} />
+        <Route path="/manufacturing/boms" element={<BOMListPage />} />
+        <Route path="/manufacturing/boms/new" element={<BOMFormPage />} />
+        <Route path="/manufacturing/boms/:id/edit" element={<BOMFormPage />} />
+        <Route
+          path="/manufacturing/work-orders"
+          element={<WorkOrderListPage />}
+        />
+        <Route
+          path="/manufacturing/work-orders/new"
+          element={<WorkOrderFormPage />}
+        />
+        <Route
+          path="/manufacturing/work-orders/:id/edit"
+          element={<WorkOrderFormPage />}
+        />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

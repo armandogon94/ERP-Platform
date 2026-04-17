@@ -2,16 +2,19 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useConfigStore } from "../../stores/configStore";
-import ProjectFormPage from "./ProjectFormPage";
+import BOMFormPage from "./BOMFormPage";
 
-vi.mock("../../api/projects", () => ({
-  fetchProjectApi: vi.fn(),
-  createProjectApi: vi.fn(),
-  updateProjectApi: vi.fn(),
+vi.mock("../../api/manufacturing", () => ({
+  fetchBOMApi: vi.fn(),
+  createBOMApi: vi.fn(),
+  updateBOMApi: vi.fn(),
+  fetchBOMLinesApi: vi.fn().mockResolvedValue([]),
+  createBOMLineApi: vi.fn(),
+  deleteBOMLineApi: vi.fn(),
 }));
 
-vi.mock("../../api/partners", () => ({
-  fetchPartnersApi: vi.fn().mockResolvedValue([]),
+vi.mock("../../api/inventory", () => ({
+  fetchProductsApi: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock("../../api/config", () => ({
@@ -20,35 +23,31 @@ vi.mock("../../api/config", () => ({
 }));
 
 import {
-  fetchProjectApi,
-  createProjectApi,
-  updateProjectApi,
-} from "../../api/projects";
+  fetchBOMApi,
+  createBOMApi,
+  updateBOMApi,
+} from "../../api/manufacturing";
 
-const mockFetch = vi.mocked(fetchProjectApi);
-const mockCreate = vi.mocked(createProjectApi);
-const mockUpdate = vi.mocked(updateProjectApi);
+const mockFetch = vi.mocked(fetchBOMApi);
+const mockCreate = vi.mocked(createBOMApi);
+const mockUpdate = vi.mocked(updateBOMApi);
 
 const sample = {
   id: 1,
-  name: "North Tower",
-  code: "NT-1",
-  customer: null,
-  customer_name: null,
-  start_date: "2026-01-01",
-  end_date: null,
-  status: "active",
-  budget: "1000000.00",
-  description: "",
+  product: 5,
+  product_name: "Cake",
+  version: "1.0",
+  active: true,
+  notes: "",
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
 };
 
 function renderNewForm() {
   return render(
-    <MemoryRouter initialEntries={["/projects/projects/new"]}>
+    <MemoryRouter initialEntries={["/manufacturing/boms/new"]}>
       <Routes>
-        <Route path="/projects/projects/new" element={<ProjectFormPage />} />
+        <Route path="/manufacturing/boms/new" element={<BOMFormPage />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -56,15 +55,15 @@ function renderNewForm() {
 
 function renderEditForm(id = 1) {
   return render(
-    <MemoryRouter initialEntries={[`/projects/projects/${id}/edit`]}>
+    <MemoryRouter initialEntries={[`/manufacturing/boms/${id}/edit`]}>
       <Routes>
-        <Route path="/projects/projects/:id/edit" element={<ProjectFormPage />} />
+        <Route path="/manufacturing/boms/:id/edit" element={<BOMFormPage />} />
       </Routes>
     </MemoryRouter>,
   );
 }
 
-describe("ProjectFormPage", () => {
+describe("BOMFormPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useConfigStore.setState({
@@ -76,29 +75,29 @@ describe("ProjectFormPage", () => {
     });
   });
 
-  it("shows New Project heading", async () => {
+  it("shows New BOM heading on create route", async () => {
     renderNewForm();
     await waitFor(() => {
-      expect(screen.getByText(/new project/i)).toBeInTheDocument();
+      expect(screen.getByText(/new bom/i)).toBeInTheDocument();
     });
   });
 
-  it("pre-fills name when editing", async () => {
+  it("pre-fills version when editing", async () => {
     mockFetch.mockResolvedValueOnce(sample);
     renderEditForm();
     await waitFor(() => {
-      expect(screen.getByDisplayValue("North Tower")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("1.0")).toBeInTheDocument();
     });
   });
 
-  it("calls createProjectApi on new submit", async () => {
+  it("calls createBOMApi on new submit", async () => {
     mockCreate.mockResolvedValueOnce(sample);
     renderNewForm();
     await waitFor(() => {
-      expect(screen.getByLabelText(/^name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/version/i)).toBeInTheDocument();
     });
-    fireEvent.change(screen.getByLabelText(/^name/i), {
-      target: { value: "New Project" },
+    fireEvent.change(screen.getByLabelText(/version/i), {
+      target: { value: "2.0" },
     });
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
     await waitFor(() => {
@@ -106,12 +105,12 @@ describe("ProjectFormPage", () => {
     });
   });
 
-  it("calls updateProjectApi on edit submit", async () => {
+  it("calls updateBOMApi on edit submit", async () => {
     mockFetch.mockResolvedValueOnce(sample);
     mockUpdate.mockResolvedValueOnce(sample);
     renderEditForm();
     await waitFor(() => {
-      expect(screen.getByDisplayValue("North Tower")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("1.0")).toBeInTheDocument();
     });
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
     await waitFor(() => {

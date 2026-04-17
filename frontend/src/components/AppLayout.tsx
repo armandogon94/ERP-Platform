@@ -30,6 +30,12 @@ const DEFAULT_SIDEBAR_ITEMS: SidebarItem[] = [
   { name: "projects", label: "Projects", icon: "\u{1F4CB}", url: "/projects/projects" },
   { name: "helpdesk", label: "Helpdesk", icon: "\u{1F3AB}", url: "/helpdesk" },
   { name: "fleet", label: "Fleet", icon: "\u{1F69A}", url: "/fleet/vehicles" },
+  {
+    name: "manufacturing",
+    label: "Manufacturing",
+    icon: "\u{1F527}",
+    url: "/manufacturing/work-orders",
+  },
 ];
 
 const DEFAULT_MODULES: AppModule[] = DEFAULT_SIDEBAR_ITEMS.map((item) => ({

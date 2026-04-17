@@ -37,4 +37,5 @@ urlpatterns = [
     path("invoicing/", include("modules.invoicing.urls")),
     path("fleet/", include("modules.fleet.urls")),
     path("projects/", include("modules.projects.urls")),
+    path("manufacturing/", include("modules.manufacturing.urls")),
 ]
