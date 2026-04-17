@@ -44,6 +44,8 @@ import TicketListPage from "./pages/helpdesk/TicketListPage";
 import TicketFormPage from "./pages/helpdesk/TicketFormPage";
 import ArticleListPage from "./pages/helpdesk/ArticleListPage";
 import ArticleFormPage from "./pages/helpdesk/ArticleFormPage";
+import ReportListPage from "./pages/reports/ReportListPage";
+import ReportBuilderPage from "./pages/reports/ReportBuilderPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -148,6 +150,8 @@ export default function App() {
         <Route path="/helpdesk/articles" element={<ArticleListPage />} />
         <Route path="/helpdesk/articles/new" element={<ArticleFormPage />} />
         <Route path="/helpdesk/articles/:id/edit" element={<ArticleFormPage />} />
+        <Route path="/reports" element={<ReportListPage />} />
+        <Route path="/reports/builder" element={<ReportBuilderPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

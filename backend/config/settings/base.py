@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "modules.manufacturing",
     "modules.pos",
     "modules.helpdesk",
+    "modules.reports",
 ]
 
 MIDDLEWARE = [

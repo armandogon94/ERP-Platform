@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 
+from api.v1.aggregation import AggregationMixin
 from api.v1.filters import CompanyScopedFilterBackend
 from api.v1.permissions import IsCompanyMember
 from modules.accounting.models import Account, Journal, JournalEntry, JournalEntryLine
@@ -50,7 +51,7 @@ class JournalViewSet(viewsets.ModelViewSet):
         return qs
 
 
-class JournalEntryViewSet(viewsets.ModelViewSet):
+class JournalEntryViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = JournalEntrySerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
@@ -58,6 +59,9 @@ class JournalEntryViewSet(viewsets.ModelViewSet):
         "-entry_date", "-created_at"
     )
     pagination_class = None
+
+    aggregatable_fields = frozenset({"status", "journal", "entry_date"})
+    aggregatable_measures = frozenset({"id"})
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

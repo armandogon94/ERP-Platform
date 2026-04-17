@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 
+from api.v1.aggregation import AggregationMixin
 from api.v1.filters import CompanyScopedFilterBackend
 from api.v1.permissions import IsCompanyMember
 from modules.sales.models import SalesOrder, SalesOrderLine, SalesQuotation
@@ -10,12 +11,15 @@ from modules.sales.serializers import (
 )
 
 
-class SalesQuotationViewSet(viewsets.ModelViewSet):
+class SalesQuotationViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = SalesQuotationSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = SalesQuotation.objects.order_by("-created_at")
     pagination_class = None
+
+    aggregatable_fields = frozenset({"status", "customer", "valid_until"})
+    aggregatable_measures = frozenset({"total_amount"})
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -28,12 +32,17 @@ class SalesQuotationViewSet(viewsets.ModelViewSet):
         return qs
 
 
-class SalesOrderViewSet(viewsets.ModelViewSet):
+class SalesOrderViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = SalesOrderSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = SalesOrder.objects.order_by("-created_at")
     pagination_class = None
+
+    aggregatable_fields = frozenset(
+        {"status", "customer", "order_date", "delivery_date"}
+    )
+    aggregatable_measures = frozenset({"total_amount"})
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

@@ -172,12 +172,7 @@ export default function TicketFormPage() {
         </div>
         <div>
           <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-          >
+          <select id="status" name="status" value={form.status} onChange={handleChange}>
             <option value="new">New</option>
             <option value="assigned">Assigned</option>
             <option value="in_progress">In Progress</option>

@@ -56,9 +56,7 @@ export default function TicketListPage() {
             {tickets.map((t) => (
               <tr key={t.id}>
                 <td>
-                  <Link to={`/helpdesk/tickets/${t.id}/edit`}>
-                    {t.ticket_number}
-                  </Link>
+                  <Link to={`/helpdesk/tickets/${t.id}/edit`}>{t.ticket_number}</Link>
                 </td>
                 <td>{t.title}</td>
                 <td>{t.priority}</td>

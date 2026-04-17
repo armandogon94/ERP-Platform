@@ -58,10 +58,9 @@ export interface KnowledgeArticle {
 export async function fetchCategoriesApi(
   params?: Record<string, string>,
 ): Promise<TicketCategory[]> {
-  const { data } = await apiClient.get<TicketCategory[]>(
-    "/v1/helpdesk/categories/",
-    { params },
-  );
+  const { data } = await apiClient.get<TicketCategory[]>("/v1/helpdesk/categories/", {
+    params,
+  });
   return data;
 }
 
@@ -90,13 +89,8 @@ export async function fetchTicketApi(id: number): Promise<Ticket> {
   return data;
 }
 
-export async function createTicketApi(
-  payload: Partial<Ticket>,
-): Promise<Ticket> {
-  const { data } = await apiClient.post<Ticket>(
-    "/v1/helpdesk/tickets/",
-    payload,
-  );
+export async function createTicketApi(payload: Partial<Ticket>): Promise<Ticket> {
+  const { data } = await apiClient.post<Ticket>("/v1/helpdesk/tickets/", payload);
   return data;
 }
 
@@ -112,16 +106,12 @@ export async function updateTicketApi(
 }
 
 export async function resolveTicketApi(id: number): Promise<Ticket> {
-  const { data } = await apiClient.post<Ticket>(
-    `/v1/helpdesk/tickets/${id}/resolve/`,
-  );
+  const { data } = await apiClient.post<Ticket>(`/v1/helpdesk/tickets/${id}/resolve/`);
   return data;
 }
 
 export async function reopenTicketApi(id: number): Promise<Ticket> {
-  const { data } = await apiClient.post<Ticket>(
-    `/v1/helpdesk/tickets/${id}/reopen/`,
-  );
+  const { data } = await apiClient.post<Ticket>(`/v1/helpdesk/tickets/${id}/reopen/`);
   return data;
 }
 
@@ -129,10 +119,9 @@ export async function reopenTicketApi(id: number): Promise<Ticket> {
 export async function fetchArticlesApi(
   params?: Record<string, string>,
 ): Promise<KnowledgeArticle[]> {
-  const { data } = await apiClient.get<KnowledgeArticle[]>(
-    "/v1/helpdesk/articles/",
-    { params },
-  );
+  const { data } = await apiClient.get<KnowledgeArticle[]>("/v1/helpdesk/articles/", {
+    params,
+  });
   return data;
 }
 

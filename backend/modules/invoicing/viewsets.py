@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 
+from api.v1.aggregation import AggregationMixin
 from api.v1.filters import CompanyScopedFilterBackend
 from api.v1.permissions import IsCompanyMember
 from modules.invoicing.models import CreditNote, Invoice, InvoiceLine
@@ -10,12 +11,19 @@ from modules.invoicing.serializers import (
 )
 
 
-class InvoiceViewSet(viewsets.ModelViewSet):
+class InvoiceViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = InvoiceSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Invoice.objects.order_by("-invoice_date", "-created_at")
     pagination_class = None
+
+    aggregatable_fields = frozenset(
+        {"status", "invoice_type", "customer", "invoice_date", "due_date"}
+    )
+    aggregatable_measures = frozenset(
+        {"subtotal", "tax_amount", "total_amount", "amount_paid"}
+    )
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

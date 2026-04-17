@@ -42,6 +42,7 @@ const DEFAULT_SIDEBAR_ITEMS: SidebarItem[] = [
     url: "/manufacturing/work-orders",
   },
   { name: "pos", label: "Point of Sale", icon: "\u{1F4B3}", url: "/pos/orders" },
+  { name: "reports", label: "Reports", icon: "\u{1F4CA}", url: "/reports" },
 ];
 
 const DEFAULT_MODULES: AppModule[] = DEFAULT_SIDEBAR_ITEMS.map((item) => ({

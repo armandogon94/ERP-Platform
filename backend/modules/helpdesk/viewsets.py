@@ -3,6 +3,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from api.v1.aggregation import AggregationMixin
 from api.v1.filters import CompanyScopedFilterBackend
 from api.v1.permissions import IsCompanyMember
 from modules.helpdesk.models import (
@@ -51,7 +52,7 @@ class SLAConfigViewSet(viewsets.ModelViewSet):
         serializer.save(company=self.request.company)
 
 
-class TicketViewSet(viewsets.ModelViewSet):
+class TicketViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = TicketSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
@@ -59,6 +60,11 @@ class TicketViewSet(viewsets.ModelViewSet):
         "category", "reporter_partner", "reporter_user", "assignee"
     ).all()
     pagination_class = None
+
+    aggregatable_fields = frozenset(
+        {"status", "priority", "category", "assignee", "sla_breached"}
+    )
+    aggregatable_measures = frozenset({"id"})
 
     def get_queryset(self):
         qs = super().get_queryset()

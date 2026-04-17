@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 
+from api.v1.aggregation import AggregationMixin
 from api.v1.filters import CompanyScopedFilterBackend
 from api.v1.permissions import IsCompanyMember
 from modules.purchasing.models import POLine, PurchaseOrder, RequestForQuote, RFQLine, Vendor
@@ -30,12 +31,17 @@ class VendorViewSet(viewsets.ModelViewSet):
         return qs
 
 
-class PurchaseOrderViewSet(viewsets.ModelViewSet):
+class PurchaseOrderViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = PurchaseOrderSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = PurchaseOrder.objects.select_related("vendor").order_by("-created_at")
     pagination_class = None
+
+    aggregatable_fields = frozenset(
+        {"status", "vendor", "partner", "order_date", "expected_date"}
+    )
+    aggregatable_measures = frozenset({"total_amount"})
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

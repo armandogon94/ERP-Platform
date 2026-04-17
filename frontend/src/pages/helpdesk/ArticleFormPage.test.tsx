@@ -53,10 +53,7 @@ function renderEditForm(id = 1) {
   return render(
     <MemoryRouter initialEntries={[`/helpdesk/articles/${id}/edit`]}>
       <Routes>
-        <Route
-          path="/helpdesk/articles/:id/edit"
-          element={<ArticleFormPage />}
-        />
+        <Route path="/helpdesk/articles/:id/edit" element={<ArticleFormPage />} />
       </Routes>
     </MemoryRouter>,
   );

@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 
+from api.v1.aggregation import AggregationMixin
 from api.v1.filters import CompanyScopedFilterBackend
 from api.v1.permissions import IsCompanyMember
 from modules.inventory.models import (
@@ -31,12 +32,15 @@ class ProductCategoryViewSet(viewsets.ModelViewSet):
         serializer.save(company=self.request.company)
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Product.objects.select_related("category").order_by("name")
     pagination_class = None
+
+    aggregatable_fields = frozenset({"category", "uom", "is_active"})
+    aggregatable_measures = frozenset({"sale_price", "cost_price", "reorder_point"})
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

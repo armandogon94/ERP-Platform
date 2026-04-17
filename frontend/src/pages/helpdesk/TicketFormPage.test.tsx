@@ -64,10 +64,7 @@ function renderEditForm(id = 1) {
   return render(
     <MemoryRouter initialEntries={[`/helpdesk/tickets/${id}/edit`]}>
       <Routes>
-        <Route
-          path="/helpdesk/tickets/:id/edit"
-          element={<TicketFormPage />}
-        />
+        <Route path="/helpdesk/tickets/:id/edit" element={<TicketFormPage />} />
       </Routes>
     </MemoryRouter>,
   );

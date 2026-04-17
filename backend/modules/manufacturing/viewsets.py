@@ -3,6 +3,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from api.v1.aggregation import AggregationMixin
 from api.v1.filters import CompanyScopedFilterBackend
 from api.v1.permissions import IsCompanyMember
 from modules.inventory.models import StockLocation, StockMove
@@ -59,12 +60,17 @@ class BOMLineViewSet(viewsets.ModelViewSet):
         serializer.save(company=self.request.company)
 
 
-class WorkOrderViewSet(viewsets.ModelViewSet):
+class WorkOrderViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = WorkOrderSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = WorkOrder.objects.select_related("product", "bom").all()
     pagination_class = None
+
+    aggregatable_fields = frozenset(
+        {"status", "product", "bom", "start_date", "end_date"}
+    )
+    aggregatable_measures = frozenset({"quantity_target", "quantity_done"})
 
     def get_queryset(self):
         qs = super().get_queryset()
