@@ -55,9 +55,7 @@ export default function DriverFormPage() {
       });
   }, [id, isEdit]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -126,12 +124,7 @@ export default function DriverFormPage() {
         </div>
         <div>
           <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-          >
+          <select id="status" name="status" value={form.status} onChange={handleChange}>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>

@@ -2,12 +2,16 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useConfigStore } from "../../stores/configStore";
-import DriverFormPage from "./DriverFormPage";
+import ProjectFormPage from "./ProjectFormPage";
 
-vi.mock("../../api/fleet", () => ({
-  fetchDriverApi: vi.fn(),
-  createDriverApi: vi.fn(),
-  updateDriverApi: vi.fn(),
+vi.mock("../../api/projects", () => ({
+  fetchProjectApi: vi.fn(),
+  createProjectApi: vi.fn(),
+  updateProjectApi: vi.fn(),
+}));
+
+vi.mock("../../api/partners", () => ({
+  fetchPartnersApi: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock("../../api/config", () => ({
@@ -15,29 +19,36 @@ vi.mock("../../api/config", () => ({
   fetchModuleConfigApi: vi.fn(),
 }));
 
-import { fetchDriverApi, createDriverApi, updateDriverApi } from "../../api/fleet";
+import {
+  fetchProjectApi,
+  createProjectApi,
+  updateProjectApi,
+} from "../../api/projects";
 
-const mockFetch = vi.mocked(fetchDriverApi);
-const mockCreate = vi.mocked(createDriverApi);
-const mockUpdate = vi.mocked(updateDriverApi);
+const mockFetch = vi.mocked(fetchProjectApi);
+const mockCreate = vi.mocked(createProjectApi);
+const mockUpdate = vi.mocked(updateProjectApi);
 
 const sample = {
   id: 1,
-  name: "Alice Driver",
-  license_number: "DL-001",
-  license_expiry: "2030-01-01",
-  phone: "555-0100",
+  name: "North Tower",
+  code: "NT-1",
+  customer: null,
+  customer_name: null,
+  start_date: "2026-01-01",
+  end_date: null,
   status: "active",
-  employee: null,
+  budget: "1000000.00",
+  description: "",
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
 };
 
 function renderNewForm() {
   return render(
-    <MemoryRouter initialEntries={["/fleet/drivers/new"]}>
+    <MemoryRouter initialEntries={["/projects/projects/new"]}>
       <Routes>
-        <Route path="/fleet/drivers/new" element={<DriverFormPage />} />
+        <Route path="/projects/projects/new" element={<ProjectFormPage />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -45,15 +56,18 @@ function renderNewForm() {
 
 function renderEditForm(id = 1) {
   return render(
-    <MemoryRouter initialEntries={[`/fleet/drivers/${id}/edit`]}>
+    <MemoryRouter initialEntries={[`/projects/projects/${id}/edit`]}>
       <Routes>
-        <Route path="/fleet/drivers/:id/edit" element={<DriverFormPage />} />
+        <Route
+          path="/projects/projects/:id/edit"
+          element={<ProjectFormPage />}
+        />
       </Routes>
     </MemoryRouter>,
   );
 }
 
-describe("DriverFormPage", () => {
+describe("ProjectFormPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useConfigStore.setState({
@@ -65,10 +79,10 @@ describe("DriverFormPage", () => {
     });
   });
 
-  it("shows New Driver heading on create route", async () => {
+  it("shows New Project heading", async () => {
     renderNewForm();
     await waitFor(() => {
-      expect(screen.getByText(/new driver/i)).toBeInTheDocument();
+      expect(screen.getByText(/new project/i)).toBeInTheDocument();
     });
   });
 
@@ -76,18 +90,18 @@ describe("DriverFormPage", () => {
     mockFetch.mockResolvedValueOnce(sample);
     renderEditForm();
     await waitFor(() => {
-      expect(screen.getByDisplayValue("Alice Driver")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("North Tower")).toBeInTheDocument();
     });
   });
 
-  it("calls createDriverApi on new submit", async () => {
+  it("calls createProjectApi on new submit", async () => {
     mockCreate.mockResolvedValueOnce(sample);
     renderNewForm();
     await waitFor(() => {
       expect(screen.getByLabelText(/^name/i)).toBeInTheDocument();
     });
     fireEvent.change(screen.getByLabelText(/^name/i), {
-      target: { value: "New Driver" },
+      target: { value: "New Project" },
     });
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
     await waitFor(() => {
@@ -95,12 +109,12 @@ describe("DriverFormPage", () => {
     });
   });
 
-  it("calls updateDriverApi on edit submit", async () => {
+  it("calls updateProjectApi on edit submit", async () => {
     mockFetch.mockResolvedValueOnce(sample);
     mockUpdate.mockResolvedValueOnce(sample);
     renderEditForm();
     await waitFor(() => {
-      expect(screen.getByDisplayValue("Alice Driver")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("North Tower")).toBeInTheDocument();
     });
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
     await waitFor(() => {

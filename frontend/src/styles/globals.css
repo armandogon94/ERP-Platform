@@ -269,6 +269,64 @@ main > div > div:not([role]) {
   margin-bottom: var(--space-4);
 }
 
+/* ── Kanban (Projects, Helpdesk) ──────────────────────────────────── */
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.kanban-column {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.kanban-column h3 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.kanban-column ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.kanban-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--font-size-sm);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.kanban-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.kanban-card strong {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-text);
+}
+
+.kanban-card div {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
 /* ── Utility ──────────────────────────────────────────────────────── */
 .visually-hidden {
   position: absolute;

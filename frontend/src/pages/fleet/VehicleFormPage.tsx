@@ -73,9 +73,7 @@ export default function VehicleFormPage() {
       });
   }, [id, isEdit]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -145,12 +143,7 @@ export default function VehicleFormPage() {
         </div>
         <div>
           <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-          >
+          <select id="status" name="status" value={form.status} onChange={handleChange}>
             <option value="active">Active</option>
             <option value="maintenance">In Maintenance</option>
             <option value="retired">Retired</option>
@@ -158,12 +151,7 @@ export default function VehicleFormPage() {
         </div>
         <div>
           <label htmlFor="driver">Driver</label>
-          <select
-            id="driver"
-            name="driver"
-            value={form.driver}
-            onChange={handleChange}
-          >
+          <select id="driver" name="driver" value={form.driver} onChange={handleChange}>
             <option value="">-- Unassigned --</option>
             {drivers.map((d) => (
               <option key={d.id} value={d.id}>

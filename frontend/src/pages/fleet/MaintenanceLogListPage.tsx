@@ -9,9 +9,7 @@ export default function MaintenanceLogListPage() {
   useEffect(() => {
     fetchMaintenanceLogsApi()
       .then(setRows)
-      .catch((err: Error) =>
-        setError(err.message || "Error loading maintenance logs"),
-      )
+      .catch((err: Error) => setError(err.message || "Error loading maintenance logs"))
       .finally(() => setIsLoading(false));
   }, []);
 

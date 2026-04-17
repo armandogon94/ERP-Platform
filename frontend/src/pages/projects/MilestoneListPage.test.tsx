@@ -2,10 +2,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useConfigStore } from "../../stores/configStore";
-import MaintenanceLogListPage from "./MaintenanceLogListPage";
+import MilestoneListPage from "./MilestoneListPage";
 
-vi.mock("../../api/fleet", () => ({
-  fetchMaintenanceLogsApi: vi.fn(),
+vi.mock("../../api/projects", () => ({
+  fetchMilestonesApi: vi.fn(),
 }));
 
 vi.mock("../../api/config", () => ({
@@ -13,20 +13,19 @@ vi.mock("../../api/config", () => ({
   fetchModuleConfigApi: vi.fn(),
 }));
 
-import { fetchMaintenanceLogsApi } from "../../api/fleet";
+import { fetchMilestonesApi } from "../../api/projects";
 
-const mockFetch = vi.mocked(fetchMaintenanceLogsApi);
+const mockFetch = vi.mocked(fetchMilestonesApi);
 
 const sample = [
   {
     id: 1,
-    vehicle: 7,
-    vehicle_plate: "ABC-123",
-    date: "2026-02-01",
-    description: "Oil change",
-    cost: "75.00",
-    mechanic: "Joe",
-    status: "scheduled",
+    project: 7,
+    project_name: "North Tower",
+    name: "Phase 1 complete",
+    due_date: "2026-06-30",
+    completed: false,
+    completed_at: null,
     created_at: "2026-01-01T00:00:00Z",
     updated_at: "2026-01-01T00:00:00Z",
   },
@@ -34,15 +33,15 @@ const sample = [
 
 function renderPage() {
   return render(
-    <MemoryRouter initialEntries={["/fleet/maintenance-logs"]}>
+    <MemoryRouter initialEntries={["/projects/milestones"]}>
       <Routes>
-        <Route path="/fleet/maintenance-logs" element={<MaintenanceLogListPage />} />
+        <Route path="/projects/milestones" element={<MilestoneListPage />} />
       </Routes>
     </MemoryRouter>,
   );
 }
 
-describe("MaintenanceLogListPage", () => {
+describe("MilestoneListPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useConfigStore.setState({
@@ -54,18 +53,18 @@ describe("MaintenanceLogListPage", () => {
     });
   });
 
-  it("renders page heading", () => {
+  it("renders heading", () => {
     mockFetch.mockReturnValueOnce(new Promise(() => {}));
     renderPage();
     expect(screen.getByRole("heading")).toBeInTheDocument();
   });
 
-  it("shows maintenance log entries after loading", async () => {
+  it("shows milestone rows after loading", async () => {
     mockFetch.mockResolvedValueOnce(sample);
     renderPage();
     await waitFor(() => {
-      expect(screen.getByText("ABC-123")).toBeInTheDocument();
-      expect(screen.getByText("Oil change")).toBeInTheDocument();
+      expect(screen.getByText("Phase 1 complete")).toBeInTheDocument();
+      expect(screen.getByText("North Tower")).toBeInTheDocument();
     });
   });
 });

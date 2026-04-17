@@ -105,9 +105,7 @@ export async function fetchVehicleApi(id: number): Promise<Vehicle> {
   return data;
 }
 
-export async function createVehicleApi(
-  payload: Partial<Vehicle>,
-): Promise<Vehicle> {
+export async function createVehicleApi(payload: Partial<Vehicle>): Promise<Vehicle> {
   const { data } = await apiClient.post<Vehicle>("/v1/fleet/vehicles/", payload);
   return data;
 }
@@ -116,10 +114,7 @@ export async function updateVehicleApi(
   id: number,
   payload: Partial<Vehicle>,
 ): Promise<Vehicle> {
-  const { data } = await apiClient.patch<Vehicle>(
-    `/v1/fleet/vehicles/${id}/`,
-    payload,
-  );
+  const { data } = await apiClient.patch<Vehicle>(`/v1/fleet/vehicles/${id}/`, payload);
   return data;
 }
 

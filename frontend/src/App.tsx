@@ -27,6 +27,10 @@ import DriverListPage from "./pages/fleet/DriverListPage";
 import DriverFormPage from "./pages/fleet/DriverFormPage";
 import MaintenanceLogListPage from "./pages/fleet/MaintenanceLogListPage";
 import FuelLogListPage from "./pages/fleet/FuelLogListPage";
+import ProjectListPage from "./pages/projects/ProjectListPage";
+import ProjectFormPage from "./pages/projects/ProjectFormPage";
+import TaskListPage from "./pages/projects/TaskListPage";
+import MilestoneListPage from "./pages/projects/MilestoneListPage";
 import { useAuthStore } from "./stores/authStore";
 
 function Home() {
@@ -104,6 +108,11 @@ export default function App() {
         <Route path="/fleet/drivers/:id/edit" element={<DriverFormPage />} />
         <Route path="/fleet/maintenance-logs" element={<MaintenanceLogListPage />} />
         <Route path="/fleet/fuel-logs" element={<FuelLogListPage />} />
+        <Route path="/projects/projects" element={<ProjectListPage />} />
+        <Route path="/projects/projects/new" element={<ProjectFormPage />} />
+        <Route path="/projects/projects/:id/edit" element={<ProjectFormPage />} />
+        <Route path="/projects/tasks" element={<TaskListPage />} />
+        <Route path="/projects/milestones" element={<MilestoneListPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

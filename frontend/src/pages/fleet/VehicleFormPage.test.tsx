@@ -16,11 +16,7 @@ vi.mock("../../api/config", () => ({
   fetchModuleConfigApi: vi.fn(),
 }));
 
-import {
-  fetchVehicleApi,
-  createVehicleApi,
-  updateVehicleApi,
-} from "../../api/fleet";
+import { fetchVehicleApi, createVehicleApi, updateVehicleApi } from "../../api/fleet";
 
 const mockFetch = vi.mocked(fetchVehicleApi);
 const mockCreate = vi.mocked(createVehicleApi);

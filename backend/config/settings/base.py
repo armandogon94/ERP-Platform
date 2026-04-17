@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "modules.accounting",
     "modules.invoicing",
     "modules.fleet",
+    "modules.projects",
 ]
 
 MIDDLEWARE = [
