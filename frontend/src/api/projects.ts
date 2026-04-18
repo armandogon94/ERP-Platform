@@ -109,6 +109,16 @@ export async function fetchTasksApi(params?: Record<string, string>): Promise<Ta
   return data;
 }
 
+export async function fetchTaskApi(id: number): Promise<Task> {
+  const { data } = await apiClient.get<Task>(`/v1/projects/tasks/${id}/`);
+  return data;
+}
+
+export async function createTaskApi(payload: Partial<Task>): Promise<Task> {
+  const { data } = await apiClient.post<Task>("/v1/projects/tasks/", payload);
+  return data;
+}
+
 export async function updateTaskApi(id: number, payload: Partial<Task>): Promise<Task> {
   const { data } = await apiClient.patch<Task>(`/v1/projects/tasks/${id}/`, payload);
   return data;

@@ -114,59 +114,88 @@ def _notify_company_admins(company, title, message, notification_type="info",
     ])
 
 
+# REVIEW S-3: registry-driven notification signals. Each rule declares the
+# model path, an optional pre-save field to watch (for transition
+# detection), a ``should_notify`` predicate, and a ``build`` function that
+# returns the Notification kwargs. _register_notification_signals walks
+# the list once and wires up post_init (if watch_field) + post_save for
+# each rule.
+NOTIFICATION_RULES = [
+    {
+        "module_path": "modules.helpdesk.models",
+        "class_name": "Ticket",
+        "watch_field": None,
+        "should_notify": lambda inst, created, prev: created,
+        "build": lambda inst: {
+            "title": f"New ticket: {inst.title}",
+            "message": f"Priority {inst.priority} — {inst.ticket_number}",
+            "notification_type": "info",
+            "related_model": "Ticket",
+            "related_id": inst.pk,
+            "action_url": f"/helpdesk/tickets/{inst.pk}/edit",
+        },
+    },
+    {
+        "module_path": "modules.invoicing.models",
+        "class_name": "Invoice",
+        # REVIEW C-4: watch `status` so post_save can detect the
+        # draft→posted transition rather than firing on every save.
+        "watch_field": "status",
+        "should_notify": lambda inst, created, prev: (
+            inst.status == "posted" and (created or prev != "posted")
+        ),
+        "build": lambda inst: {
+            "title": f"Invoice posted: {inst.invoice_number}",
+            "message": f"{inst.customer_name} — ${inst.total_amount}",
+            "notification_type": "success",
+            "related_model": "Invoice",
+            "related_id": inst.pk,
+            "action_url": f"/invoicing/invoices/{inst.pk}/edit",
+        },
+    },
+]
+
+
 def _register_notification_signals():
-    """Wire up post_save handlers on business models. Called from apps.ready()."""
-    try:
-        from modules.helpdesk.models import Ticket
+    """Wire up post_save (and post_init for transition rules) for every rule
+    in ``NOTIFICATION_RULES``. Called from apps.ready().
 
-        @receiver(post_save, sender=Ticket, weak=False)
-        def on_ticket_saved(sender, instance, created, **kwargs):
-            if not created:
+    REVIEW S-3: collapses two near-identical try/except blocks into one
+    registry-driven loop.
+    """
+    from importlib import import_module
+
+    for rule in NOTIFICATION_RULES:
+        try:
+            module = import_module(rule["module_path"])
+            model_cls = getattr(module, rule["class_name"])
+        except (ImportError, AttributeError):
+            # Module not installed → skip this rule.
+            continue
+
+        # Each rule closes over its own model + watch_field; we use defaults
+        # in the inner functions to capture the current loop value.
+        watch_field = rule["watch_field"]
+        should_notify = rule["should_notify"]
+        build = rule["build"]
+
+        if watch_field:
+            @receiver(post_init, sender=model_cls, weak=False)
+            def _cache_prev(sender, instance, _field=watch_field, **kwargs):
+                setattr(instance, f"_prev_{_field}", getattr(instance, _field))
+
+        @receiver(post_save, sender=model_cls, weak=False)
+        def _on_save(
+            sender, instance, created,
+            _watch=watch_field, _should=should_notify, _build=build,
+            **kwargs,
+        ):
+            prev = getattr(instance, f"_prev_{_watch}", None) if _watch else None
+            # Refresh cache immediately so subsequent saves on the same
+            # Python instance see the new "prev" state.
+            if _watch:
+                setattr(instance, f"_prev_{_watch}", getattr(instance, _watch))
+            if not _should(instance, created, prev):
                 return
-            _notify_company_admins(
-                instance.company,
-                title=f"New ticket: {instance.title}",
-                message=f"Priority {instance.priority} — {instance.ticket_number}",
-                notification_type="info",
-                related_model="Ticket",
-                related_id=instance.pk,
-                action_url=f"/helpdesk/tickets/{instance.pk}/edit",
-            )
-    except Exception:
-        pass
-
-    try:
-        from modules.invoicing.models import Invoice
-
-        # REVIEW C-4: only notify on the draft→posted transition, not on every
-        # save of an already-posted invoice. We track the pre-save status on
-        # each instance via post_init; post_save compares against it.
-
-        @receiver(post_init, sender=Invoice, weak=False)
-        def cache_invoice_status(sender, instance, **kwargs):
-            instance._prev_status = instance.status
-
-        @receiver(post_save, sender=Invoice, weak=False)
-        def on_invoice_saved(sender, instance, created, **kwargs):
-            prev = getattr(instance, "_prev_status", None)
-            is_transition = (
-                instance.status == "posted"
-                and (created or prev != "posted")
-            )
-            # Refresh the cached status so subsequent saves in the same
-            # Python object compare against the new value.
-            instance._prev_status = instance.status
-
-            if not is_transition:
-                return
-            _notify_company_admins(
-                instance.company,
-                title=f"Invoice posted: {instance.invoice_number}",
-                message=f"{instance.customer_name} — ${instance.total_amount}",
-                notification_type="success",
-                related_model="Invoice",
-                related_id=instance.pk,
-                action_url=f"/invoicing/invoices/{instance.pk}/edit",
-            )
-    except Exception:
-        pass
+            kwargs_out = _build(instance)
+            _notify_company_admins(instance.company, **kwargs_out)

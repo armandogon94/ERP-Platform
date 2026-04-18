@@ -125,6 +125,15 @@ REST_FRAMEWORK = {
     # pagination opt in via ``pagination_class = DefaultCursorPagination``.
     "DEFAULT_PAGINATION_CLASS": "api.v1.pagination.SafeArrayPagination",
     "PAGE_SIZE": 50,
+    # REVIEW S-8: per-scope throttles so high-cost endpoints (e.g. calendar
+    # bulk upsert accepting 500 events at a time) can opt into a limit.
+    # Endpoints without a scope are unthrottled.
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "calendar-bulk": "60/min",  # 60 bulk calls/min/user
+    },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 

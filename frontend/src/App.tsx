@@ -30,6 +30,7 @@ import MaintenanceLogListPage from "./pages/fleet/MaintenanceLogListPage";
 import FuelLogListPage from "./pages/fleet/FuelLogListPage";
 import ProjectListPage from "./pages/projects/ProjectListPage";
 import ProjectFormPage from "./pages/projects/ProjectFormPage";
+import TaskFormPage from "./pages/projects/TaskFormPage";
 import TaskListPage from "./pages/projects/TaskListPage";
 import MilestoneListPage from "./pages/projects/MilestoneListPage";
 import BOMListPage from "./pages/manufacturing/BOMListPage";
@@ -120,6 +121,8 @@ export default function App() {
         <Route path="/projects/projects/new" element={<ProjectFormPage />} />
         <Route path="/projects/projects/:id/edit" element={<ProjectFormPage />} />
         <Route path="/projects/tasks" element={<TaskListPage />} />
+        <Route path="/projects/tasks/new" element={<TaskFormPage />} />
+        <Route path="/projects/tasks/:id/edit" element={<TaskFormPage />} />
         <Route path="/projects/milestones" element={<MilestoneListPage />} />
         <Route path="/manufacturing/boms" element={<BOMListPage />} />
         <Route path="/manufacturing/boms/new" element={<BOMFormPage />} />

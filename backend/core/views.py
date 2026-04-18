@@ -226,115 +226,78 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         return Response({"count": count})
 
 
+# REVIEW S-2: KPI tile definitions are table-driven so adding a tile is
+# a 1-line change. Each entry is (module_path, model_class_name, label,
+# tile_fn) where tile_fn receives a company-scoped queryset and returns
+# a dict with at least "value"; "detail" is optional.
+_HOME_KPI_DEFS = [
+    (
+        "modules.invoicing.models", "Invoice", "Outstanding Invoices", "invoicing",
+        lambda qs: (
+            lambda agg: {
+                "value": f"{agg['count'] or 0}",
+                "detail": f"${agg['total'] or 0:.2f}",
+            }
+        )(qs.filter(status="posted").aggregate(total=Sum("total_amount"), count=Count("id"))),
+    ),
+    (
+        "modules.sales.models", "SalesOrder", "Open Sales Orders", "sales",
+        lambda qs: {"value": str(qs.filter(status__in=["confirmed", "in_progress"]).count())},
+    ),
+    (
+        "modules.purchasing.models", "PurchaseOrder", "Open Purchase Orders", "purchasing",
+        lambda qs: {"value": str(qs.filter(status__in=["draft", "sent", "confirmed"]).count())},
+    ),
+    (
+        "modules.helpdesk.models", "Ticket", "Open Tickets", "helpdesk",
+        lambda qs: {"value": str(qs.exclude(status__in=["resolved", "closed"]).count())},
+    ),
+    (
+        "modules.hr.models", "Employee", "Active Employees", "hr",
+        lambda qs: {"value": str(qs.count())},
+    ),
+    (
+        "modules.inventory.models", "Product", "Products in Catalog", "inventory",
+        lambda qs: {"value": str(qs.count())},
+    ),
+]
+
+
+def _compute_home_kpis(company):
+    """Walk _HOME_KPI_DEFS and assemble the tile list for one company."""
+    from importlib import import_module
+
+    tiles: list[dict] = []
+    for module_path, class_name, label, module_tag, tile_fn in _HOME_KPI_DEFS:
+        try:
+            module = import_module(module_path)
+            model_cls = getattr(module, class_name)
+            qs = model_cls.objects.filter(company=company)
+            tile = {"label": label, "module": module_tag, **tile_fn(qs)}
+            tiles.append(tile)
+        except (ImportError, LookupError, AttributeError):
+            # REVIEW I-6: module not installed → skip. Narrow exception
+            # list so real ORM bugs still surface.
+            continue
+    return tiles
+
+
 @api_view(["GET"])
 @permission_classes([IsCompanyMember])
 def home_kpis(request):
     """Lightweight home KPIs using plain ORM aggregates (no materialized views, D25).
 
-    Returns 4-6 tiles summarising the authenticated user's company. Modules
-    that aren't installed return a zero/absent tile rather than a crash.
+    REVIEW S-1: cached for 60 seconds per company to cut DB load on
+    dashboard refreshes. REVIEW S-2: tile definitions are table-driven
+    in ``_HOME_KPI_DEFS`` so adding a new tile is one list entry.
     """
+    from django.core.cache import cache
+
     company = request.company
-    tiles: list[dict] = []
-
-    # Invoicing — outstanding invoices (posted but not paid)
-    try:
-        from modules.invoicing.models import Invoice
-
-        outstanding = Invoice.objects.filter(
-            company=company, status="posted"
-        ).aggregate(total=Sum("total_amount"), count=Count("id"))
-        tiles.append({
-            "label": "Outstanding Invoices",
-            "value": f"{outstanding['count'] or 0}",
-            "detail": f"${outstanding['total'] or 0:.2f}",
-            "module": "invoicing",
-        })
-    except (ImportError, LookupError):
-        # REVIEW I-6: module not installed in this deployment → skip tile.
-        # Real ORM errors now surface instead of being swallowed.
-        pass
-
-    # Sales — open sales orders (REVIEW C-5: SalesOrder has no "draft" state;
-    # real open statuses are "confirmed" and "in_progress").
-    try:
-        from modules.sales.models import SalesOrder
-
-        open_orders = SalesOrder.objects.filter(
-            company=company, status__in=["confirmed", "in_progress"]
-        ).count()
-        tiles.append({
-            "label": "Open Sales Orders",
-            "value": str(open_orders),
-            "module": "sales",
-        })
-    except (ImportError, LookupError):
-        # REVIEW I-6: module not installed in this deployment → skip tile.
-        # Real ORM errors now surface instead of being swallowed.
-        pass
-
-    # Purchasing — open POs
-    try:
-        from modules.purchasing.models import PurchaseOrder
-
-        open_pos = PurchaseOrder.objects.filter(
-            company=company, status__in=["draft", "sent", "confirmed"]
-        ).count()
-        tiles.append({
-            "label": "Open Purchase Orders",
-            "value": str(open_pos),
-            "module": "purchasing",
-        })
-    except (ImportError, LookupError):
-        # REVIEW I-6: module not installed in this deployment → skip tile.
-        # Real ORM errors now surface instead of being swallowed.
-        pass
-
-    # Helpdesk — open tickets
-    try:
-        from modules.helpdesk.models import Ticket
-
-        open_tickets = Ticket.objects.filter(
-            company=company
-        ).exclude(status__in=["resolved", "closed"]).count()
-        tiles.append({
-            "label": "Open Tickets",
-            "value": str(open_tickets),
-            "module": "helpdesk",
-        })
-    except (ImportError, LookupError):
-        # REVIEW I-6: module not installed in this deployment → skip tile.
-        # Real ORM errors now surface instead of being swallowed.
-        pass
-
-    # HR — active employees
-    try:
-        from modules.hr.models import Employee
-
-        employees = Employee.objects.filter(company=company).count()
-        tiles.append({
-            "label": "Active Employees",
-            "value": str(employees),
-            "module": "hr",
-        })
-    except (ImportError, LookupError):
-        # REVIEW I-6: module not installed in this deployment → skip tile.
-        # Real ORM errors now surface instead of being swallowed.
-        pass
-
-    # Inventory — products below reorder threshold
-    try:
-        from modules.inventory.models import Product
-
-        products = Product.objects.filter(company=company).count()
-        tiles.append({
-            "label": "Products in Catalog",
-            "value": str(products),
-            "module": "inventory",
-        })
-    except (ImportError, LookupError):
-        # REVIEW I-6: module not installed in this deployment → skip tile.
-        # Real ORM errors now surface instead of being swallowed.
-        pass
+    cache_key = f"home_kpis:{company.id}"
+    tiles = cache.get(cache_key)
+    if tiles is None:
+        tiles = _compute_home_kpis(company)
+        cache.set(cache_key, tiles, timeout=60)
 
     return Response({"tiles": tiles})

@@ -68,6 +68,31 @@ class TestHomeKPIsEndpoint:
             "invoice" in t["label"].lower() for t in body["tiles"]
         )
 
+    def test_result_is_cached_for_60s(self, api_client):
+        """REVIEW S-1: repeat requests hit the cache, not the DB."""
+        from django.core.cache import cache
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        company = CompanyFactory()
+        user = UserFactory(company=company)
+        cache.delete(f"home_kpis:{company.id}")
+        auth(api_client, user)
+
+        with CaptureQueriesContext(connection) as first:
+            r1 = api_client.get("/api/v1/core/home-kpis/")
+        assert r1.status_code == 200
+        first_query_count = len(first.captured_queries)
+
+        with CaptureQueriesContext(connection) as second:
+            r2 = api_client.get("/api/v1/core/home-kpis/")
+        assert r2.status_code == 200
+        # Second call should skip the 6 KPI aggregate queries.
+        assert len(second.captured_queries) < first_query_count, (
+            f"Cache miss: first call ran {first_query_count} queries, "
+            f"second ran {len(second.captured_queries)}"
+        )
+
     def test_open_sales_orders_counts_confirmed_and_in_progress(self, api_client):
         """REVIEW C-5: "Open Sales Orders" must include confirmed + in_progress
         (SalesOrder has no "draft" state; the original filter undercounted)."""

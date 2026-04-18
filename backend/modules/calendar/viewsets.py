@@ -134,6 +134,18 @@ class EventViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
         return Response(serializer.data, status=http_status.HTTP_200_OK)
 
+    def get_throttles(self):
+        # REVIEW S-8: scope-throttle only the bulk action (500 events × 60/min
+        # per user is the upper bound). Other actions stay unthrottled.
+        if self.action == "bulk":
+            from rest_framework.throttling import ScopedRateThrottle
+
+            class _BulkScope(ScopedRateThrottle):
+                scope = "calendar-bulk"
+
+            return [_BulkScope()]
+        return super().get_throttles()
+
     # ─── Bulk upsert ───────────────────────────────────────────────
     @action(detail=False, methods=["post"])
     @transaction.atomic

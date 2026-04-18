@@ -353,9 +353,10 @@ main > div > div:not([role]) {
   box-shadow: 0 0 0 3px var(--color-bg);
 }
 
-.audit-item.action-create::before { background: #10b981; }
-.audit-item.action-update::before { background: #f59e0b; }
-.audit-item.action-delete::before { background: #dc2626; }
+/* REVIEW S-6: pull from semantic tokens rather than raw hex. */
+.audit-item.action-create::before { background: var(--color-success); }
+.audit-item.action-update::before { background: var(--color-warning); }
+.audit-item.action-delete::before { background: var(--color-danger); }
 
 .audit-item-header {
   display: flex;
@@ -411,7 +412,8 @@ main > div > div:not([role]) {
   position: absolute;
   top: -2px;
   right: -2px;
-  background: #dc2626;
+  /* REVIEW S-6: semantic token, not raw hex. */
+  background: var(--color-danger);
   color: #fff;
   border-radius: 999px;
   font-size: 10px;
