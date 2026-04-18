@@ -109,3 +109,76 @@ class TestNotificationSignals:
         )
         after = Notification.objects.filter(recipient=admin).count()
         assert after >= before + 1
+
+    def test_resaving_already_posted_invoice_does_not_spam(self):
+        """REVIEW C-4: only the draft→posted transition should notify."""
+        from modules.invoicing.models import Invoice
+
+        company = CompanyFactory()
+        admin = UserFactory(company=company, is_admin=True)
+        invoice = Invoice.objects.create(
+            company=company,
+            invoice_number="INV-C4",
+            customer_name="Acme",
+            status="posted",
+            total_amount=Decimal("100.00"),
+            subtotal=Decimal("100.00"),
+        )
+        baseline = Notification.objects.filter(recipient=admin).count()
+
+        # Every subsequent save must NOT generate another notification.
+        for _ in range(3):
+            invoice.subtotal = invoice.subtotal + Decimal("1.00")
+            invoice.save()
+
+        after = Notification.objects.filter(recipient=admin).count()
+        assert after == baseline, (
+            f"Invoice re-save must not spam admins — got {after - baseline} extra"
+        )
+
+    def test_draft_to_posted_transition_notifies(self):
+        """The first draft→posted transition should still notify."""
+        from modules.invoicing.models import Invoice
+
+        company = CompanyFactory()
+        admin = UserFactory(company=company, is_admin=True)
+        invoice = Invoice.objects.create(
+            company=company,
+            invoice_number="INV-C4B",
+            customer_name="Acme",
+            status="draft",
+            total_amount=Decimal("100.00"),
+            subtotal=Decimal("100.00"),
+        )
+        before = Notification.objects.filter(recipient=admin).count()
+        invoice.status = "posted"
+        invoice.save()
+        after = Notification.objects.filter(recipient=admin).count()
+        assert after == before + 1
+
+    def test_ticket_update_does_not_create_notification(self):
+        """REVIEW C-9: edits to an existing ticket should not spam admins."""
+        from modules.helpdesk.models import Ticket, TicketCategory
+
+        company = CompanyFactory()
+        admin = UserFactory(company=company, is_admin=True)
+        category = TicketCategory.objects.create(company=company, name="General")
+        ticket = Ticket.objects.create(
+            company=company,
+            ticket_number="TKT-C9",
+            title="Printer",
+            category=category,
+            priority="high",
+            status="new",
+        )
+        baseline = Notification.objects.filter(recipient=admin).count()
+
+        ticket.title = "Printer (updated)"
+        ticket.save()
+        ticket.priority = "urgent"
+        ticket.save()
+
+        after = Notification.objects.filter(recipient=admin).count()
+        assert after == baseline, (
+            f"Ticket update must not spam admins — got {after - baseline} extra"
+        )

@@ -244,12 +244,13 @@ def home_kpis(request):
     except Exception:
         pass
 
-    # Sales — open sales orders
+    # Sales — open sales orders (REVIEW C-5: SalesOrder has no "draft" state;
+    # real open statuses are "confirmed" and "in_progress").
     try:
         from modules.sales.models import SalesOrder
 
         open_orders = SalesOrder.objects.filter(
-            company=company, status__in=["draft", "confirmed"]
+            company=company, status__in=["confirmed", "in_progress"]
         ).count()
         tiles.append({
             "label": "Open Sales Orders",

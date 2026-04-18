@@ -67,3 +67,29 @@ class TestHomeKPIsEndpoint:
         assert "Outstanding Invoices" in labels or any(
             "invoice" in t["label"].lower() for t in body["tiles"]
         )
+
+    def test_open_sales_orders_counts_confirmed_and_in_progress(self, api_client):
+        """REVIEW C-5: "Open Sales Orders" must include confirmed + in_progress
+        (SalesOrder has no "draft" state; the original filter undercounted)."""
+        from modules.sales.models import SalesOrder
+
+        company = CompanyFactory()
+        user = UserFactory(company=company)
+        SalesOrder.objects.create(
+            company=company, order_number="SO-1", status="confirmed",
+            customer_name="A",
+        )
+        SalesOrder.objects.create(
+            company=company, order_number="SO-2", status="in_progress",
+            customer_name="B",
+        )
+        SalesOrder.objects.create(
+            company=company, order_number="SO-3", status="delivered",
+            customer_name="C",
+        )
+        auth(api_client, user)
+
+        response = api_client.get("/api/v1/core/home-kpis/")
+        assert response.status_code == 200
+        tiles = {t["label"]: t["value"] for t in response.json()["tiles"]}
+        assert tiles.get("Open Sales Orders") == "2"

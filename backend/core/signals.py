@@ -1,4 +1,4 @@
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete, post_init, post_save
 from django.dispatch import receiver
 
 from core.models import AuditLog, Company, IndustryConfigTemplate, ModuleConfig, TenantModel
@@ -105,9 +105,26 @@ def _register_notification_signals():
     try:
         from modules.invoicing.models import Invoice
 
+        # REVIEW C-4: only notify on the draft→posted transition, not on every
+        # save of an already-posted invoice. We track the pre-save status on
+        # each instance via post_init; post_save compares against it.
+
+        @receiver(post_init, sender=Invoice, weak=False)
+        def cache_invoice_status(sender, instance, **kwargs):
+            instance._prev_status = instance.status
+
         @receiver(post_save, sender=Invoice, weak=False)
         def on_invoice_saved(sender, instance, created, **kwargs):
-            if instance.status != "posted":
+            prev = getattr(instance, "_prev_status", None)
+            is_transition = (
+                instance.status == "posted"
+                and (created or prev != "posted")
+            )
+            # Refresh the cached status so subsequent saves in the same
+            # Python object compare against the new value.
+            instance._prev_status = instance.status
+
+            if not is_transition:
                 return
             _notify_company_admins(
                 instance.company,
