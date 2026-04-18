@@ -133,13 +133,24 @@ class ViewDefinitionViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class PartnerViewSet(viewsets.ModelViewSet):
-    """CRUD for company-scoped Partner records (Slice 10.6, D21)."""
+    """CRUD for company-scoped Partner records (Slice 10.6, D21).
+
+    REVIEW C-2: destructive operations (create/update/destroy) require
+    company-admin privileges; reads remain open to any company member.
+    Partners cascade into invoices, sales orders, tickets, and projects,
+    so allowing any member to delete them was a privilege-escalation path.
+    """
 
     serializer_class = PartnerSerializer
-    permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Partner.objects.all()
     pagination_class = None
+
+    def get_permissions(self):
+        # Read-only actions only need company membership.
+        if self.action in {"list", "retrieve"}:
+            return [IsCompanyMember()]
+        return [IsCompanyMember(), IsCompanyAdmin()]
 
     def get_queryset(self):
         qs = super().get_queryset()

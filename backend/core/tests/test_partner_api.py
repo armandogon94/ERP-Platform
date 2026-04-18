@@ -13,6 +13,52 @@ def auth(api_client, user):
 
 
 @pytest.mark.django_db
+class TestPartnerAdminGating:
+    """REVIEW C-2: destructive partner ops require company admin."""
+
+    def test_delete_forbidden_for_non_admin(self, api_client):
+        company = CompanyFactory()
+        member = UserFactory(company=company, is_admin=False)
+        partner = PartnerFactory(company=company)
+        auth(api_client, member)
+
+        response = api_client.delete(f"/api/v1/core/partners/{partner.id}/")
+        assert response.status_code == 403
+
+    def test_delete_allowed_for_admin(self, api_client):
+        company = CompanyFactory()
+        admin = UserFactory(company=company, is_admin=True)
+        partner = PartnerFactory(company=company)
+        auth(api_client, admin)
+
+        response = api_client.delete(f"/api/v1/core/partners/{partner.id}/")
+        assert response.status_code == 204
+
+    def test_update_forbidden_for_non_admin(self, api_client):
+        company = CompanyFactory()
+        member = UserFactory(company=company, is_admin=False)
+        partner = PartnerFactory(company=company, name="Old")
+        auth(api_client, member)
+
+        response = api_client.patch(
+            f"/api/v1/core/partners/{partner.id}/",
+            {"name": "New"},
+            format="json",
+        )
+        assert response.status_code == 403
+
+    def test_read_allowed_for_non_admin(self, api_client):
+        """Non-admins can still read partners — only writes are gated."""
+        company = CompanyFactory()
+        member = UserFactory(company=company, is_admin=False)
+        PartnerFactory(company=company, name="Visible")
+        auth(api_client, member)
+
+        response = api_client.get("/api/v1/core/partners/")
+        assert response.status_code == 200
+
+
+@pytest.mark.django_db
 class TestPartnerAPI:
     def test_list_requires_auth(self, api_client):
         response = api_client.get("/api/v1/core/partners/")
@@ -69,7 +115,7 @@ class TestPartnerAPI:
 
     def test_create_partner(self, api_client):
         company = CompanyFactory()
-        user = UserFactory(company=company)
+        user = UserFactory(company=company, is_admin=True)
         auth(api_client, user)
 
         payload = {
@@ -89,7 +135,7 @@ class TestPartnerAPI:
     def test_create_does_not_require_company_field(self, api_client):
         """perform_create should inject request.company — client should not pass it."""
         company = CompanyFactory()
-        user = UserFactory(company=company)
+        user = UserFactory(company=company, is_admin=True)
         auth(api_client, user)
 
         response = api_client.post(
@@ -101,7 +147,7 @@ class TestPartnerAPI:
 
     def test_update_partner(self, api_client):
         company = CompanyFactory()
-        user = UserFactory(company=company)
+        user = UserFactory(company=company, is_admin=True)
         partner = PartnerFactory(company=company, name="Original Name")
         auth(api_client, user)
 
@@ -115,7 +161,7 @@ class TestPartnerAPI:
 
     def test_delete_partner(self, api_client):
         company = CompanyFactory()
-        user = UserFactory(company=company)
+        user = UserFactory(company=company, is_admin=True)
         partner = PartnerFactory(company=company, name="Delete Me")
         auth(api_client, user)
 
