@@ -4,31 +4,26 @@ import NotificationBell from "./NotificationBell";
 
 vi.mock("../api/notifications", () => ({
   fetchNotificationsApi: vi.fn(),
-  fetchUnreadCountApi: vi.fn(),
   markNotificationReadApi: vi.fn(),
 }));
 
-import { fetchNotificationsApi, fetchUnreadCountApi } from "../api/notifications";
+import { fetchNotificationsApi } from "../api/notifications";
 
-const mockList = vi.mocked(fetchNotificationsApi);
-const mockCount = vi.mocked(fetchUnreadCountApi);
+const mockFetch = vi.mocked(fetchNotificationsApi);
 
 describe("NotificationBell", () => {
   beforeEach(() => {
-    mockList.mockReset();
-    mockCount.mockReset();
+    mockFetch.mockReset();
   });
 
   it("renders a bell button", () => {
-    mockList.mockResolvedValue([]);
-    mockCount.mockResolvedValue(0);
+    mockFetch.mockResolvedValue({ notifications: [], unreadCount: 0 });
     render(<NotificationBell />);
     expect(screen.getByRole("button", { name: /notifications/i })).toBeInTheDocument();
   });
 
   it("shows unread count badge when > 0", async () => {
-    mockList.mockResolvedValue([]);
-    mockCount.mockResolvedValue(3);
+    mockFetch.mockResolvedValue({ notifications: [], unreadCount: 3 });
     render(<NotificationBell />);
     await waitFor(() => {
       expect(screen.getByText("3")).toBeInTheDocument();
@@ -36,11 +31,10 @@ describe("NotificationBell", () => {
   });
 
   it("hides the badge when unread count is 0", async () => {
-    mockList.mockResolvedValue([]);
-    mockCount.mockResolvedValue(0);
+    mockFetch.mockResolvedValue({ notifications: [], unreadCount: 0 });
     render(<NotificationBell />);
     await waitFor(() => {
-      expect(mockCount).toHaveBeenCalled();
+      expect(mockFetch).toHaveBeenCalled();
     });
     expect(screen.queryByTestId("notification-badge")).not.toBeInTheDocument();
   });

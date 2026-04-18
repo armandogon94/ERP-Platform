@@ -67,12 +67,23 @@ class Event(TenantModel):
         max_length=255,
         blank=True,
         null=True,
-        unique=True,
+        db_index=True,
         help_text="External UID from CRM calendar sync (RFC 5545 UID)",
     )
 
     class Meta:
         ordering = ["start_datetime"]
+        # REVIEW I-4: enforce (company, external_uid) uniqueness at the DB
+        # layer so concurrent bulk POSTs can't create duplicates. A partial
+        # index excludes null/empty values (the common case for events that
+        # were never synced externally).
+        constraints = [
+            models.UniqueConstraint(
+                fields=["company", "external_uid"],
+                condition=models.Q(external_uid__isnull=False) & ~models.Q(external_uid=""),
+                name="calendar_event_company_external_uid_uniq",
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.title} ({self.start_datetime:%Y-%m-%d %H:%M})"

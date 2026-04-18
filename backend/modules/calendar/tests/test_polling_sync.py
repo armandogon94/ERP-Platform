@@ -107,6 +107,18 @@ class TestUpsertByExternalUID:
         event = Event.objects.get(company=company, external_uid="uid-x")
         assert event.title == "v2"
 
+    def test_updated_since_unparseable_returns_400(self, api_client):
+        """REVIEW I-5: malformed ?updated_since must 400, not silently return
+        the full set."""
+        company = CompanyFactory()
+        user = UserFactory(company=company)
+        auth(api_client, user)
+        response = api_client.get(
+            "/api/v1/calendar/events/?updated_since=not-a-date"
+        )
+        assert response.status_code == 400
+        assert "updated_since" in response.json()
+
     def test_lww_tie_prefers_stored(self, api_client):
         """REVIEW C-10: when incoming.updated_at == stored.updated_at, the
         stored record wins (no silent overwrite on a tie — see D27 LWW spec)."""

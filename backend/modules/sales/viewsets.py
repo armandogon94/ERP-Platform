@@ -15,7 +15,10 @@ class SalesQuotationViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = SalesQuotationSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
-    queryset = SalesQuotation.objects.order_by("-created_at")
+    # REVIEW I-8: select_related customer prevents N+1 once serializers read
+    # customer.<attr>. Denormalized customer_name still works in list views,
+    # but the join is cheap insurance.
+    queryset = SalesQuotation.objects.select_related("customer").order_by("-created_at")
 
     aggregatable_fields = frozenset({"status", "customer", "valid_until"})
     aggregatable_measures = frozenset({"total_amount"})
@@ -35,7 +38,7 @@ class SalesOrderViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = SalesOrderSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
-    queryset = SalesOrder.objects.order_by("-created_at")
+    queryset = SalesOrder.objects.select_related("customer").order_by("-created_at")
 
     aggregatable_fields = frozenset(
         {"status", "customer", "order_date", "delivery_date"}

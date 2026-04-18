@@ -59,8 +59,11 @@ class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
     def _patch_config(self, request, pk):
-        # Require company admin
-        if not request.is_company_admin:
+        # REVIEW I-3: check admin via the standard DRF permission machinery
+        # so it short-circuits before body parsing and returns a consistent
+        # 403 shape.
+        admin_perm = IsCompanyAdmin()
+        if not admin_perm.has_permission(request, self):
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("Only company admins can update module config.")
 
@@ -189,9 +192,20 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         ).order_by("-created_at")
 
     def list(self, request, *args, **kwargs):
+        # REVIEW I-9: emit the unread count as a response header so the
+        # frontend bell can refresh both fields in a single round-trip
+        # instead of polling /unread_count/ separately every 30s. Response
+        # body remains a plain array for backward compat with existing
+        # TypeScript clients.
         qs = self.get_queryset()[:50]
+        unread = Notification.objects.filter(
+            recipient=request.user, is_read=False
+        ).count()
         serializer = self.get_serializer(qs, many=True)
-        return Response(serializer.data)
+        return Response(
+            serializer.data,
+            headers={"X-Unread-Count": str(unread)},
+        )
 
     @action(detail=True, methods=["post"])
     def mark_read(self, request, pk=None):
@@ -236,7 +250,9 @@ def home_kpis(request):
             "detail": f"${outstanding['total'] or 0:.2f}",
             "module": "invoicing",
         })
-    except Exception:
+    except (ImportError, LookupError):
+        # REVIEW I-6: module not installed in this deployment → skip tile.
+        # Real ORM errors now surface instead of being swallowed.
         pass
 
     # Sales — open sales orders (REVIEW C-5: SalesOrder has no "draft" state;
@@ -252,7 +268,9 @@ def home_kpis(request):
             "value": str(open_orders),
             "module": "sales",
         })
-    except Exception:
+    except (ImportError, LookupError):
+        # REVIEW I-6: module not installed in this deployment → skip tile.
+        # Real ORM errors now surface instead of being swallowed.
         pass
 
     # Purchasing — open POs
@@ -267,7 +285,9 @@ def home_kpis(request):
             "value": str(open_pos),
             "module": "purchasing",
         })
-    except Exception:
+    except (ImportError, LookupError):
+        # REVIEW I-6: module not installed in this deployment → skip tile.
+        # Real ORM errors now surface instead of being swallowed.
         pass
 
     # Helpdesk — open tickets
@@ -282,7 +302,9 @@ def home_kpis(request):
             "value": str(open_tickets),
             "module": "helpdesk",
         })
-    except Exception:
+    except (ImportError, LookupError):
+        # REVIEW I-6: module not installed in this deployment → skip tile.
+        # Real ORM errors now surface instead of being swallowed.
         pass
 
     # HR — active employees
@@ -295,7 +317,9 @@ def home_kpis(request):
             "value": str(employees),
             "module": "hr",
         })
-    except Exception:
+    except (ImportError, LookupError):
+        # REVIEW I-6: module not installed in this deployment → skip tile.
+        # Real ORM errors now surface instead of being swallowed.
         pass
 
     # Inventory — products below reorder threshold
@@ -308,7 +332,9 @@ def home_kpis(request):
             "value": str(products),
             "module": "inventory",
         })
-    except Exception:
+    except (ImportError, LookupError):
+        # REVIEW I-6: module not installed in this deployment → skip tile.
+        # Real ORM errors now surface instead of being swallowed.
         pass
 
     return Response({"tiles": tiles})

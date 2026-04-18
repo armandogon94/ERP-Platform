@@ -15,7 +15,12 @@ class InvoiceViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = InvoiceSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
-    queryset = Invoice.objects.order_by("-invoice_date", "-created_at")
+    # REVIEW I-8: select_related prevents N+1 once serializers touch
+    # customer.<attr>. Denormalized customer_name still keeps the list
+    # cheap today, but the join is free insurance against future reads.
+    queryset = Invoice.objects.select_related("customer").order_by(
+        "-invoice_date", "-created_at"
+    )
 
     aggregatable_fields = frozenset(
         {"status", "invoice_type", "customer", "invoice_date", "due_date"}

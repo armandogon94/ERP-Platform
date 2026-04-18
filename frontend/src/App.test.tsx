@@ -9,8 +9,9 @@ vi.mock("./api/home", () => ({
 }));
 
 vi.mock("./api/notifications", () => ({
-  fetchNotificationsApi: vi.fn().mockResolvedValue([]),
-  fetchUnreadCountApi: vi.fn().mockResolvedValue(0),
+  fetchNotificationsApi: vi
+    .fn()
+    .mockResolvedValue({ notifications: [], unreadCount: 0 }),
   markNotificationReadApi: vi.fn(),
 }));
 

@@ -34,7 +34,11 @@ class PurchaseOrderViewSet(AggregationMixin, viewsets.ModelViewSet):
     serializer_class = PurchaseOrderSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
-    queryset = PurchaseOrder.objects.select_related("vendor").order_by("-created_at")
+    # REVIEW I-8: include partner in the join — PurchaseOrder has both
+    # vendor (denormalized legacy) and partner (canonical Slice 10.6) FKs.
+    queryset = PurchaseOrder.objects.select_related("vendor", "partner").order_by(
+        "-created_at"
+    )
 
     aggregatable_fields = frozenset(
         {"status", "vendor", "partner", "order_date", "expected_date"}

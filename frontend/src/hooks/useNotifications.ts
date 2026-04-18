@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   fetchNotificationsApi,
-  fetchUnreadCountApi,
   markNotificationReadApi,
   type Notification,
 } from "../api/notifications";
@@ -14,10 +13,9 @@ export function useNotifications() {
 
   const refresh = useCallback(async () => {
     try {
-      const [list, count] = await Promise.all([
-        fetchNotificationsApi(),
-        fetchUnreadCountApi(),
-      ]);
+      // REVIEW I-9: single round-trip returns both list + unread count.
+      const { notifications: list, unreadCount: count } =
+        await fetchNotificationsApi();
       setNotifications(list);
       setUnreadCount(count);
     } catch {

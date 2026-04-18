@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db import transaction
 from django.utils.dateparse import parse_datetime
 from rest_framework import status as http_status, viewsets
 from rest_framework.decorators import action
@@ -61,10 +62,16 @@ class EventViewSet(viewsets.ModelViewSet):
         if event_type:
             qs = qs.filter(event_type=event_type)
 
-        updated_since = _parse_updated_at(
-            self.request.query_params.get("updated_since")
-        )
-        if updated_since is not None:
+        raw_since = self.request.query_params.get("updated_since")
+        if raw_since:
+            updated_since = _parse_updated_at(raw_since)
+            # REVIEW I-5: when the param is present but unparseable, 400
+            # rather than silently returning the full set.
+            if updated_since is None:
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError(
+                    {"updated_since": f"Unparseable ISO-8601 timestamp: {raw_since!r}"}
+                )
             qs = qs.filter(updated_at__gte=updated_since)
 
         start = self.request.query_params.get("start")
@@ -114,7 +121,12 @@ class EventViewSet(viewsets.ModelViewSet):
 
     # ─── Bulk upsert ───────────────────────────────────────────────
     @action(detail=False, methods=["post"])
+    @transaction.atomic
     def bulk(self, request):
+        """REVIEW I-1: wrap the batch in a single transaction so partial
+        failures roll back the whole set. A per-payload save point would
+        let successes persist even when the caller's overall intent failed;
+        the documented semantics are all-or-nothing at the batch level."""
         payload = request.data
         if not isinstance(payload, list):
             return Response(
