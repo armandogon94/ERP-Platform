@@ -14,8 +14,7 @@ export function useNotifications() {
   const refresh = useCallback(async () => {
     try {
       // REVIEW I-9: single round-trip returns both list + unread count.
-      const { notifications: list, unreadCount: count } =
-        await fetchNotificationsApi();
+      const { notifications: list, unreadCount: count } = await fetchNotificationsApi();
       setNotifications(list);
       setUnreadCount(count);
     } catch {

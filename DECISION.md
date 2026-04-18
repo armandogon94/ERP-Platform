@@ -294,15 +294,18 @@ This provides meaningful access control without the N² complexity of field-leve
 
 ## D22: Sequence Auto-Generation Trigger
 
-**Decision:** Auto-generate sequence numbers (INV-2026-001, PO-2026-001, SO-2026-001, QUO-2026-001, JE-2026-001, CN-2026-001) via `save()` override + `pre_save` signal that calls the existing `core.sequence.get_next_sequence(company, prefix)` helper — but **only when the number field is blank**.
+**Decision:** Auto-generate sequence numbers (INV-2026-001, PO-2026-001, SO-2026-001, QUO-2026-001, JE-2026-001, CN-2026-001) via a **`save()` override** on each numbered model that calls the existing `core.sequence.get_next_sequence(company, prefix)` helper — but **only when the number field is blank**.
 
 **Alternatives:**
-- (a) `save()` override + pre_save signal, only when blank (chosen)
+- (a) `save()` override, only when blank (chosen)
 - (b) Database trigger (PostgreSQL `BEFORE INSERT`)
 - (c) Explicit call at serializer/viewset `perform_create` time
 - (d) Require callers to always set the number (status quo)
+- (e) `pre_save` signal dispatcher in `core/signals.py`
 
-**Rationale:** Matches this project's signals-for-cache-invalidation pattern (Slice 3). `save()` + signal is Python-level and visible in tests/tracebacks; DB triggers (b) hide logic from Django and complicate migrations. Serializer-level (c) misses records created via admin, management commands, or shell — sequence must fire on every write path. Status quo (d) means the field is perpetually blank (actual current bug). Guarding on `if not self.number:` preserves explicit overrides (e.g., during data imports).
+**Rationale:** `save()` override is Python-level, visible in tests/tracebacks, and fires on every write path (API, admin, management commands, shell) — no coverage gaps. DB triggers (b) hide logic from Django and complicate migrations. Serializer-level (c) misses records created via admin/commands/shell. Status quo (d) leaves the field perpetually blank. A `pre_save` signal (e) is indistinguishable from `save()` behaviorally but adds a layer of indirection and duplicates the "if blank" guard in a distant file; keeping the logic on the model itself makes it locally reviewable.
+
+**Implementation note (REVIEW I-14):** Earlier drafts referred to this as "signal auto-gen"; the ships implementation is pure `save()` override on each of Invoice, CreditNote, PurchaseOrder, RequestForQuote, SalesQuotation, SalesOrder, POSOrder, Ticket, JournalEntry. There is **no** `pre_save` signal wired for sequence generation. Future numbered entities should follow the same `save()` pattern — see `backend/modules/invoicing/models.py::Invoice.save` as the canonical template.
 
 ---
 

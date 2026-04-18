@@ -79,6 +79,25 @@ class InvoiceLine(TenantModel):
     class Meta:
         ordering = ["pk"]
 
+    def save(self, *args, **kwargs):
+        # REVIEW I-11: total_price is a stored column for query performance
+        # but the source of truth is quantity × unit_price × (1 + tax_rate/100).
+        # Compute on save so a caller that forgets to populate it can't
+        # silently corrupt invoice totals. Callers that DO pass an explicit
+        # total are respected iff it matches the computed value within
+        # rounding tolerance; otherwise the computed value wins and the
+        # caller's value is logged as a divergence (no-op here — the
+        # computed value simply replaces it).
+        quantity = self.quantity or 0
+        unit_price = self.unit_price or 0
+        tax_rate = self.tax_rate or 0
+        from decimal import Decimal
+        tax_multiplier = Decimal("1") + (Decimal(tax_rate) / Decimal("100"))
+        self.total_price = (Decimal(quantity) * Decimal(unit_price) * tax_multiplier).quantize(
+            Decimal("0.01")
+        )
+        super().save(*args, **kwargs)
+
     def __str__(self) -> str:
         return self.description or f"Line {self.pk}"
 

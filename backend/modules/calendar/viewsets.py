@@ -104,10 +104,25 @@ class EventViewSet(viewsets.ModelViewSet):
         if existing is None:
             return super().create(request, *args, **kwargs)
 
-        incoming_updated = _parse_updated_at(request.data.get("updated_at"))
+        # REVIEW I-2: an upsert against an existing external_uid MUST carry
+        # updated_at — otherwise the LWW compare is undefined and a stale
+        # payload could silently overwrite newer stored data. Reject with
+        # 400 so the caller notices and fixes their sync cursor.
+        raw_updated = request.data.get("updated_at")
+        if not raw_updated:
+            return Response(
+                {"updated_at": "Required on upsert against existing external_uid (last-write-wins)."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        incoming_updated = _parse_updated_at(raw_updated)
+        if incoming_updated is None:
+            return Response(
+                {"updated_at": f"Unparseable ISO-8601 timestamp: {raw_updated!r}"},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
         # REVIEW C-10: tie on updated_at preserves the stored record. Use <=
         # so only a strictly newer payload wins the last-write-wins compare.
-        if incoming_updated is not None and incoming_updated <= existing.updated_at:
+        if incoming_updated <= existing.updated_at:
             # Stored version wins.
             return Response(
                 self.get_serializer(existing).data,
@@ -164,13 +179,29 @@ class EventViewSet(viewsets.ModelViewSet):
                 serializer.save(company=request.company)
                 created += 1
             else:
-                incoming_updated = _parse_updated_at(item.get("updated_at"))
-                # REVIEW C-10: same LWW semantics as single upsert — tie
-                # preserves stored record.
-                if (
-                    incoming_updated is not None
-                    and incoming_updated <= existing.updated_at
-                ):
+                # REVIEW I-2: an upsert without updated_at cannot compare
+                # LWW — surface as a per-row error so the caller can fix
+                # their batch rather than silently overwriting stored data.
+                raw_updated = item.get("updated_at")
+                if not raw_updated:
+                    errors.append({
+                        "index": i,
+                        "errors": {
+                            "updated_at": "Required on upsert against existing external_uid."
+                        },
+                    })
+                    continue
+                incoming_updated = _parse_updated_at(raw_updated)
+                if incoming_updated is None:
+                    errors.append({
+                        "index": i,
+                        "errors": {
+                            "updated_at": f"Unparseable ISO-8601: {raw_updated!r}"
+                        },
+                    })
+                    continue
+                # REVIEW C-10: tie on updated_at preserves the stored record.
+                if incoming_updated <= existing.updated_at:
                     skipped += 1
                     continue
                 serializer = self.get_serializer(

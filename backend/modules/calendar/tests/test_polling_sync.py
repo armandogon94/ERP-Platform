@@ -91,12 +91,19 @@ class TestUpsertByExternalUID:
         auth(api_client, user)
         api_client.post(
             "/api/v1/calendar/events/",
-            _event_payload(external_uid="uid-x", title="v1"),
+            _event_payload(
+                external_uid="uid-x", title="v1", updated_at=timezone.now()
+            ),
             format="json",
         )
+        # Use a timestamp strictly in the future so LWW picks the new payload.
         response = api_client.post(
             "/api/v1/calendar/events/",
-            _event_payload(external_uid="uid-x", title="v2"),
+            _event_payload(
+                external_uid="uid-x",
+                title="v2",
+                updated_at=timezone.now() + timedelta(minutes=5),
+            ),
             format="json",
         )
         # Either 200 (updated) or 201 (created) is acceptable, but not an error.
@@ -106,6 +113,22 @@ class TestUpsertByExternalUID:
         ).count() == 1
         event = Event.objects.get(company=company, external_uid="uid-x")
         assert event.title == "v2"
+
+    def test_upsert_rejects_missing_updated_at(self, api_client):
+        """REVIEW I-2: an upsert that collides with a stored external_uid
+        MUST include updated_at — otherwise LWW is undefined."""
+        company = CompanyFactory()
+        user = UserFactory(company=company)
+        EventFactory(company=company, external_uid="uid-i2", title="stored")
+        auth(api_client, user)
+
+        payload = _event_payload(external_uid="uid-i2", title="no timestamp")
+        payload.pop("updated_at", None)
+        response = api_client.post(
+            "/api/v1/calendar/events/", payload, format="json"
+        )
+        assert response.status_code == 400
+        assert "updated_at" in response.json()
 
     def test_updated_since_unparseable_returns_400(self, api_client):
         """REVIEW I-5: malformed ?updated_since must 400, not silently return
@@ -218,15 +241,21 @@ class TestBulkEndpoint:
         user = UserFactory(company=company)
         auth(api_client, user)
         start = timezone.now()
+        # updated_at field is auto_now=True on the server — client values are
+        # ignored for storage but still inform LWW. Use future timestamps to
+        # simulate "newer than stored" without flaking on sub-second timing.
+        t_now = timezone.now()
         batch = [
-            _event_payload(external_uid="uid-a", title="A", start=start),
-            _event_payload(external_uid="uid-b", title="B", start=start),
+            _event_payload(external_uid="uid-a", title="A", start=start, updated_at=t_now),
+            _event_payload(external_uid="uid-b", title="B", start=start, updated_at=t_now),
         ]
         api_client.post("/api/v1/calendar/events/bulk/", batch, format="json")
-        # Second call with one update + one new
+        # Second call: payload carries an updated_at clearly in the future so
+        # LWW picks "incoming strictly newer than stored".
+        t_future = timezone.now() + timedelta(minutes=5)
         batch_two = [
-            _event_payload(external_uid="uid-a", title="A-updated", start=start),
-            _event_payload(external_uid="uid-c", title="C", start=start),
+            _event_payload(external_uid="uid-a", title="A-updated", start=start, updated_at=t_future),
+            _event_payload(external_uid="uid-c", title="C", start=start, updated_at=t_future),
         ]
         response = api_client.post(
             "/api/v1/calendar/events/bulk/", batch_two, format="json"

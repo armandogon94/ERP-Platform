@@ -23,9 +23,7 @@ export interface NotificationsResponse {
  * polling round trips compared to the separate /unread_count/ endpoint.
  */
 export async function fetchNotificationsApi(): Promise<NotificationsResponse> {
-  const response = await apiClient.get<Notification[]>(
-    "/v1/core/notifications/",
-  );
+  const response = await apiClient.get<Notification[]>("/v1/core/notifications/");
   const headerCount = response.headers["x-unread-count"];
   const unreadCount =
     typeof headerCount === "string" ? Number.parseInt(headerCount, 10) || 0 : 0;
