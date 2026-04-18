@@ -487,6 +487,33 @@ This provides meaningful access control without the N² complexity of field-leve
 
 ---
 
+## D37: AuditLog Retention and Offload Strategy
+
+**Decision:** Run `trim_audit_log --days 90` nightly to cap table growth.
+Defer Celery-based async offload of audit writes until observable load
+warrants it.
+
+**Alternatives:**
+- (a) Synchronous writes + nightly retention trim (chosen — MVP)
+- (b) Async via Celery task queue + retention trim
+- (c) Append-only table partitioned by month with drop-old-partition policy
+- (d) No retention (status quo before this decision)
+
+**Rationale:** Review C-6 flagged AuditLog as unbounded-growth risk.
+(a) addresses the growth half with one management command (`python
+manage.py trim_audit_log --days 90`); register in django-celery-beat's
+`PeriodicTask` table or cron. (b) requires a broker-queued task per
+TenantModel save which is ~2ms added to every write path — not worth it
+until p50 write latency becomes a bottleneck. (c) is correct for truly
+large deployments (>10M audit rows) but adds partition maintenance
+complexity the current scale doesn't need. (d) is the pre-REVIEW state.
+
+**Scale thresholds for upgrading:**
+- Move to (b) when synchronous audit INSERTs add >5ms to p95 write latency.
+- Move to (c) when the table exceeds 10M rows (post-trim).
+
+---
+
 ## D36: Denormalized Customer Snapshot on Invoice/Sales
 
 **Decision:** Keep `customer_name` and `customer_email` CharFields on
@@ -523,5 +550,6 @@ denormalization.
 | 2026-04-16 | D21–D32 | Active |
 | 2026-04-16 | D33–D35 | Active |
 | 2026-04-17 | D36 | Active |
+| 2026-04-17 | D37 | Active |
 
 All decisions are subject to revision as implementation reveals new constraints. Updates will be appended with rationale for the change.
