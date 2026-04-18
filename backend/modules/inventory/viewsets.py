@@ -2,6 +2,7 @@ from rest_framework import viewsets
 
 from api.v1.aggregation import AggregationMixin
 from api.v1.filters import CompanyScopedFilterBackend
+from api.v1.mixins import FilterParamsMixin
 from api.v1.permissions import IsCompanyMember
 from modules.inventory.models import (
     Product,
@@ -31,30 +32,21 @@ class ProductCategoryViewSet(viewsets.ModelViewSet):
         serializer.save(company=self.request.company)
 
 
-class ProductViewSet(AggregationMixin, viewsets.ModelViewSet):
+class ProductViewSet(FilterParamsMixin, AggregationMixin, viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Product.objects.select_related("category").order_by("name")
+    filter_params = {
+        "is_active": "is_active__bool",
+        "category": "category_id",
+    }
 
     aggregatable_fields = frozenset({"category", "unit_of_measure", "is_active"})
     aggregatable_measures = frozenset({"sale_price", "cost_price", "reorder_point"})
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-
-        is_active = self.request.query_params.get("is_active")
-        if is_active is not None:
-            qs = qs.filter(is_active=is_active.lower() == "true")
-
-        category = self.request.query_params.get("category")
-        if category:
-            qs = qs.filter(category_id=category)
-
-        return qs
 
 
 class StockLocationViewSet(viewsets.ModelViewSet):
@@ -77,33 +69,21 @@ class StockLotViewSet(viewsets.ModelViewSet):
         serializer.save(company=self.request.company)
 
 
-class StockMoveViewSet(viewsets.ModelViewSet):
+class StockMoveViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = StockMoveSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = StockMove.objects.select_related(
         "product", "source_location", "destination_location"
     ).order_by("-move_date", "-created_at")
+    filter_params = {
+        "status": "status",
+        "move_type": "move_type",
+        "product": "product_id",
+    }
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-
-        status = self.request.query_params.get("status")
-        if status:
-            qs = qs.filter(status=status)
-
-        move_type = self.request.query_params.get("move_type")
-        if move_type:
-            qs = qs.filter(move_type=move_type)
-
-        product = self.request.query_params.get("product")
-        if product:
-            qs = qs.filter(product_id=product)
-
-        return qs
 
 
 class ReorderRuleViewSet(viewsets.ModelViewSet):

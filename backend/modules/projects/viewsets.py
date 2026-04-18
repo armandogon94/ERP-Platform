@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from api.v1.filters import CompanyScopedFilterBackend
+from api.v1.mixins import FilterParamsMixin
 from api.v1.permissions import IsCompanyMember
 from modules.projects.models import Milestone, Project, ProjectTimesheet, Task
 from modules.projects.serializers import (
@@ -17,21 +18,12 @@ from modules.projects.serializers import (
 )
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
+class ProjectViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Project.objects.select_related("customer").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        status = self.request.query_params.get("status")
-        customer = self.request.query_params.get("customer")
-        if status:
-            qs = qs.filter(status=status)
-        if customer:
-            qs = qs.filter(customer_id=customer)
-        return qs
+    filter_params = {"status": "status", "customer": "customer_id"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -60,63 +52,40 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Response(ProjectProgressSerializer(data).data)
 
 
-class TaskViewSet(viewsets.ModelViewSet):
+class TaskViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Task.objects.select_related("project", "assignee").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        status = self.request.query_params.get("status")
-        project = self.request.query_params.get("project")
-        assignee = self.request.query_params.get("assignee")
-        if status:
-            qs = qs.filter(status=status)
-        if project:
-            qs = qs.filter(project_id=project)
-        if assignee:
-            qs = qs.filter(assignee_id=assignee)
-        return qs
+    filter_params = {
+        "status": "status",
+        "project": "project_id",
+        "assignee": "assignee_id",
+    }
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
 
 
-class MilestoneViewSet(viewsets.ModelViewSet):
+class MilestoneViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = MilestoneSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Milestone.objects.select_related("project").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        project = self.request.query_params.get("project")
-        if project:
-            qs = qs.filter(project_id=project)
-        return qs
+    filter_params = {"project": "project_id"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
 
 
-class ProjectTimesheetViewSet(viewsets.ModelViewSet):
+class ProjectTimesheetViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = ProjectTimesheetSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = ProjectTimesheet.objects.select_related(
         "project", "task", "employee"
     ).all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        project = self.request.query_params.get("project")
-        employee = self.request.query_params.get("employee")
-        if project:
-            qs = qs.filter(project_id=project)
-        if employee:
-            qs = qs.filter(employee_id=employee)
-        return qs
+    filter_params = {"project": "project_id", "employee": "employee_id"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

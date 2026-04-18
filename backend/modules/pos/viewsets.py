@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from api.v1.filters import CompanyScopedFilterBackend
+from api.v1.mixins import FilterParamsMixin
 from api.v1.permissions import IsCompanyMember
 from modules.pos.models import CashMovement, POSOrder, POSOrderLine, POSSession
 from modules.pos.serializers import (
@@ -18,18 +19,12 @@ from modules.pos.serializers import (
 )
 
 
-class POSSessionViewSet(viewsets.ModelViewSet):
+class POSSessionViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = POSSessionSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = POSSession.objects.select_related("opened_by").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        status = self.request.query_params.get("status")
-        if status:
-            qs = qs.filter(status=status)
-        return qs
+    filter_params = {"status": "status"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company, opened_by=self.request.user)
@@ -76,55 +71,34 @@ class POSSessionViewSet(viewsets.ModelViewSet):
         return Response(self.get_serializer(session).data)
 
 
-class POSOrderViewSet(viewsets.ModelViewSet):
+class POSOrderViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = POSOrderSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = POSOrder.objects.select_related("session", "customer").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        session = self.request.query_params.get("session")
-        status = self.request.query_params.get("status")
-        if session:
-            qs = qs.filter(session_id=session)
-        if status:
-            qs = qs.filter(status=status)
-        return qs
+    filter_params = {"session": "session_id", "status": "status"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
 
 
-class POSOrderLineViewSet(viewsets.ModelViewSet):
+class POSOrderLineViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = POSOrderLineSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = POSOrderLine.objects.select_related("order", "product").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        order = self.request.query_params.get("order")
-        if order:
-            qs = qs.filter(order_id=order)
-        return qs
+    filter_params = {"order": "order_id"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
 
 
-class CashMovementViewSet(viewsets.ModelViewSet):
+class CashMovementViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = CashMovementSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = CashMovement.objects.select_related("session").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        session = self.request.query_params.get("session")
-        if session:
-            qs = qs.filter(session_id=session)
-        return qs
+    filter_params = {"session": "session_id"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

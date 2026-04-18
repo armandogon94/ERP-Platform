@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from api.v1.aggregation import AggregationMixin
 from api.v1.filters import CompanyScopedFilterBackend
+from api.v1.mixins import FilterParamsMixin
 from api.v1.permissions import IsCompanyMember
 from modules.inventory.models import StockLocation, StockMove
 from modules.manufacturing.models import (
@@ -21,60 +22,39 @@ from modules.manufacturing.serializers import (
 )
 
 
-class BillOfMaterialsViewSet(viewsets.ModelViewSet):
+class BillOfMaterialsViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = BillOfMaterialsSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = BillOfMaterials.objects.select_related("product").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        product = self.request.query_params.get("product")
-        active = self.request.query_params.get("active")
-        if product:
-            qs = qs.filter(product_id=product)
-        if active is not None:
-            qs = qs.filter(active=(active.lower() == "true"))
-        return qs
+    filter_params = {"product": "product_id", "active": "active__bool"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
 
 
-class BOMLineViewSet(viewsets.ModelViewSet):
+class BOMLineViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = BOMLineSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = BOMLine.objects.select_related("component", "bom").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        bom = self.request.query_params.get("bom")
-        if bom:
-            qs = qs.filter(bom_id=bom)
-        return qs
+    filter_params = {"bom": "bom_id"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
 
 
-class WorkOrderViewSet(AggregationMixin, viewsets.ModelViewSet):
+class WorkOrderViewSet(FilterParamsMixin, AggregationMixin, viewsets.ModelViewSet):
     serializer_class = WorkOrderSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = WorkOrder.objects.select_related("product", "bom").all()
+    filter_params = {"status": "status"}
 
     aggregatable_fields = frozenset(
         {"status", "product", "bom", "start_date", "end_date"}
     )
     aggregatable_measures = frozenset({"quantity_target", "quantity_done"})
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        status = self.request.query_params.get("status")
-        if status:
-            qs = qs.filter(status=status)
-        return qs
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -145,21 +125,12 @@ class WorkOrderViewSet(AggregationMixin, viewsets.ModelViewSet):
         return Response(self.get_serializer(wo).data)
 
 
-class ProductionCostViewSet(viewsets.ModelViewSet):
+class ProductionCostViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = ProductionCostSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = ProductionCost.objects.select_related("work_order").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        work_order = self.request.query_params.get("work_order")
-        cost_type = self.request.query_params.get("cost_type")
-        if work_order:
-            qs = qs.filter(work_order_id=work_order)
-        if cost_type:
-            qs = qs.filter(cost_type=cost_type)
-        return qs
+    filter_params = {"work_order": "work_order_id", "cost_type": "cost_type"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

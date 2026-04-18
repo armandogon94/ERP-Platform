@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from api.v1.aggregation import AggregationMixin
 from api.v1.filters import CompanyScopedFilterBackend
+from api.v1.mixins import FilterParamsMixin
 from api.v1.permissions import IsCompanyMember
 from modules.helpdesk.models import (
     KnowledgeArticle,
@@ -30,54 +31,35 @@ class TicketCategoryViewSet(viewsets.ModelViewSet):
         serializer.save(company=self.request.company)
 
 
-class SLAConfigViewSet(viewsets.ModelViewSet):
+class SLAConfigViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = SLAConfigSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = SLAConfig.objects.select_related("category").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        category = self.request.query_params.get("category")
-        priority = self.request.query_params.get("priority")
-        if category:
-            qs = qs.filter(category_id=category)
-        if priority:
-            qs = qs.filter(priority=priority)
-        return qs
+    filter_params = {"category": "category_id", "priority": "priority"}
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
 
 
-class TicketViewSet(AggregationMixin, viewsets.ModelViewSet):
+class TicketViewSet(FilterParamsMixin, AggregationMixin, viewsets.ModelViewSet):
     serializer_class = TicketSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Ticket.objects.select_related(
         "category", "reporter_partner", "reporter_user", "assignee"
     ).all()
+    filter_params = {
+        "status": "status",
+        "priority": "priority",
+        "category": "category_id",
+        "assignee": "assignee_id",
+    }
 
     aggregatable_fields = frozenset(
         {"status", "priority", "category", "assignee", "sla_breached"}
     )
     aggregatable_measures = frozenset({"id"})
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        status = self.request.query_params.get("status")
-        priority = self.request.query_params.get("priority")
-        category = self.request.query_params.get("category")
-        assignee = self.request.query_params.get("assignee")
-        if status:
-            qs = qs.filter(status=status)
-        if priority:
-            qs = qs.filter(priority=priority)
-        if category:
-            qs = qs.filter(category_id=category)
-        if assignee:
-            qs = qs.filter(assignee_id=assignee)
-        return qs
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -109,21 +91,15 @@ class TicketViewSet(AggregationMixin, viewsets.ModelViewSet):
         return Response(self.get_serializer(ticket).data)
 
 
-class KnowledgeArticleViewSet(viewsets.ModelViewSet):
+class KnowledgeArticleViewSet(FilterParamsMixin, viewsets.ModelViewSet):
     serializer_class = KnowledgeArticleSerializer
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = KnowledgeArticle.objects.select_related("category").all()
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        published = self.request.query_params.get("published")
-        category = self.request.query_params.get("category")
-        if published is not None:
-            qs = qs.filter(published=(published.lower() == "true"))
-        if category:
-            qs = qs.filter(category_id=category)
-        return qs
+    filter_params = {
+        "published": "published__bool",
+        "category": "category_id",
+    }
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
