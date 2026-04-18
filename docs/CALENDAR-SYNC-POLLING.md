@@ -74,11 +74,12 @@ Content-Type: application/json
 
 * If `external_uid` is missing: standard REST create (returns **201**).
 * If the company already has an event with the same `external_uid`:
-  * **If** `updated_at` on the incoming payload is **older** than the
-    stored record's `updated_at` → returns the stored record with **200**;
-    the payload is discarded (last-write-wins).
-  * **Otherwise** the stored record is updated in place and returned with
-    **200**.
+  * **If** `updated_at` on the incoming payload is **older than or equal
+    to** the stored record's `updated_at` → returns the stored record with
+    **200**; the payload is discarded (last-write-wins; ties prefer the
+    stored record to avoid clock-skew flap).
+  * **Otherwise** (incoming is strictly newer) the stored record is
+    updated in place and returned with **200**.
 
 ### 3. Push many events (batched polling push)
 

@@ -107,6 +107,36 @@ class TestUpsertByExternalUID:
         event = Event.objects.get(company=company, external_uid="uid-x")
         assert event.title == "v2"
 
+    def test_lww_tie_prefers_stored(self, api_client):
+        """REVIEW C-10: when incoming.updated_at == stored.updated_at, the
+        stored record wins (no silent overwrite on a tie — see D27 LWW spec)."""
+        company = CompanyFactory()
+        user = UserFactory(company=company)
+        existing = EventFactory(
+            company=company,
+            external_uid="uid-tie",
+            title="stored",
+        )
+        tie_time = timezone.now()
+        Event.objects.filter(pk=existing.pk).update(updated_at=tie_time)
+        auth(api_client, user)
+
+        response = api_client.post(
+            "/api/v1/calendar/events/",
+            _event_payload(
+                external_uid="uid-tie",
+                title="incoming (same timestamp)",
+                updated_at=tie_time,
+            ),
+            format="json",
+        )
+        assert response.status_code in (200, 201, 409)
+        existing.refresh_from_db()
+        assert existing.title == "stored", (
+            "Tie on updated_at must preserve stored record; got "
+            f"'{existing.title}' after upsert"
+        )
+
     def test_lww_older_update_ignored(self, api_client):
         """If the incoming payload's updated_at is older than the stored
         record's updated_at, the stored version wins (last-write-wins)."""

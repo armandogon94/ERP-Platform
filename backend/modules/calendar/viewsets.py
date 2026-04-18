@@ -100,7 +100,9 @@ class EventViewSet(viewsets.ModelViewSet):
             return super().create(request, *args, **kwargs)
 
         incoming_updated = _parse_updated_at(request.data.get("updated_at"))
-        if incoming_updated is not None and incoming_updated < existing.updated_at:
+        # REVIEW C-10: tie on updated_at preserves the stored record. Use <=
+        # so only a strictly newer payload wins the last-write-wins compare.
+        if incoming_updated is not None and incoming_updated <= existing.updated_at:
             # Stored version wins.
             return Response(
                 self.get_serializer(existing).data,
@@ -153,9 +155,11 @@ class EventViewSet(viewsets.ModelViewSet):
                 created += 1
             else:
                 incoming_updated = _parse_updated_at(item.get("updated_at"))
+                # REVIEW C-10: same LWW semantics as single upsert — tie
+                # preserves stored record.
                 if (
                     incoming_updated is not None
-                    and incoming_updated < existing.updated_at
+                    and incoming_updated <= existing.updated_at
                 ):
                     skipped += 1
                     continue
