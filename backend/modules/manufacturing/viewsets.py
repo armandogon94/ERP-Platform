@@ -26,7 +26,6 @@ class BillOfMaterialsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = BillOfMaterials.objects.select_related("product").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -47,7 +46,6 @@ class BOMLineViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = BOMLine.objects.select_related("component", "bom").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -65,7 +63,6 @@ class WorkOrderViewSet(AggregationMixin, viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = WorkOrder.objects.select_related("product", "bom").all()
-    pagination_class = None
 
     aggregatable_fields = frozenset(
         {"status", "product", "bom", "start_date", "end_date"}
@@ -153,7 +150,6 @@ class ProductionCostViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = ProductionCost.objects.select_related("work_order").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()

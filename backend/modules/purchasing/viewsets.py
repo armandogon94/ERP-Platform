@@ -18,7 +18,6 @@ class VendorViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Vendor.objects.order_by("name")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -36,7 +35,6 @@ class PurchaseOrderViewSet(AggregationMixin, viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = PurchaseOrder.objects.select_related("vendor").order_by("-created_at")
-    pagination_class = None
 
     aggregatable_fields = frozenset(
         {"status", "vendor", "partner", "order_date", "expected_date"}
@@ -62,7 +60,6 @@ class POLineViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = POLine.objects.order_by("pk")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -80,7 +77,6 @@ class RequestForQuoteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = RequestForQuote.objects.select_related("vendor").order_by("-created_at")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -101,7 +97,6 @@ class RFQLineViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = RFQLine.objects.order_by("pk")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

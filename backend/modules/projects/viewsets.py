@@ -22,7 +22,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Project.objects.select_related("customer").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -66,7 +65,6 @@ class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Task.objects.select_related("project", "assignee").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -90,7 +88,6 @@ class MilestoneViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Milestone.objects.select_related("project").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -110,7 +107,6 @@ class ProjectTimesheetViewSet(viewsets.ModelViewSet):
     queryset = ProjectTimesheet.objects.select_related(
         "project", "task", "employee"
     ).all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()

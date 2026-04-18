@@ -23,7 +23,6 @@ class POSSessionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = POSSession.objects.select_related("opened_by").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -82,7 +81,6 @@ class POSOrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = POSOrder.objects.select_related("session", "customer").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -103,7 +101,6 @@ class POSOrderLineViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = POSOrderLine.objects.select_related("order", "product").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -121,7 +118,6 @@ class CashMovementViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = CashMovement.objects.select_related("session").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()

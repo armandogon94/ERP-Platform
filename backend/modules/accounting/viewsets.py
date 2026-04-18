@@ -17,7 +17,6 @@ class AccountViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Account.objects.select_related("parent").order_by("code")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -38,7 +37,6 @@ class JournalViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Journal.objects.order_by("name")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -58,7 +56,6 @@ class JournalEntryViewSet(AggregationMixin, viewsets.ModelViewSet):
     queryset = JournalEntry.objects.select_related("journal").order_by(
         "-entry_date", "-created_at"
     )
-    pagination_class = None
 
     aggregatable_fields = frozenset({"status", "journal", "entry_date"})
     aggregatable_measures = frozenset({"id"})
@@ -82,7 +79,6 @@ class JournalEntryLineViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = JournalEntryLine.objects.select_related("account").order_by("pk")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

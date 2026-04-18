@@ -26,7 +26,6 @@ class ProductCategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = ProductCategory.objects.order_by("name")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -37,7 +36,6 @@ class ProductViewSet(AggregationMixin, viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Product.objects.select_related("category").order_by("name")
-    pagination_class = None
 
     aggregatable_fields = frozenset({"category", "unit_of_measure", "is_active"})
     aggregatable_measures = frozenset({"sale_price", "cost_price", "reorder_point"})
@@ -64,7 +62,6 @@ class StockLocationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = StockLocation.objects.order_by("name")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -75,7 +72,6 @@ class StockLotViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = StockLot.objects.select_related("product").order_by("-expiry_date")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -88,7 +84,6 @@ class StockMoveViewSet(viewsets.ModelViewSet):
     queryset = StockMove.objects.select_related(
         "product", "source_location", "destination_location"
     ).order_by("-move_date", "-created_at")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -118,7 +113,6 @@ class ReorderRuleViewSet(viewsets.ModelViewSet):
     queryset = ReorderRule.objects.select_related("product", "location").order_by(
         "product__name"
     )
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

@@ -120,7 +120,10 @@ REST_FRAMEWORK = {
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ],
-    "DEFAULT_PAGINATION_CLASS": "api.v1.pagination.DefaultCursorPagination",
+    # REVIEW C-3: default pagination caps responses at 500 rows (array shape
+    # preserved, no frontend breakage). Endpoints that need real cursor
+    # pagination opt in via ``pagination_class = DefaultCursorPagination``.
+    "DEFAULT_PAGINATION_CLASS": "api.v1.pagination.SafeArrayPagination",
     "PAGE_SIZE": 50,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }

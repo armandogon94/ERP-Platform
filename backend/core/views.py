@@ -37,7 +37,6 @@ class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = ModuleRegistry.objects.order_by("sequence", "name")
-    pagination_class = None
 
     @action(detail=True, methods=["get", "patch"])
     def config(self, request, pk=None):
@@ -101,7 +100,6 @@ class ViewDefinitionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = ViewDefinition.objects.all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -144,7 +142,6 @@ class PartnerViewSet(viewsets.ModelViewSet):
     serializer_class = PartnerSerializer
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Partner.objects.all()
-    pagination_class = None
 
     def get_permissions(self):
         # Read-only actions only need company membership.
@@ -173,7 +170,6 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = AuditLog.objects.select_related("user").order_by("-timestamp")
-    pagination_class = None
 
     def list(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())[:100]
@@ -186,7 +182,6 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = NotificationSerializer
     permission_classes = [IsCompanyMember]
-    pagination_class = None
 
     def get_queryset(self):
         return Notification.objects.filter(

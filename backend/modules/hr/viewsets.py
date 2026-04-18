@@ -18,7 +18,6 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Department.objects.order_by("name")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -31,7 +30,6 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Employee.objects.select_related("department").order_by("last_name", "first_name")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -44,7 +42,6 @@ class LeaveRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = LeaveRequest.objects.select_related("employee").order_by("-start_date")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -57,7 +54,6 @@ class PayrollViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Payroll.objects.select_related("employee").order_by("-period_start")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

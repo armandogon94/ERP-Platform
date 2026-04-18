@@ -15,7 +15,6 @@ class ReportTemplateViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = ReportTemplate.objects.all()
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -26,7 +25,6 @@ class PivotDefinitionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = PivotDefinition.objects.all()
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -37,7 +35,6 @@ class ScheduledExportViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = ScheduledExport.objects.select_related("report").all()
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

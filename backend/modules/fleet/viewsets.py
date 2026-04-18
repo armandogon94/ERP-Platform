@@ -23,7 +23,6 @@ class DriverViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Driver.objects.all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -41,7 +40,6 @@ class VehicleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Vehicle.objects.select_related("driver").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -62,7 +60,6 @@ class MaintenanceLogViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = MaintenanceLog.objects.select_related("vehicle").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -83,7 +80,6 @@ class FuelLogViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = FuelLog.objects.select_related("vehicle").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -101,7 +97,6 @@ class VehicleServiceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = VehicleService.objects.select_related("vehicle").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()

@@ -25,7 +25,6 @@ class TicketCategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = TicketCategory.objects.all()
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -36,7 +35,6 @@ class SLAConfigViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = SLAConfig.objects.select_related("category").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -59,7 +57,6 @@ class TicketViewSet(AggregationMixin, viewsets.ModelViewSet):
     queryset = Ticket.objects.select_related(
         "category", "reporter_partner", "reporter_user", "assignee"
     ).all()
-    pagination_class = None
 
     aggregatable_fields = frozenset(
         {"status", "priority", "category", "assignee", "sla_breached"}
@@ -117,7 +114,6 @@ class KnowledgeArticleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = KnowledgeArticle.objects.select_related("category").all()
-    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()

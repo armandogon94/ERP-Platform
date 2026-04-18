@@ -16,7 +16,6 @@ class InvoiceViewSet(AggregationMixin, viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Invoice.objects.order_by("-invoice_date", "-created_at")
-    pagination_class = None
 
     aggregatable_fields = frozenset(
         {"status", "invoice_type", "customer", "invoice_date", "due_date"}
@@ -44,7 +43,6 @@ class InvoiceLineViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = InvoiceLine.objects.order_by("pk")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -62,7 +60,6 @@ class CreditNoteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = CreditNote.objects.select_related("invoice").order_by("-created_at")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

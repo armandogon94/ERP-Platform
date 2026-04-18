@@ -16,7 +16,6 @@ class SalesQuotationViewSet(AggregationMixin, viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = SalesQuotation.objects.order_by("-created_at")
-    pagination_class = None
 
     aggregatable_fields = frozenset({"status", "customer", "valid_until"})
     aggregatable_measures = frozenset({"total_amount"})
@@ -37,7 +36,6 @@ class SalesOrderViewSet(AggregationMixin, viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = SalesOrder.objects.order_by("-created_at")
-    pagination_class = None
 
     aggregatable_fields = frozenset(
         {"status", "customer", "order_date", "delivery_date"}
@@ -60,7 +58,6 @@ class SalesOrderLineViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = SalesOrderLine.objects.order_by("pk")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)

@@ -34,7 +34,6 @@ class ResourceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend, OrderingFilter]
     queryset = Resource.objects.order_by("name")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -47,7 +46,6 @@ class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend, OrderingFilter]
     queryset = Event.objects.prefetch_related("attendees").order_by("start_datetime")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -187,7 +185,6 @@ class EventAttendeeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = EventAttendee.objects.select_related("event", "user", "resource")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
@@ -198,7 +195,6 @@ class ReminderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCompanyMember]
     filter_backends = [CompanyScopedFilterBackend]
     queryset = Reminder.objects.select_related("event")
-    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.company)
