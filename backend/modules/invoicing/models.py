@@ -30,6 +30,17 @@ class Invoice(TenantModel):
         choices=Status.choices,
         default=Status.DRAFT,
     )
+    # REVIEW I-10 / D21: the `customer` FK is the canonical identity. The
+    # `customer_name` and `customer_email` CharFields are INTENTIONALLY kept
+    # as denormalized copies so that:
+    #   (1) list views render without a Partner JOIN (perf);
+    #   (2) the invoice preserves the name as it was at issue time, even
+    #       if the Partner is later renamed (historical integrity —
+    #       matches Odoo's "commercial_partner" snapshot pattern);
+    #   (3) invoices can be issued to one-off customers without creating
+    #       a Partner record.
+    # Serializers populate `customer_name` from `customer.name` on save if
+    # left blank; explicit values are respected.
     customer = models.ForeignKey(
         "core.Partner",
         null=True,
@@ -53,6 +64,14 @@ class Invoice(TenantModel):
     def save(self, *args, **kwargs):
         if not self.invoice_number and self.company_id:
             self.invoice_number = get_next_sequence(self.company, "INV")
+        # REVIEW I-10: if customer FK is set but denormalized name/email is
+        # blank, populate them at save time. Explicit values win (one-off
+        # customers, historical snapshots).
+        if self.customer_id:
+            if not self.customer_name:
+                self.customer_name = self.customer.name or ""
+            if not self.customer_email:
+                self.customer_email = self.customer.email or ""
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:

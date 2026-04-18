@@ -17,6 +17,10 @@ class SalesQuotation(TenantModel):
         EXPIRED = "expired", "Expired"
 
     quotation_number = models.CharField(max_length=100, blank=True, default="")
+    # REVIEW I-10 / D21: `customer` is canonical; `customer_name`/
+    # `customer_email` are intentional denormalized snapshots (list-view
+    # perf + historical integrity + one-off customer support). save()
+    # populates them from the FK when blank.
     customer = models.ForeignKey(
         "core.Partner",
         null=True,
@@ -43,6 +47,12 @@ class SalesQuotation(TenantModel):
     def save(self, *args, **kwargs):
         if not self.quotation_number and self.company_id:
             self.quotation_number = get_next_sequence(self.company, "QUO")
+        # REVIEW I-10: backfill denormalized customer fields from the FK.
+        if self.customer_id:
+            if not self.customer_name:
+                self.customer_name = self.customer.name or ""
+            if not self.customer_email:
+                self.customer_email = self.customer.email or ""
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
@@ -60,6 +70,7 @@ class SalesOrder(TenantModel):
         CANCELLED = "cancelled", "Cancelled"
 
     order_number = models.CharField(max_length=100, blank=True, default="")
+    # REVIEW I-10 / D21: see SalesQuotation for denormalization rationale.
     customer = models.ForeignKey(
         "core.Partner",
         null=True,
@@ -94,6 +105,11 @@ class SalesOrder(TenantModel):
     def save(self, *args, **kwargs):
         if not self.order_number and self.company_id:
             self.order_number = get_next_sequence(self.company, "SO")
+        if self.customer_id:
+            if not self.customer_name:
+                self.customer_name = self.customer.name or ""
+            if not self.customer_email:
+                self.customer_email = self.customer.email or ""
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:

@@ -4,14 +4,34 @@ from django.dispatch import receiver
 from core.models import AuditLog, Company, IndustryConfigTemplate, ModuleConfig, TenantModel
 
 
+# REVIEW I-7: models/events to exclude from AuditLog to keep the 100-row
+# UI timeline focused on user actions rather than framework plumbing.
+_AUDIT_LOG_EXCLUDED_MODELS = frozenset({
+    "AuditLog",         # recursion guard
+    "Notification",     # high-frequency, not user-initiated
+    "Sequence",         # sequence-counter bumps on every numbered save
+    "IndustryConfigTemplate",  # seeded at deploy; not user actions
+    "ModuleRegistry",   # same
+    "ViewDefinition",   # same
+})
+
+
 @receiver(post_save)
 def create_audit_log(sender, instance, created, **kwargs):
-    """Log create/update actions on TenantModel subclasses."""
+    """Log create/update actions on TenantModel subclasses.
+
+    REVIEW I-7: skip raw fixture loads (``kwargs["raw"]``) and a blocklist
+    of framework-plumbing models so the audit timeline shows real user
+    actions — not sequence counters, notifications, or seed noise.
+    """
     if not isinstance(instance, TenantModel):
         return
 
-    # Don't log AuditLog itself to avoid recursion
-    if sender is AuditLog:
+    if kwargs.get("raw"):
+        # loaddata / fixture replay — do not audit.
+        return
+
+    if sender.__name__ in _AUDIT_LOG_EXCLUDED_MODELS:
         return
 
     company = getattr(instance, "company", None)

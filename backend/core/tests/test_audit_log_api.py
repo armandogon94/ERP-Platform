@@ -40,6 +40,22 @@ class TestAuditLogAPI:
         assert 1 in ids
         assert 99 not in ids
 
+    def test_notifications_do_not_pollute_audit_timeline(self, api_client):
+        """REVIEW I-7: Notification creates shouldn't create AuditLog rows."""
+        from core.models import Notification
+
+        company = CompanyFactory()
+        user = UserFactory(company=company)
+        before = AuditLog.objects.filter(company=company).count()
+        Notification.objects.create(
+            recipient=user, title="Hi", notification_type="info"
+        )
+        after = AuditLog.objects.filter(company=company).count()
+        assert after == before, (
+            "Notification saves must be excluded from the audit timeline "
+            f"(got {after - before} new rows)"
+        )
+
     def test_list_ordered_by_most_recent_first(self, api_client):
         company = CompanyFactory()
         user = UserFactory(company=company)

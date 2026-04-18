@@ -487,6 +487,34 @@ This provides meaningful access control without the N² complexity of field-leve
 
 ---
 
+## D36: Denormalized Customer Snapshot on Invoice/Sales
+
+**Decision:** Keep `customer_name` and `customer_email` CharFields on
+`Invoice`, `SalesQuotation`, and `SalesOrder` alongside the canonical
+`customer` Partner FK. `save()` backfills the denormalized fields from
+the FK when blank; explicit values are respected.
+
+**Alternatives:**
+- (a) Drop the CharFields, always JOIN via `customer.name` (strict normalization)
+- (b) Keep CharFields as intentional denormalization with save() sync (chosen)
+- (c) Eventual consistency — update CharFields on Partner.save via signal
+
+**Rationale:** Three concrete reasons to keep the denormalization —
+(1) **Performance:** list views render without a Partner JOIN, critical
+at scale. (2) **Historical integrity:** the name-at-issue-time is
+preserved even if the Partner is later renamed, matching Odoo's
+`commercial_partner` snapshot pattern. (3) **One-off customers:**
+invoices can be issued without creating a Partner record (cash sale,
+walk-in, etc.).
+
+Option (a) is textbook-correct but loses (2) and (3). Option (c) is
+tempting but the sync direction is actually wrong — an invoice's
+customer_name should NOT change when the Partner is renamed (think
+audit trail). Closing REVIEW I-10 by affirming the intentional
+denormalization.
+
+---
+
 ## Decision Log
 
 | Date | Decision | Status |
@@ -494,5 +522,6 @@ This provides meaningful access control without the N² complexity of field-leve
 | 2026-04-11 | D1–D20 | Active |
 | 2026-04-16 | D21–D32 | Active |
 | 2026-04-16 | D33–D35 | Active |
+| 2026-04-17 | D36 | Active |
 
 All decisions are subject to revision as implementation reveals new constraints. Updates will be appended with rationale for the change.
