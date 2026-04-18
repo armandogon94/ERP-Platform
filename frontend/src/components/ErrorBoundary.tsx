@@ -34,8 +34,8 @@ export default class ErrorBoundary extends Component<Props, State> {
           <div className="error-boundary">
             <h1>Something went wrong</h1>
             <p>
-              The application hit an unexpected error. Try reloading; if this
-              keeps happening, contact your administrator.
+              The application hit an unexpected error. Try reloading; if this keeps
+              happening, contact your administrator.
             </p>
             <details>
               <summary>Error details</summary>

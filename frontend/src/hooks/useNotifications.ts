@@ -31,10 +31,13 @@ export function useNotifications() {
     return () => window.clearInterval(id);
   }, [refresh]);
 
-  const markRead = useCallback(async (id: number) => {
-    await markNotificationReadApi(id);
-    await refresh();
-  }, [refresh]);
+  const markRead = useCallback(
+    async (id: number) => {
+      await markNotificationReadApi(id);
+      await refresh();
+    },
+    [refresh],
+  );
 
   return { notifications, unreadCount, refresh, markRead };
 }

@@ -8,10 +8,7 @@ vi.mock("../api/notifications", () => ({
   markNotificationReadApi: vi.fn(),
 }));
 
-import {
-  fetchNotificationsApi,
-  fetchUnreadCountApi,
-} from "../api/notifications";
+import { fetchNotificationsApi, fetchUnreadCountApi } from "../api/notifications";
 
 const mockList = vi.mocked(fetchNotificationsApi);
 const mockCount = vi.mocked(fetchUnreadCountApi);

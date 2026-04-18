@@ -13,9 +13,7 @@ export interface Notification {
 }
 
 export async function fetchNotificationsApi(): Promise<Notification[]> {
-  const { data } = await apiClient.get<Notification[]>(
-    "/v1/core/notifications/",
-  );
+  const { data } = await apiClient.get<Notification[]>("/v1/core/notifications/");
   return data;
 }
 

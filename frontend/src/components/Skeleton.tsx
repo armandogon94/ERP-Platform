@@ -11,12 +11,7 @@ interface SkeletonProps {
  */
 export default function Skeleton({ lines = 3, height = 14 }: SkeletonProps) {
   return (
-    <div
-      className="skeleton"
-      role="status"
-      aria-label="Loading"
-      aria-busy="true"
-    >
+    <div className="skeleton" role="status" aria-label="Loading" aria-busy="true">
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}

@@ -10,11 +10,7 @@ interface EmptyStateProps {
  * Shown when a list has zero rows. Better than an empty table because
  * it explains *why* the screen is empty and offers a next step.
  */
-export default function EmptyState({
-  title,
-  description,
-  action,
-}: EmptyStateProps) {
+export default function EmptyState({ title, description, action }: EmptyStateProps) {
   return (
     <div className="empty-state">
       <h3>{title}</h3>
