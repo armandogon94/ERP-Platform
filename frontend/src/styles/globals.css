@@ -483,6 +483,31 @@ main > div > div:not([role]) {
   font-size: var(--font-size-sm);
 }
 
+/* ── List-page shell (REVIEW S-4) ─────────────────────────────────── */
+.list-page-shell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.list-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.list-page-header h1 {
+  margin: 0;
+}
+
+.list-page-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
 /* ── Home KPI tiles ───────────────────────────────────────────────── */
 .home-page {
   padding: var(--space-2) 0;

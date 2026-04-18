@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { type AggregateRow, fetchAggregateApi } from "../../api/reports";
 import PivotView from "../../views/PivotView";
-import GraphView, { type ChartType } from "../../views/GraphView";
+import type { ChartType } from "../../views/GraphView";
+
+// REVIEW S-5: defer loading Recharts + all four chart subtrees (~100KB
+// gzipped) until the user actually runs a graph report. PivotView stays
+// eager because it's tiny and frequently the default view.
+const GraphView = lazy(() => import("../../views/GraphView"));
 
 // Curated list of reportable models with their whitelist of group_by /
 // measure fields (kept in sync with backend AggregationMixin declarations).
@@ -224,7 +229,9 @@ export default function ReportBuilderPage() {
           />
         )}
         {rows !== null && viewMode !== "pivot" && (
-          <GraphView rows={rows} chartType={viewMode} />
+          <Suspense fallback={<div role="status">Loading chart…</div>}>
+            <GraphView rows={rows} chartType={viewMode} />
+          </Suspense>
         )}
       </div>
     </div>
