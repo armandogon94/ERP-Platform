@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from modules.reports.models import PivotDefinition, ReportTemplate, ScheduledExport
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class ReportTemplateSerializer(serializers.ModelSerializer):
+class ReportTemplateSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = ReportTemplate
         fields = [
@@ -21,7 +22,7 @@ class ReportTemplateSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class PivotDefinitionSerializer(serializers.ModelSerializer):
+class PivotDefinitionSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = PivotDefinition
         fields = [
@@ -38,7 +39,7 @@ class PivotDefinitionSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class ScheduledExportSerializer(serializers.ModelSerializer):
+class ScheduledExportSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = ScheduledExport
         fields = [

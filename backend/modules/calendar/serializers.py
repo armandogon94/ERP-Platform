@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from modules.calendar.models import Event, EventAttendee, Reminder, Resource
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class ResourceSerializer(serializers.ModelSerializer):
+class ResourceSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Resource
         fields = [
@@ -18,7 +19,7 @@ class ResourceSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class EventSerializer(serializers.ModelSerializer):
+class EventSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     attendee_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -46,7 +47,7 @@ class EventSerializer(serializers.ModelSerializer):
         return obj.attendees.count()
 
 
-class EventAttendeeSerializer(serializers.ModelSerializer):
+class EventAttendeeSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = EventAttendee
         fields = [
@@ -62,7 +63,7 @@ class EventAttendeeSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class ReminderSerializer(serializers.ModelSerializer):
+class ReminderSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Reminder
         fields = [

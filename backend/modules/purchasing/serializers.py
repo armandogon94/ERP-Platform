@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from modules.purchasing.models import POLine, PurchaseOrder, RequestForQuote, RFQLine, Vendor
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class VendorSerializer(serializers.ModelSerializer):
+class VendorSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Vendor
         fields = [
@@ -22,7 +23,7 @@ class VendorSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class POLineSerializer(serializers.ModelSerializer):
+class POLineSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = POLine
         fields = [
@@ -38,7 +39,7 @@ class POLineSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class PurchaseOrderSerializer(serializers.ModelSerializer):
+class PurchaseOrderSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     vendor_name = serializers.CharField(source="vendor.name", read_only=True)
 
     class Meta:
@@ -60,7 +61,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "vendor_name", "created_at", "updated_at"]
 
 
-class RFQLineSerializer(serializers.ModelSerializer):
+class RFQLineSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = RFQLine
         fields = [
@@ -75,7 +76,7 @@ class RFQLineSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class RequestForQuoteSerializer(serializers.ModelSerializer):
+class RequestForQuoteSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     vendor_name = serializers.CharField(source="vendor.name", read_only=True)
 
     class Meta:

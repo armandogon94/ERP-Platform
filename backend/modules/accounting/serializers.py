@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from modules.accounting.models import Account, Journal, JournalEntry, JournalEntryLine
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class AccountSerializer(serializers.ModelSerializer):
+class AccountSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     parent_name = serializers.CharField(
         source="parent.name", read_only=True, default=None
     )
@@ -25,7 +26,7 @@ class AccountSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "parent_name", "created_at", "updated_at"]
 
 
-class JournalSerializer(serializers.ModelSerializer):
+class JournalSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Journal
         fields = [
@@ -40,7 +41,7 @@ class JournalSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class JournalEntryLineSerializer(serializers.ModelSerializer):
+class JournalEntryLineSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     account_name = serializers.CharField(source="account.name", read_only=True)
 
     class Meta:
@@ -59,7 +60,7 @@ class JournalEntryLineSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "account_name", "created_at", "updated_at"]
 
 
-class JournalEntrySerializer(serializers.ModelSerializer):
+class JournalEntrySerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     journal_name = serializers.CharField(source="journal.name", read_only=True)
 
     class Meta:

@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from modules.projects.models import Milestone, Project, ProjectTimesheet, Task
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class ProjectSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     customer_name = serializers.CharField(source="customer.name", read_only=True)
 
     class Meta:
@@ -25,7 +26,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "customer_name", "created_at", "updated_at"]
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class TaskSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     project_name = serializers.CharField(source="project.name", read_only=True)
     assignee_name = serializers.CharField(source="assignee.full_name", read_only=True)
 
@@ -55,7 +56,7 @@ class TaskSerializer(serializers.ModelSerializer):
         ]
 
 
-class MilestoneSerializer(serializers.ModelSerializer):
+class MilestoneSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     project_name = serializers.CharField(source="project.name", read_only=True)
 
     class Meta:
@@ -79,7 +80,7 @@ class MilestoneSerializer(serializers.ModelSerializer):
         ]
 
 
-class ProjectTimesheetSerializer(serializers.ModelSerializer):
+class ProjectTimesheetSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     project_name = serializers.CharField(source="project.name", read_only=True)
     employee_name = serializers.CharField(source="employee.full_name", read_only=True)
 

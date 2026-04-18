@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from modules.pos.models import CashMovement, POSOrder, POSOrderLine, POSSession
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class POSSessionSerializer(serializers.ModelSerializer):
+class POSSessionSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     opened_by_username = serializers.CharField(
         source="opened_by.username", read_only=True
     )
@@ -38,7 +39,7 @@ class POSSessionSerializer(serializers.ModelSerializer):
         ]
 
 
-class POSOrderLineSerializer(serializers.ModelSerializer):
+class POSOrderLineSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
 
     class Meta:
@@ -58,7 +59,7 @@ class POSOrderLineSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "product_name", "created_at", "updated_at"]
 
 
-class POSOrderSerializer(serializers.ModelSerializer):
+class POSOrderSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     customer_name = serializers.CharField(source="customer.name", read_only=True)
 
     class Meta:
@@ -86,7 +87,7 @@ class POSOrderSerializer(serializers.ModelSerializer):
         ]
 
 
-class CashMovementSerializer(serializers.ModelSerializer):
+class CashMovementSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = CashMovement
         fields = [

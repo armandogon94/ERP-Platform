@@ -6,9 +6,10 @@ from modules.manufacturing.models import (
     ProductionCost,
     WorkOrder,
 )
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class BillOfMaterialsSerializer(serializers.ModelSerializer):
+class BillOfMaterialsSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
 
     class Meta:
@@ -26,7 +27,7 @@ class BillOfMaterialsSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "product_name", "created_at", "updated_at"]
 
 
-class BOMLineSerializer(serializers.ModelSerializer):
+class BOMLineSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     component_name = serializers.CharField(source="component.name", read_only=True)
 
     class Meta:
@@ -44,7 +45,7 @@ class BOMLineSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "component_name", "created_at", "updated_at"]
 
 
-class WorkOrderSerializer(serializers.ModelSerializer):
+class WorkOrderSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
 
     class Meta:
@@ -66,7 +67,7 @@ class WorkOrderSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "product_name", "created_at", "updated_at"]
 
 
-class ProductionCostSerializer(serializers.ModelSerializer):
+class ProductionCostSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = ProductionCost
         fields = [

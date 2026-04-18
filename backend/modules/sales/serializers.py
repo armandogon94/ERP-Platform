@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from modules.sales.models import SalesOrder, SalesOrderLine, SalesQuotation
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class SalesQuotationSerializer(serializers.ModelSerializer):
+class SalesQuotationSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = SalesQuotation
         fields = [
@@ -29,7 +30,7 @@ class SalesQuotationSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class SalesOrderLineSerializer(serializers.ModelSerializer):
+class SalesOrderLineSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = SalesOrderLine
         fields = [
@@ -45,7 +46,7 @@ class SalesOrderLineSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class SalesOrderSerializer(serializers.ModelSerializer):
+class SalesOrderSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = SalesOrder
         fields = [

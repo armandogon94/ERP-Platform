@@ -6,9 +6,10 @@ from modules.helpdesk.models import (
     Ticket,
     TicketCategory,
 )
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class TicketCategorySerializer(serializers.ModelSerializer):
+class TicketCategorySerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = TicketCategory
         fields = [
@@ -23,7 +24,7 @@ class TicketCategorySerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class SLAConfigSerializer(serializers.ModelSerializer):
+class SLAConfigSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     category_name = serializers.CharField(source="category.name", read_only=True)
 
     class Meta:
@@ -41,7 +42,7 @@ class SLAConfigSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "category_name", "created_at", "updated_at"]
 
 
-class TicketSerializer(serializers.ModelSerializer):
+class TicketSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     category_name = serializers.CharField(source="category.name", read_only=True)
     reporter_partner_name = serializers.CharField(
         source="reporter_partner.name", read_only=True
@@ -83,7 +84,7 @@ class TicketSerializer(serializers.ModelSerializer):
         ]
 
 
-class KnowledgeArticleSerializer(serializers.ModelSerializer):
+class KnowledgeArticleSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     category_name = serializers.CharField(source="category.name", read_only=True)
 
     class Meta:

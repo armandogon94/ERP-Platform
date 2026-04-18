@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from modules.invoicing.models import CreditNote, Invoice, InvoiceLine
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class InvoiceLineSerializer(serializers.ModelSerializer):
+class InvoiceLineSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = InvoiceLine
         fields = [
@@ -20,7 +21,7 @@ class InvoiceLineSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class InvoiceSerializer(serializers.ModelSerializer):
+class InvoiceSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = [
@@ -50,7 +51,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class CreditNoteSerializer(serializers.ModelSerializer):
+class CreditNoteSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     invoice_number = serializers.CharField(
         source="invoice.invoice_number", read_only=True
     )

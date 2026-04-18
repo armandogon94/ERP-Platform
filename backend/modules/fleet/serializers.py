@@ -7,9 +7,10 @@ from modules.fleet.models import (
     Vehicle,
     VehicleService,
 )
+from api.v1.serializer_fields import TenantScopedSerializerMixin
 
 
-class DriverSerializer(serializers.ModelSerializer):
+class DriverSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Driver
         fields = [
@@ -26,7 +27,7 @@ class DriverSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class VehicleSerializer(serializers.ModelSerializer):
+class VehicleSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     driver_name = serializers.CharField(source="driver.name", read_only=True)
 
     class Meta:
@@ -48,7 +49,7 @@ class VehicleSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "driver_name", "created_at", "updated_at"]
 
 
-class MaintenanceLogSerializer(serializers.ModelSerializer):
+class MaintenanceLogSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     vehicle_plate = serializers.CharField(
         source="vehicle.license_plate", read_only=True
     )
@@ -70,7 +71,7 @@ class MaintenanceLogSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "vehicle_plate", "created_at", "updated_at"]
 
 
-class FuelLogSerializer(serializers.ModelSerializer):
+class FuelLogSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     vehicle_plate = serializers.CharField(
         source="vehicle.license_plate", read_only=True
     )
@@ -92,7 +93,7 @@ class FuelLogSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "vehicle_plate", "created_at", "updated_at"]
 
 
-class VehicleServiceSerializer(serializers.ModelSerializer):
+class VehicleServiceSerializer(TenantScopedSerializerMixin, serializers.ModelSerializer):
     vehicle_plate = serializers.CharField(
         source="vehicle.license_plate", read_only=True
     )
