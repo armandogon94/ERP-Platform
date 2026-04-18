@@ -156,6 +156,35 @@ class TestNotificationSignals:
         after = Notification.objects.filter(recipient=admin).count()
         assert after == before + 1
 
+    def test_notify_many_admins_uses_single_query(self):
+        """REVIEW C-7: notifying N admins should be 1 bulk INSERT, not N inserts."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+        from modules.helpdesk.models import Ticket, TicketCategory
+
+        company = CompanyFactory()
+        for _ in range(5):
+            UserFactory(company=company, is_admin=True)
+        category = TicketCategory.objects.create(company=company, name="General")
+
+        with CaptureQueriesContext(connection) as ctx:
+            Ticket.objects.create(
+                company=company,
+                ticket_number="TKT-BULK",
+                title="Bulk test",
+                category=category,
+                priority="high",
+                status="new",
+            )
+
+        notification_inserts = [
+            q for q in ctx.captured_queries
+            if "INSERT INTO" in q["sql"] and "core_notification" in q["sql"]
+        ]
+        assert len(notification_inserts) == 1, (
+            f"Expected 1 bulk INSERT for 5 admins, got {len(notification_inserts)}"
+        )
+
     def test_ticket_update_does_not_create_notification(self):
         """REVIEW C-9: edits to an existing ticket should not spam admins."""
         from modules.helpdesk.models import Ticket, TicketCategory

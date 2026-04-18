@@ -63,15 +63,26 @@ def invalidate_on_module_config_change(sender, instance, **kwargs):
 
 def _notify_company_admins(company, title, message, notification_type="info",
                             related_model="", related_id=None, action_url=""):
-    """Create a Notification for every company admin in this company."""
+    """Create a Notification for every company admin in this company.
+
+    REVIEW C-7: uses a single ``bulk_create`` so that 1 ticket save = 1 + 1
+    INSERT (ticket + bulk admin notifications) instead of 1 + N. This keeps
+    the signal chain O(1) queries regardless of admin count. Async offload
+    via Celery is still a future improvement but not required for MVP.
+    """
     from core.models import Notification, UserProfile
 
-    admins = UserProfile.objects.filter(
-        company=company, is_company_admin=True
-    ).select_related("user")
-    for profile in admins:
-        Notification.objects.create(
-            recipient=profile.user,
+    admin_user_ids = list(
+        UserProfile.objects.filter(
+            company=company, is_company_admin=True
+        ).values_list("user_id", flat=True)
+    )
+    if not admin_user_ids:
+        return
+
+    Notification.objects.bulk_create([
+        Notification(
+            recipient_id=user_id,
             title=title,
             message=message,
             notification_type=notification_type,
@@ -79,6 +90,8 @@ def _notify_company_admins(company, title, message, notification_type="info",
             related_id=related_id,
             action_url=action_url,
         )
+        for user_id in admin_user_ids
+    ])
 
 
 def _register_notification_signals():
