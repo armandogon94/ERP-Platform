@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
+import ListPageShell from "../../components/ListPageShell";
 import { type Milestone, fetchMilestonesApi } from "../../api/projects";
-import Skeleton from "../../components/Skeleton";
 
 export default function MilestoneListPage() {
   const [rows, setRows] = useState<Milestone[]>([]);
@@ -15,34 +15,33 @@ export default function MilestoneListPage() {
   }, []);
 
   return (
-    <div>
-      <h1>Milestones</h1>
-
-      {isLoading && <Skeleton />}
-      {error && <div role="alert">{error}</div>}
-
-      {!isLoading && !error && (
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Project</th>
-              <th>Due</th>
-              <th>Completed</th>
+    <ListPageShell
+      title="Milestones"
+      isLoading={isLoading}
+      error={error || undefined}
+      isEmpty={rows.length === 0}
+      empty={{ title: "No milestones yet" }}
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Project</th>
+            <th>Due</th>
+            <th>Completed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((m) => (
+            <tr key={m.id}>
+              <td>{m.name}</td>
+              <td>{m.project_name}</td>
+              <td>{m.due_date ?? "—"}</td>
+              <td>{m.completed ? "Yes" : "No"}</td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((m) => (
-              <tr key={m.id}>
-                <td>{m.name}</td>
-                <td>{m.project_name}</td>
-                <td>{m.due_date ?? "—"}</td>
-                <td>{m.completed ? "Yes" : "No"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+          ))}
+        </tbody>
+      </table>
+    </ListPageShell>
   );
 }

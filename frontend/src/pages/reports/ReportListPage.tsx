@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import ListPageShell from "../../components/ListPageShell";
 import { type ReportTemplate, fetchReportTemplatesApi } from "../../api/reports";
-import Skeleton from "../../components/Skeleton";
 
 export default function ReportListPage() {
   const [rows, setRows] = useState<ReportTemplate[]>([]);
@@ -16,36 +16,34 @@ export default function ReportListPage() {
   }, []);
 
   return (
-    <div>
-      <h1>Reports</h1>
-
-      <Link to="/reports/builder">New Report (Builder)</Link>
-
-      {isLoading && <Skeleton />}
-      {error && <div role="alert">{error}</div>}
-
-      {!isLoading && !error && (
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Model</th>
-              <th>Industry</th>
-              <th>Description</th>
+    <ListPageShell
+      title="Reports"
+      actions={<Link to="/reports/builder">New Report (Builder)</Link>}
+      isLoading={isLoading}
+      error={error || undefined}
+      isEmpty={rows.length === 0}
+      empty={{ title: "No reports yet" }}
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Model</th>
+            <th>Industry</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.id}>
+              <td>{r.name}</td>
+              <td>{r.model_name}</td>
+              <td>{r.industry_tag}</td>
+              <td>{r.description}</td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.id}>
-                <td>{r.name}</td>
-                <td>{r.model_name}</td>
-                <td>{r.industry_tag}</td>
-                <td>{r.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+          ))}
+        </tbody>
+      </table>
+    </ListPageShell>
   );
 }

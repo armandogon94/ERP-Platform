@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import ListPageShell from "../../components/ListPageShell";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Product, fetchProductsApi } from "../../api/inventory";
-import Skeleton from "../../components/Skeleton";
 
 export default function ProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -23,39 +23,37 @@ export default function ProductListPage() {
   }, []);
 
   return (
-    <div>
-      <h1>{productLabel}s</h1>
-
-      {isLoading && <Skeleton />}
-
-      {error && <div>Error: {error}</div>}
-
-      {!isLoading && !error && (
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>SKU</th>
-              <th>UOM</th>
-              <th>Cost</th>
-              <th>Sale Price</th>
-              <th>Active</th>
+    <ListPageShell
+      title={`${productLabel}s`}
+      isLoading={isLoading}
+      error={error ? `Error: ${error}` : undefined}
+      isEmpty={products.length === 0}
+      empty={{ title: `No ${productLabel.toLowerCase()}s yet` }}
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>SKU</th>
+            <th>UOM</th>
+            <th>Cost</th>
+            <th>Sale Price</th>
+            <th>Active</th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.map((product) => (
+            <tr key={product.id}>
+              <td>{product.name}</td>
+              <td>{product.sku}</td>
+              <td>{product.unit_of_measure}</td>
+              <td>{product.cost_price}</td>
+              <td>{product.sale_price}</td>
+              <td>{product.is_active ? "Yes" : "No"}</td>
             </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.id}>
-                <td>{product.name}</td>
-                <td>{product.sku}</td>
-                <td>{product.unit_of_measure}</td>
-                <td>{product.cost_price}</td>
-                <td>{product.sale_price}</td>
-                <td>{product.is_active ? "Yes" : "No"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+          ))}
+        </tbody>
+      </table>
+    </ListPageShell>
   );
 }

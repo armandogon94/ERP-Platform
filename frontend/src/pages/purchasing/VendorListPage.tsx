@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import ListPageShell from "../../components/ListPageShell";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type Vendor, fetchVendorsApi } from "../../api/purchasing";
-import Skeleton from "../../components/Skeleton";
 
 export default function VendorListPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -19,38 +19,36 @@ export default function VendorListPage() {
   }, []);
 
   return (
-    <div>
-      <h1>{vendorLabel}s</h1>
-
-      <Link to="/purchasing/vendors/new">New {vendorLabel}</Link>
-
-      {isLoading && <Skeleton />}
-      {error && <div role="alert">{error}</div>}
-
-      {!isLoading && !error && (
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Payment Terms</th>
-              <th>Active</th>
+    <ListPageShell
+      title={`${vendorLabel}s`}
+      actions={<Link to="/purchasing/vendors/new">New {vendorLabel}</Link>}
+      isLoading={isLoading}
+      error={error || undefined}
+      isEmpty={vendors.length === 0}
+      empty={{ title: `No ${vendorLabel.toLowerCase()}s yet` }}
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Payment Terms</th>
+            <th>Active</th>
+          </tr>
+        </thead>
+        <tbody>
+          {vendors.map((v) => (
+            <tr key={v.id}>
+              <td>
+                <Link to={`/purchasing/vendors/${v.id}/edit`}>{v.name}</Link>
+              </td>
+              <td>{v.email}</td>
+              <td>{v.payment_terms}</td>
+              <td>{v.is_active ? "Yes" : "No"}</td>
             </tr>
-          </thead>
-          <tbody>
-            {vendors.map((v) => (
-              <tr key={v.id}>
-                <td>
-                  <Link to={`/purchasing/vendors/${v.id}/edit`}>{v.name}</Link>
-                </td>
-                <td>{v.email}</td>
-                <td>{v.payment_terms}</td>
-                <td>{v.is_active ? "Yes" : "No"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+          ))}
+        </tbody>
+      </table>
+    </ListPageShell>
   );
 }

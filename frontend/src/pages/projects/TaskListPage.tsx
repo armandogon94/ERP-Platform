@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
+import ListPageShell from "../../components/ListPageShell";
 import { type Task, fetchTasksApi } from "../../api/projects";
-import Skeleton from "../../components/Skeleton";
 
 const STATUSES: { value: string; label: string }[] = [
   { value: "todo", label: "To Do" },
@@ -24,20 +24,22 @@ export default function TaskListPage() {
   }, []);
 
   return (
-    <div>
-      <h1>Tasks</h1>
-
-      <button
-        type="button"
-        onClick={() => setView((v) => (v === "list" ? "kanban" : "list"))}
-      >
-        {view === "list" ? "Kanban" : "List"} view
-      </button>
-
-      {isLoading && <Skeleton />}
-      {error && <div role="alert">{error}</div>}
-
-      {!isLoading && !error && view === "list" && (
+    <ListPageShell
+      title="Tasks"
+      actions={
+        <button
+          type="button"
+          onClick={() => setView((v) => (v === "list" ? "kanban" : "list"))}
+        >
+          {view === "list" ? "Kanban" : "List"} view
+        </button>
+      }
+      isLoading={isLoading}
+      error={error || undefined}
+      isEmpty={tasks.length === 0}
+      empty={{ title: "No tasks yet" }}
+    >
+      {view === "list" && (
         <table>
           <thead>
             <tr>
@@ -64,7 +66,7 @@ export default function TaskListPage() {
         </table>
       )}
 
-      {!isLoading && !error && view === "kanban" && (
+      {view === "kanban" && (
         <div className="kanban-board">
           {STATUSES.map((s) => {
             const columnTasks = tasks.filter((t) => t.status === s.value);
@@ -87,6 +89,6 @@ export default function TaskListPage() {
           })}
         </div>
       )}
-    </div>
+    </ListPageShell>
   );
 }

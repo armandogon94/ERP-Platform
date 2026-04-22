@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import ListPageShell from "../../components/ListPageShell";
 import { type POSOrder, fetchPOSOrdersApi } from "../../api/pos";
-import Skeleton from "../../components/Skeleton";
 
 export default function POSOrderListPage() {
   const [rows, setRows] = useState<POSOrder[]>([]);
@@ -16,42 +16,40 @@ export default function POSOrderListPage() {
   }, []);
 
   return (
-    <div>
-      <h1>POS Orders</h1>
-
-      <Link to="/pos/orders/new">New Order</Link>
-
-      {isLoading && <Skeleton />}
-      {error && <div role="alert">{error}</div>}
-
-      {!isLoading && !error && (
-        <table>
-          <thead>
-            <tr>
-              <th>Order #</th>
-              <th>Customer</th>
-              <th>Subtotal</th>
-              <th>Tax</th>
-              <th>Total</th>
-              <th>Status</th>
+    <ListPageShell
+      title="POS Orders"
+      actions={<Link to="/pos/orders/new">New Order</Link>}
+      isLoading={isLoading}
+      error={error || undefined}
+      isEmpty={rows.length === 0}
+      empty={{ title: "No POS orders yet" }}
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Customer</th>
+            <th>Subtotal</th>
+            <th>Tax</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((o) => (
+            <tr key={o.id}>
+              <td>
+                <Link to={`/pos/orders/${o.id}/edit`}>{o.order_number}</Link>
+              </td>
+              <td>{o.customer_name ?? "—"}</td>
+              <td>{o.subtotal}</td>
+              <td>{o.tax_amount}</td>
+              <td>{o.total}</td>
+              <td>{o.status}</td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((o) => (
-              <tr key={o.id}>
-                <td>
-                  <Link to={`/pos/orders/${o.id}/edit`}>{o.order_number}</Link>
-                </td>
-                <td>{o.customer_name ?? "—"}</td>
-                <td>{o.subtotal}</td>
-                <td>{o.tax_amount}</td>
-                <td>{o.total}</td>
-                <td>{o.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+          ))}
+        </tbody>
+      </table>
+    </ListPageShell>
   );
 }

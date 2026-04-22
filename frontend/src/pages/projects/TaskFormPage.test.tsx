@@ -4,11 +4,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import TaskFormPage from "./TaskFormPage";
 
 vi.mock("../../api/projects", () => ({
-  fetchProjectsApi: vi.fn().mockResolvedValue([
-    { id: 1, name: "Apollo", code: "APL", customer: null, customer_name: null,
-      start_date: null, end_date: null, status: "planned", budget: "0",
-      description: "", created_at: "", updated_at: "" },
-  ]),
+  fetchProjectsApi: vi
+    .fn()
+    .mockResolvedValue([
+      {
+        id: 1,
+        name: "Apollo",
+        code: "APL",
+        customer: null,
+        customer_name: null,
+        start_date: null,
+        end_date: null,
+        status: "planned",
+        budget: "0",
+        description: "",
+        created_at: "",
+        updated_at: "",
+      },
+    ]),
   fetchTaskApi: vi.fn(),
   createTaskApi: vi.fn(),
   updateTaskApi: vi.fn(),
@@ -19,11 +32,7 @@ vi.mock("../../api/config", () => ({
   fetchModuleConfigApi: vi.fn(),
 }));
 
-import {
-  createTaskApi,
-  fetchTaskApi,
-  updateTaskApi,
-} from "../../api/projects";
+import { createTaskApi, fetchTaskApi, updateTaskApi } from "../../api/projects";
 
 const mockCreate = vi.mocked(createTaskApi);
 const mockFetch = vi.mocked(fetchTaskApi);
@@ -50,10 +59,19 @@ describe("TaskFormPage", () => {
 
   it("creates a new task on submit", async () => {
     mockCreate.mockResolvedValueOnce({
-      id: 7, project: 1, project_name: "Apollo", name: "Ship it",
-      description: "", assignee: null, assignee_name: null,
-      status: "todo", priority: "normal", due_date: null,
-      parent_task: null, created_at: "", updated_at: "",
+      id: 7,
+      project: 1,
+      project_name: "Apollo",
+      name: "Ship it",
+      description: "",
+      assignee: null,
+      assignee_name: null,
+      status: "todo",
+      priority: "normal",
+      due_date: null,
+      parent_task: null,
+      created_at: "",
+      updated_at: "",
     });
     renderAt("/projects/tasks/new");
 
@@ -78,10 +96,19 @@ describe("TaskFormPage", () => {
 
   it("loads an existing task and patches on submit", async () => {
     mockFetch.mockResolvedValueOnce({
-      id: 42, project: 1, project_name: "Apollo", name: "Old name",
-      description: "desc", assignee: null, assignee_name: null,
-      status: "in_progress", priority: "high", due_date: "2026-05-01",
-      parent_task: null, created_at: "", updated_at: "",
+      id: 42,
+      project: 1,
+      project_name: "Apollo",
+      name: "Old name",
+      description: "desc",
+      assignee: null,
+      assignee_name: null,
+      status: "in_progress",
+      priority: "high",
+      due_date: "2026-05-01",
+      parent_task: null,
+      created_at: "",
+      updated_at: "",
     });
     mockUpdate.mockResolvedValueOnce({} as never);
     renderAt("/projects/tasks/42/edit");

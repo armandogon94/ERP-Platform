@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
+import ListPageShell from "../../components/ListPageShell";
 import { type TicketCategory, fetchCategoriesApi } from "../../api/helpdesk";
-import Skeleton from "../../components/Skeleton";
 
 export default function CategoryListPage() {
   const [rows, setRows] = useState<TicketCategory[]>([]);
@@ -15,32 +15,31 @@ export default function CategoryListPage() {
   }, []);
 
   return (
-    <div>
-      <h1>Ticket Categories</h1>
-
-      {isLoading && <Skeleton />}
-      {error && <div role="alert">{error}</div>}
-
-      {!isLoading && !error && (
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>SLA Hours</th>
-              <th>Industry Tag</th>
+    <ListPageShell
+      title="Ticket Categories"
+      isLoading={isLoading}
+      error={error || undefined}
+      isEmpty={rows.length === 0}
+      empty={{ title: "No ticket categories yet" }}
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>SLA Hours</th>
+            <th>Industry Tag</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((c) => (
+            <tr key={c.id}>
+              <td>{c.name}</td>
+              <td>{c.sla_hours}</td>
+              <td>{c.industry_tag}</td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((c) => (
-              <tr key={c.id}>
-                <td>{c.name}</td>
-                <td>{c.sla_hours}</td>
-                <td>{c.industry_tag}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+          ))}
+        </tbody>
+      </table>
+    </ListPageShell>
   );
 }

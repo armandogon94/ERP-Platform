@@ -50,11 +50,7 @@ describe("ListPageShell", () => {
 
   it("renders actions next to the heading", () => {
     render(
-      <ListPageShell
-        title="Employees"
-        isLoading={false}
-        actions={<button>New</button>}
-      >
+      <ListPageShell title="Employees" isLoading={false} actions={<button>New</button>}>
         <table />
       </ListPageShell>,
     );

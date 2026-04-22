@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import ListPageShell from "../../components/ListPageShell";
 import { type Ticket, fetchTicketsApi } from "../../api/helpdesk";
-import Skeleton from "../../components/Skeleton";
 
 const STATUSES: { value: string; label: string }[] = [
   { value: "new", label: "New" },
@@ -25,23 +25,26 @@ export default function TicketListPage() {
   }, []);
 
   return (
-    <div>
-      <h1>Tickets</h1>
-
-      <Link to="/helpdesk/tickets/new">New Ticket</Link>
-
-      <button
-        type="button"
-        onClick={() => setView((v) => (v === "list" ? "kanban" : "list"))}
-        style={{ marginLeft: "8px" }}
-      >
-        {view === "list" ? "Kanban" : "List"} view
-      </button>
-
-      {isLoading && <Skeleton />}
-      {error && <div role="alert">{error}</div>}
-
-      {!isLoading && !error && view === "list" && (
+    <ListPageShell
+      title="Tickets"
+      actions={
+        <>
+          <Link to="/helpdesk/tickets/new">New Ticket</Link>
+          <button
+            type="button"
+            onClick={() => setView((v) => (v === "list" ? "kanban" : "list"))}
+            style={{ marginLeft: "8px" }}
+          >
+            {view === "list" ? "Kanban" : "List"} view
+          </button>
+        </>
+      }
+      isLoading={isLoading}
+      error={error || undefined}
+      isEmpty={tickets.length === 0}
+      empty={{ title: "No tickets yet" }}
+    >
+      {view === "list" && (
         <table>
           <thead>
             <tr>
@@ -70,7 +73,7 @@ export default function TicketListPage() {
         </table>
       )}
 
-      {!isLoading && !error && view === "kanban" && (
+      {view === "kanban" && (
         <div className="kanban-board">
           {STATUSES.map((s) => {
             const columnTickets = tickets.filter((t) => t.status === s.value);
@@ -95,6 +98,6 @@ export default function TicketListPage() {
           })}
         </div>
       )}
-    </div>
+    </ListPageShell>
   );
 }

@@ -43,7 +43,9 @@ export default function TaskFormPage() {
   const headingPrefix = isEdit ? "Edit" : "New";
 
   useEffect(() => {
-    fetchProjectsApi().then(setProjects).catch(() => {});
+    fetchProjectsApi()
+      .then(setProjects)
+      .catch(() => {});
     if (isEdit && id) {
       fetchTaskApi(Number(id))
         .then((t: Task) =>

@@ -69,9 +69,10 @@ describe("ReportListPage", () => {
       expect(screen.getByText("Monthly Sales")).toBeInTheDocument();
     });
     expect(screen.getByText("Invoices by Customer")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /new report/i }),
-    ).toHaveAttribute("href", "/reports/builder");
+    expect(screen.getByRole("link", { name: /new report/i })).toHaveAttribute(
+      "href",
+      "/reports/builder",
+    );
   });
 
   it("surfaces errors via role=alert", async () => {

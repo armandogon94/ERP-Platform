@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { type MaintenanceLog, fetchMaintenanceLogsApi } from "../../api/fleet";
-import Skeleton from "../../components/Skeleton";
+import ListPageShell from "../../components/ListPageShell";
 
 export default function MaintenanceLogListPage() {
   const [rows, setRows] = useState<MaintenanceLog[]>([]);
@@ -15,38 +15,37 @@ export default function MaintenanceLogListPage() {
   }, []);
 
   return (
-    <div>
-      <h1>Maintenance Logs</h1>
-
-      {isLoading && <Skeleton />}
-      {error && <div role="alert">{error}</div>}
-
-      {!isLoading && !error && (
-        <table>
-          <thead>
-            <tr>
-              <th>Vehicle</th>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Mechanic</th>
-              <th>Cost</th>
-              <th>Status</th>
+    <ListPageShell
+      title="Maintenance Logs"
+      isLoading={isLoading}
+      error={error || undefined}
+      isEmpty={rows.length === 0}
+      empty={{ title: "No maintenance logs yet" }}
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Mechanic</th>
+            <th>Cost</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((m) => (
+            <tr key={m.id}>
+              <td>{m.vehicle_plate}</td>
+              <td>{m.date ?? "—"}</td>
+              <td>{m.description}</td>
+              <td>{m.mechanic}</td>
+              <td>{m.cost}</td>
+              <td>{m.status}</td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((m) => (
-              <tr key={m.id}>
-                <td>{m.vehicle_plate}</td>
-                <td>{m.date ?? "—"}</td>
-                <td>{m.description}</td>
-                <td>{m.mechanic}</td>
-                <td>{m.cost}</td>
-                <td>{m.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+          ))}
+        </tbody>
+      </table>
+    </ListPageShell>
   );
 }

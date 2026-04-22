@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import ListPageShell from "../../components/ListPageShell";
 import { useTerminology } from "../../hooks/useTerminology";
 import { type JournalEntry, fetchJournalEntriesApi } from "../../api/accounting";
-import Skeleton from "../../components/Skeleton";
 
 export default function JournalEntryListPage() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -10,6 +10,8 @@ export default function JournalEntryListPage() {
   const [error, setError] = useState<string | null>(null);
 
   const entryLabel = useTerminology("Journal Entry", "Journal Entry");
+  const pluralTitle =
+    entryLabel === "Journal Entry" ? "Journal Entries" : `${entryLabel}s`;
 
   useEffect(() => {
     fetchJournalEntriesApi()
@@ -19,38 +21,36 @@ export default function JournalEntryListPage() {
   }, []);
 
   return (
-    <div>
-      <h1>{entryLabel === "Journal Entry" ? "Journal Entries" : `${entryLabel}s`}</h1>
-
-      <Link to="/accounting/entries/new">New {entryLabel}</Link>
-
-      {isLoading && <Skeleton />}
-      {error && <div role="alert">{error}</div>}
-
-      {!isLoading && !error && (
-        <table>
-          <thead>
-            <tr>
-              <th>Reference</th>
-              <th>Journal</th>
-              <th>Date</th>
-              <th>Status</th>
+    <ListPageShell
+      title={pluralTitle}
+      actions={<Link to="/accounting/entries/new">New {entryLabel}</Link>}
+      isLoading={isLoading}
+      error={error || undefined}
+      isEmpty={entries.length === 0}
+      empty={{ title: `No ${entryLabel.toLowerCase()}s yet` }}
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Journal</th>
+            <th>Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map((e) => (
+            <tr key={e.id}>
+              <td>
+                <Link to={`/accounting/entries/${e.id}/edit`}>{e.reference}</Link>
+              </td>
+              <td>{e.journal_name}</td>
+              <td>{e.entry_date ?? "—"}</td>
+              <td>{e.status}</td>
             </tr>
-          </thead>
-          <tbody>
-            {entries.map((e) => (
-              <tr key={e.id}>
-                <td>
-                  <Link to={`/accounting/entries/${e.id}/edit`}>{e.reference}</Link>
-                </td>
-                <td>{e.journal_name}</td>
-                <td>{e.entry_date ?? "—"}</td>
-                <td>{e.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+          ))}
+        </tbody>
+      </table>
+    </ListPageShell>
   );
 }
