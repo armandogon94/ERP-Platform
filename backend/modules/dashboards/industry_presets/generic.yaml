@@ -1,0 +1,42 @@
+industry: generic
+dashboards:
+  - name: "Home"
+    slug: "home"
+    is_default: true
+    widgets:
+      - widget_type: kpi
+        title: "Outstanding Invoices"
+        data_source: "invoicing.outstanding_total"
+        position: 0
+      - widget_type: kpi
+        title: "Open Sales Orders"
+        data_source: "sales.open_orders_count"
+        position: 1
+      - widget_type: kpi
+        title: "Open Tickets"
+        data_source: "helpdesk.open_tickets_count"
+        position: 2
+      - widget_type: kpi
+        title: "Active Employees"
+        data_source: "hr.active_employees"
+        position: 3
+      - widget_type: line
+        title: "Revenue (last 30 days)"
+        data_source: "invoicing.revenue_daily"
+        config:
+          period: "last_30_days"
+        position: 4
+      - widget_type: bar
+        title: "Invoices by Status"
+        data_source: "invoicing.invoices_by_status"
+        position: 5
+      - widget_type: pie
+        title: "Tickets by Priority"
+        data_source: "helpdesk.tickets_by_priority"
+        position: 6
+      - widget_type: bar
+        title: "Top 5 Customers"
+        data_source: "sales.top_customers"
+        config:
+          limit: 5
+        position: 7

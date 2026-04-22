@@ -1,0 +1,43 @@
+industry: legal
+# JurisPath — legal firm. Cases, matters, billable hours, clients.
+dashboards:
+  - name: "Practice Overview"
+    slug: "home"
+    is_default: true
+    widgets:
+      - widget_type: kpi
+        title: "Active Matters"
+        data_source: "projects.active_projects_count"
+        position: 0
+      - widget_type: kpi
+        title: "Open Case Inquiries"
+        data_source: "helpdesk.open_tickets_count"
+        position: 1
+      - widget_type: kpi
+        title: "Outstanding Billing"
+        data_source: "invoicing.outstanding_total"
+        position: 2
+      - widget_type: kpi
+        title: "Court Dates This Week"
+        data_source: "calendar.events_today"
+        position: 3
+      - widget_type: line
+        title: "Billings Trend (90d)"
+        data_source: "invoicing.revenue_daily"
+        config:
+          period: "last_90_days"
+        position: 4
+      - widget_type: pie
+        title: "Tasks by Status"
+        data_source: "projects.tasks_by_status"
+        position: 5
+      - widget_type: bar
+        title: "Top Clients by Billing"
+        data_source: "sales.top_customers"
+        config:
+          limit: 10
+        position: 6
+      - widget_type: bar
+        title: "Calendar This Week"
+        data_source: "calendar.events_this_week"
+        position: 7

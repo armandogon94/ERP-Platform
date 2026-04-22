@@ -1,0 +1,46 @@
+industry: fintech
+# NovaPay — fintech / payment processing. Transaction volume, clients, revenue.
+dashboards:
+  - name: "Payments Overview"
+    slug: "home"
+    is_default: true
+    widgets:
+      - widget_type: kpi
+        title: "Outstanding Invoices"
+        data_source: "invoicing.outstanding_total"
+        position: 0
+      - widget_type: kpi
+        title: "Active Clients"
+        subtitle: "Partners with open orders"
+        data_source: "sales.open_orders_count"
+        position: 1
+      - widget_type: kpi
+        title: "Revenue This Month"
+        data_source: "invoicing.revenue_total"
+        config:
+          period: "this_month"
+        position: 2
+      - widget_type: kpi
+        title: "Open Support Cases"
+        data_source: "helpdesk.open_tickets_count"
+        position: 3
+      - widget_type: area
+        title: "Revenue Trend (90d)"
+        data_source: "invoicing.revenue_daily"
+        config:
+          period: "last_90_days"
+        position: 4
+      - widget_type: bar
+        title: "Top Clients by Volume"
+        data_source: "sales.top_customers"
+        config:
+          limit: 10
+        position: 5
+      - widget_type: pie
+        title: "Invoice Status Distribution"
+        data_source: "invoicing.invoices_by_status"
+        position: 6
+      - widget_type: bar
+        title: "Support by Priority"
+        data_source: "helpdesk.tickets_by_priority"
+        position: 7

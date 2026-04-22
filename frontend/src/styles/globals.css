@@ -483,6 +483,88 @@ main > div > div:not([role]) {
   font-size: var(--font-size-sm);
 }
 
+/* ── Dashboard grid + widgets ─────────────────────────────────────── */
+.dashboard-page {
+  padding: var(--space-2) 0;
+}
+
+.dashboard-grid {
+  display: grid;
+  /* Auto-fill tiles. KPI widgets naturally fit 4 across at desktop; chart
+   * widgets span 2 columns. A 12-column grid gives us flexibility. */
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.widget {
+  grid-column: span 12;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* KPI tiles: 3 across on tablet, 4 across on desktop. */
+@media (min-width: 768px) {
+  .widget-kpi { grid-column: span 4; }
+  .widget-chart { grid-column: span 6; }
+  .widget-table { grid-column: span 6; }
+}
+
+@media (min-width: 1200px) {
+  .widget-kpi { grid-column: span 3; }
+  .widget-chart { grid-column: span 6; }
+  .widget-table { grid-column: span 6; }
+}
+
+.widget-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: var(--font-weight-semibold);
+}
+
+.widget-subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.widget-kpi-value {
+  font-size: 2.25rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-top: var(--space-1);
+}
+
+.widget-kpi-detail {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.widget-empty {
+  padding: var(--space-6) 0;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.widget-table table {
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-2);
+}
+
+.widget-error {
+  border-color: var(--color-danger);
+}
+
 /* ── List-page shell (REVIEW S-4) ─────────────────────────────────── */
 .list-page-shell {
   display: flex;

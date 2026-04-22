@@ -1,0 +1,47 @@
+industry: hospitality
+# TableSync — restaurant. Covers, reservations, menu items, shift management.
+dashboards:
+  - name: "Restaurant Floor"
+    slug: "home"
+    is_default: true
+    widgets:
+      - widget_type: kpi
+        title: "Reservations Today"
+        subtitle: "Booked covers"
+        data_source: "calendar.events_today"
+        position: 0
+      - widget_type: kpi
+        title: "Open Tickets"
+        subtitle: "Active customer orders"
+        data_source: "sales.open_orders_count"
+        position: 1
+      - widget_type: kpi
+        title: "Menu Items in Stock"
+        data_source: "inventory.products_count"
+        position: 2
+      - widget_type: kpi
+        title: "Staff on Shift"
+        data_source: "hr.active_employees"
+        position: 3
+      - widget_type: line
+        title: "Daily Revenue (30d)"
+        data_source: "invoicing.revenue_daily"
+        config:
+          period: "last_30_days"
+        position: 4
+      - widget_type: bar
+        title: "Reservations This Week"
+        data_source: "calendar.events_this_week"
+        position: 5
+      - widget_type: table
+        title: "Low-Stock Items"
+        data_source: "inventory.low_stock_items"
+        config:
+          limit: 10
+        position: 6
+      - widget_type: bar
+        title: "Top Regulars by Spend"
+        data_source: "sales.top_customers"
+        config:
+          limit: 5
+        position: 7

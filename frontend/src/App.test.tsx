@@ -8,6 +8,21 @@ vi.mock("./api/home", () => ({
   fetchHomeKPIsApi: vi.fn().mockResolvedValue({ tiles: [] }),
 }));
 
+vi.mock("./api/dashboards", () => ({
+  fetchDefaultDashboardApi: vi.fn().mockResolvedValue({
+    id: 1,
+    name: "Welcome",
+    slug: "home",
+    is_default: true,
+    industry_preset: "generic",
+    layout_json: {},
+    widgets: [],
+    created_at: "",
+    updated_at: "",
+  }),
+  fetchDashboardDataApi: vi.fn().mockResolvedValue({}),
+}));
+
 vi.mock("./api/notifications", () => ({
   fetchNotificationsApi: vi
     .fn()
@@ -51,14 +66,19 @@ describe("App", () => {
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
   });
 
-  it("shows home page when authenticated", () => {
+  it("shows the dashboard when authenticated", async () => {
     useAuthStore.setState({ isAuthenticated: true });
     render(
       <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>,
     );
-    expect(screen.getByRole("heading", { name: "Welcome" })).toBeInTheDocument();
+    // DashboardPage renders a "Dashboard" heading while loading, then
+    // swaps it for the dashboard name once the API resolves. Match
+    // either so the test tolerates mock timing.
+    expect(
+      await screen.findByRole("heading", { name: /dashboard|welcome/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows 404 for unknown routes", () => {

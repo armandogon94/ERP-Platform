@@ -41,4 +41,5 @@ urlpatterns = [
     path("pos/", include("modules.pos.urls")),
     path("helpdesk/", include("modules.helpdesk.urls")),
     path("reports/", include("modules.reports.urls")),
+    path("dashboards/", include("modules.dashboards.urls")),
 ]

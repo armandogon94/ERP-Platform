@@ -1,0 +1,44 @@
+industry: logistics
+# SwiftRoute — logistics / fleet. Vehicles, shipments, driver availability.
+dashboards:
+  - name: "Operations Dashboard"
+    slug: "home"
+    is_default: true
+    widgets:
+      - widget_type: kpi
+        title: "Open Shipments"
+        data_source: "sales.open_orders_count"
+        position: 0
+      - widget_type: kpi
+        title: "Outstanding Invoices"
+        data_source: "invoicing.outstanding_total"
+        position: 1
+      - widget_type: kpi
+        title: "Open POs"
+        subtitle: "Material orders in flight"
+        data_source: "purchasing.open_pos_count"
+        position: 2
+      - widget_type: kpi
+        title: "Active Drivers"
+        data_source: "hr.active_employees"
+        position: 3
+      - widget_type: line
+        title: "Revenue (30d)"
+        data_source: "invoicing.revenue_daily"
+        position: 4
+      - widget_type: bar
+        title: "Spend by Vendor"
+        data_source: "purchasing.spend_by_vendor"
+        config:
+          limit: 5
+        position: 5
+      - widget_type: bar
+        title: "Top Shippers by Volume"
+        data_source: "sales.top_customers"
+        config:
+          limit: 5
+        position: 6
+      - widget_type: pie
+        title: "Shipments by Status"
+        data_source: "sales.orders_by_status"
+        position: 7

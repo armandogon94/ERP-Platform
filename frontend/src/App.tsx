@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
+import DashboardPage from "./pages/dashboard/DashboardPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import EmployeeListPage from "./pages/hr/EmployeeListPage";
@@ -73,7 +74,9 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/hr/employees" element={<EmployeeListPage />} />
         <Route path="/hr/employees/new" element={<EmployeeFormPage />} />
         <Route path="/hr/employees/:id/edit" element={<EmployeeFormPage />} />

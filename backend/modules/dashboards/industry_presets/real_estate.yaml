@@ -1,0 +1,44 @@
+industry: real_estate
+# UrbanNest — real estate. Listings, leads, closings, commissions.
+dashboards:
+  - name: "Agency Overview"
+    slug: "home"
+    is_default: true
+    widgets:
+      - widget_type: kpi
+        title: "Active Listings"
+        subtitle: "Properties on market"
+        data_source: "inventory.products_count"
+        position: 0
+      - widget_type: kpi
+        title: "Open Deals"
+        data_source: "sales.open_orders_count"
+        position: 1
+      - widget_type: kpi
+        title: "Outstanding Commissions"
+        data_source: "invoicing.outstanding_total"
+        position: 2
+      - widget_type: kpi
+        title: "Active Agents"
+        data_source: "hr.active_employees"
+        position: 3
+      - widget_type: line
+        title: "Closings Revenue (90d)"
+        data_source: "invoicing.revenue_daily"
+        config:
+          period: "last_90_days"
+        position: 4
+      - widget_type: bar
+        title: "Top Buyers"
+        data_source: "sales.top_customers"
+        config:
+          limit: 5
+        position: 5
+      - widget_type: pie
+        title: "Deal Status"
+        data_source: "sales.orders_by_status"
+        position: 6
+      - widget_type: bar
+        title: "Showings This Week"
+        data_source: "calendar.events_this_week"
+        position: 7

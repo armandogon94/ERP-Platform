@@ -1,0 +1,39 @@
+industry: healthcare
+# MedVista — healthcare clinic. Patient visits, providers, billing.
+dashboards:
+  - name: "Clinic Dashboard"
+    slug: "home"
+    is_default: true
+    widgets:
+      - widget_type: kpi
+        title: "Appointments Today"
+        data_source: "calendar.events_today"
+        position: 0
+      - widget_type: kpi
+        title: "Active Treatment Plans"
+        data_source: "sales.open_orders_count"
+        position: 1
+      - widget_type: kpi
+        title: "Outstanding Patient Billing"
+        data_source: "invoicing.outstanding_total"
+        position: 2
+      - widget_type: kpi
+        title: "Active Providers"
+        data_source: "hr.active_employees"
+        position: 3
+      - widget_type: line
+        title: "Billing Trend (30d)"
+        data_source: "invoicing.revenue_daily"
+        position: 4
+      - widget_type: bar
+        title: "Staff by Department"
+        data_source: "hr.employees_by_department"
+        position: 5
+      - widget_type: pie
+        title: "Invoices by Status"
+        data_source: "invoicing.invoices_by_status"
+        position: 6
+      - widget_type: bar
+        title: "Appointments This Week"
+        data_source: "calendar.events_this_week"
+        position: 7

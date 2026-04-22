@@ -1,0 +1,45 @@
+industry: dental
+# DentaFlow — dental clinic. Patients, appointments, treatments, recalls.
+dashboards:
+  - name: "Clinic Overview"
+    slug: "home"
+    is_default: true
+    widgets:
+      - widget_type: kpi
+        title: "Today's Appointments"
+        subtitle: "Scheduled patient visits"
+        data_source: "calendar.events_today"
+        position: 0
+      - widget_type: kpi
+        title: "Open Treatment Plans"
+        subtitle: "Treatment plans in progress"
+        data_source: "sales.open_orders_count"
+        position: 1
+      - widget_type: kpi
+        title: "Outstanding Patient Invoices"
+        data_source: "invoicing.outstanding_total"
+        position: 2
+      - widget_type: kpi
+        title: "Open Patient Inquiries"
+        data_source: "helpdesk.open_tickets_count"
+        position: 3
+      - widget_type: line
+        title: "Patient Revenue (30d)"
+        data_source: "invoicing.revenue_daily"
+        config:
+          period: "last_30_days"
+        position: 4
+      - widget_type: bar
+        title: "Appointments This Week"
+        data_source: "calendar.events_this_week"
+        position: 5
+      - widget_type: pie
+        title: "Treatment Plans by Status"
+        data_source: "sales.orders_by_status"
+        position: 6
+      - widget_type: bar
+        title: "Top Patients by Billing"
+        data_source: "sales.top_customers"
+        config:
+          limit: 5
+        position: 7
