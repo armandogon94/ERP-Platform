@@ -43,16 +43,10 @@ export interface ChartRow {
 export type TableRow = Record<string, string | number | null>;
 
 /** Either shape OR an error envelope from the backend. */
-export type WidgetData =
-  | KpiData
-  | ChartRow[]
-  | TableRow[]
-  | { error: string };
+export type WidgetData = KpiData | ChartRow[] | TableRow[] | { error: string };
 
 export async function fetchDefaultDashboardApi(): Promise<Dashboard> {
-  const { data } = await apiClient.get<Dashboard>(
-    "/v1/dashboards/dashboards/default/",
-  );
+  const { data } = await apiClient.get<Dashboard>("/v1/dashboards/dashboards/default/");
   return data;
 }
 
@@ -65,9 +59,7 @@ export async function fetchDashboardDataApi(
   return data;
 }
 
-export async function reseedDashboardApi(
-  dashboardId: number,
-): Promise<Dashboard> {
+export async function reseedDashboardApi(dashboardId: number): Promise<Dashboard> {
   const { data } = await apiClient.post<Dashboard>(
     `/v1/dashboards/dashboards/${dashboardId}/reseed/`,
   );

@@ -10,11 +10,7 @@ interface TableWidgetProps {
  * Ranked-list / plain-table widget. Infers columns from the first row's
  * keys. Renders nothing if the payload is an error envelope.
  */
-export default function TableWidget({
-  title,
-  subtitle,
-  data,
-}: TableWidgetProps) {
+export default function TableWidget({ title, subtitle, data }: TableWidgetProps) {
   const rows: TableRow[] = Array.isArray(data) ? data : [];
   const columns = rows[0] ? Object.keys(rows[0]) : [];
 

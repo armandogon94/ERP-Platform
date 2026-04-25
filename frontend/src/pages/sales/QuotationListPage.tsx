@@ -40,9 +40,7 @@ export default function QuotationListPage() {
           {quotations.map((q) => (
             <tr key={q.id}>
               <td>
-                <Link to={`/sales/quotations/${q.id}/edit`}>
-                  {q.quotation_number}
-                </Link>
+                <Link to={`/sales/quotations/${q.id}/edit`}>{q.quotation_number}</Link>
               </td>
               <td>{q.customer_name}</td>
               <td>{q.status}</td>

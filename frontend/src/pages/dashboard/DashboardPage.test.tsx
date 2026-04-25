@@ -13,10 +13,7 @@ vi.mock("../../api/config", () => ({
   fetchModuleConfigApi: vi.fn(),
 }));
 
-import {
-  fetchDashboardDataApi,
-  fetchDefaultDashboardApi,
-} from "../../api/dashboards";
+import { fetchDashboardDataApi, fetchDefaultDashboardApi } from "../../api/dashboards";
 
 const mockDash = vi.mocked(fetchDefaultDashboardApi);
 const mockData = vi.mocked(fetchDashboardDataApi);
@@ -101,7 +98,9 @@ describe("DashboardPage", () => {
         },
       ],
     });
-    mockData.mockResolvedValueOnce({ 22: { error: "Unknown data source: nope.nothing" } });
+    mockData.mockResolvedValueOnce({
+      22: { error: "Unknown data source: nope.nothing" },
+    });
 
     renderPage();
 

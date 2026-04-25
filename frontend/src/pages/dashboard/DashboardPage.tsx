@@ -22,9 +22,7 @@ import Skeleton from "../../components/Skeleton";
  */
 export default function DashboardPage() {
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
-  const [widgetData, setWidgetData] = useState<
-    Record<number, WidgetData> | null
-  >(null);
+  const [widgetData, setWidgetData] = useState<Record<number, WidgetData> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

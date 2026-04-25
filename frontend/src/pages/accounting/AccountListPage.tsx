@@ -21,9 +21,7 @@ export default function AccountListPage() {
   return (
     <ListPageShell
       title={`Chart of ${accountLabel}s`}
-      actions={
-        <Link to="/accounting/accounts/new">New {accountLabel}</Link>
-      }
+      actions={<Link to="/accounting/accounts/new">New {accountLabel}</Link>}
       isLoading={isLoading}
       error={error || undefined}
       isEmpty={accounts.length === 0}
