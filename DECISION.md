@@ -487,6 +487,61 @@ This provides meaningful access control without the N² complexity of field-leve
 
 ---
 
+## D38: Calendar Sync — Webhooks Alongside Polling
+
+**Decision:** Adopt **HMAC-signed webhooks** as the primary cross-system
+calendar sync, with the existing Slice 18 polling layer retained as a
+safety net. Webhook auth is HMAC-SHA256 over the raw request body with
+a per-company shared secret. Wire format is locked at
+`docs/CALENDAR-SYNC-WEBHOOKS.md` and converged with the CRM Project 13
+agent through a one-round-trip discovery handoff (see
+`docs/crm-handoff/`).
+
+**Alternatives:**
+- (a) Polling-only (status quo from Slice 18)
+- (b) **Webhooks + polling-as-safety-net (chosen)**
+- (c) Webhooks-only (no fallback)
+- (d) WebSocket bidirectional channel (Django Channels both directions)
+
+**Rationale:**
+- Polling has 5-minute latency by design — too coarse for real-time
+  scheduling UX. Webhooks bring it to <5 seconds end-to-end.
+- (a) is simple but slow. (c) is fast but loses sync silently when the
+  receiver is briefly unreachable; we'd need to add reconciliation
+  logic that polling already provides for free. (d) requires both
+  sides to maintain a persistent connection — operationally heavier
+  and harder to debug across deploys.
+- (b) gets the latency win while keeping the resilience floor. If
+  webhooks fail (network, peer down, signature drift), polling
+  reconciles within 5 minutes. Implementation cost on our side: ~half
+  a day. Cost on the CRM side (greenfield): ~4-6 hours.
+
+**Wire-format invariants** (full spec at `docs/CALENDAR-SYNC-WEBHOOKS.md`):
+- HMAC-SHA256 of raw body, header `X-Webhook-Signature: sha256=<hex>`.
+- 5-minute timestamp skew rejection (replay defense; idempotency cache
+  catches actual replays).
+- Loop prevention: instance flag `_skip_webhook=True` set by receiver
+  before save, checked by post_save signal. Belt-and-braces: receiver
+  also 400s on `X-Webhook-Source` matching its own name.
+- LWW unchanged from polling spec: `updated_at` required; tie preserves
+  stored; strict `>` for incoming wins.
+- Idempotency: 24h Redis dedupe on `X-Webhook-Delivery-Id`.
+- Tenant identity: `Company.slug == Workspace.slug` shared verbatim
+  across all 10 industries, no mapping table.
+
+**Implementation (Slice 22):** New `CompanyWebhookConfig` model;
+HMAC verifier in `api/v1/webhook_security.py`; receiver endpoint at
+`POST /api/v1/webhooks/calendar/<company_slug>/`; Celery emitter task
+in `modules/calendar/tasks.py` with retry policy (max 5, exponential
+backoff, max 600s); post_save signal in `modules/calendar/signals.py`
+with loop guard; `setup_calendar_webhook` management command for
+provisioning.
+
+**Joint handshake test** runs after both sides ship — see
+`docs/CALENDAR-SYNC-WEBHOOKS.md` §Test plan.
+
+---
+
 ## D37: AuditLog Retention and Offload Strategy
 
 **Decision:** Run `trim_audit_log --days 90` nightly to cap table growth.
@@ -551,5 +606,6 @@ denormalization.
 | 2026-04-16 | D33–D35 | Active |
 | 2026-04-17 | D36 | Active |
 | 2026-04-17 | D37 | Active |
+| 2026-04-22 | D38 | Active |
 
 All decisions are subject to revision as implementation reveals new constraints. Updates will be appended with rationale for the change.

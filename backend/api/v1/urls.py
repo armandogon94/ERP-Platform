@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.v1.auth import LoginView, LogoutView, MeView, RefreshView
+from modules.calendar.webhook_receiver import calendar_webhook
 
 
 class APIRootView(APIView):
@@ -42,4 +43,11 @@ urlpatterns = [
     path("helpdesk/", include("modules.helpdesk.urls")),
     path("reports/", include("modules.reports.urls")),
     path("dashboards/", include("modules.dashboards.urls")),
+    # Cross-system webhooks (Slice 22, D38, HMAC-only auth).
+    # Spec: docs/CALENDAR-SYNC-WEBHOOKS.md.
+    path(
+        "webhooks/calendar/<slug:slug>/",
+        calendar_webhook,
+        name="calendar-webhook",
+    ),
 ]

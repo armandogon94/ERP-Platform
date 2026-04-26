@@ -6,3 +6,7 @@ class CalendarConfig(AppConfig):
     name = "modules.calendar"
     label = "calendar_module"
     verbose_name = "Calendar"
+
+    def ready(self):
+        # Wire post_save handlers for outbound webhook emission (Slice 22).
+        from modules.calendar import signals  # noqa: F401

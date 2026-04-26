@@ -542,3 +542,46 @@ class Setting(models.Model):
     def __str__(self):
         scope = self.company.slug if self.company else "global"
         return f"{self.key} ({scope})"
+
+
+class CompanyWebhookConfig(models.Model):
+    """Per-company webhook peer + shared HMAC secret (Slice 22, D38).
+
+    See docs/CALENDAR-SYNC-WEBHOOKS.md §Configuration. Holds the URL we
+    POST outbound webhooks to (the peer's receiver), the HMAC secret
+    shared with that peer for signing/verifying both directions, and
+    status fields used by the emitter to record success / error state.
+
+    One row per company — webhooks are tenant-scoped end-to-end.
+    """
+
+    company = models.OneToOneField(
+        "core.Company",
+        on_delete=models.CASCADE,
+        related_name="webhook_config",
+    )
+    peer_url = models.URLField(
+        max_length=500,
+        help_text=(
+            "Where outbound webhooks are POSTed. Example: "
+            "https://crm.novapay.com/api/v1/webhooks/calendar/novapay/"
+        ),
+    )
+    shared_secret = models.CharField(
+        max_length=128,
+        help_text="32+ byte hex key shared with the peer. Used for HMAC sign + verify.",
+    )
+    enabled = models.BooleanField(
+        default=False,
+        help_text="When False, both inbound and outbound webhooks are no-ops.",
+    )
+    last_success_at = models.DateTimeField(null=True, blank=True)
+    last_error_at = models.DateTimeField(null=True, blank=True)
+    last_error_message = models.TextField(blank=True, default="")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        state = "enabled" if self.enabled else "disabled"
+        return f"WebhookConfig({self.company.slug}, {state})"
